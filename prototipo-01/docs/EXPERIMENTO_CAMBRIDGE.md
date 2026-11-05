@@ -64,7 +64,7 @@ Cada execução cria uma pasta nova. Parâmetros disponíveis: `--recorte`, `--j
 
 O comando falha explicitamente se CUDA ou o peso correto não estiver disponível. Não altera os dados originais ou camadas do navegador.
 
-Para preparar novamente este ambiente, partir da [instalação Detectron2 validada](DETECTRON2_WINDOWS.md), instalar `requirements-detectree2-lock.txt` e depois `git+https://github.com/PatBall1/detectree2.git@39da1ba52e9392e54c2b29deef711f1b676bf86b` com `pip --no-deps`. Os dois projetos fonte são instalados separadamente das dependências fixadas. Baixar o peso pelo endereço de `backend/cambridge-model.json` para `.models/detectree2/`; o adaptador confere seu SHA-256 ao carregar. A versão Rasterio deste ambiente é 1.4.4, mantendo o NumPy 1.26.4 validado; o ambiente DeepForest continua separado.
+Para preparar novamente este ambiente, partir da [instalação Detectron2 validada](DETECTRON2_WINDOWS.md), instalar `requirements/requirements-detectree2-lock.txt` e depois `git+https://github.com/PatBall1/detectree2.git@39da1ba52e9392e54c2b29deef711f1b676bf86b` com `pip --no-deps`. Os dois projetos fonte são instalados separadamente das dependências fixadas. Baixar o peso pelo endereço de `backend/cambridge-model.json` para `.models/detectree2/`; o adaptador confere seu SHA-256 ao carregar. A versão Rasterio deste ambiente é 1.4.4, mantendo o NumPy 1.26.4 validado; o ambiente DeepForest continua separado.
 
 O próximo marco aguarda sua revisão: comparar flexi e os controles, calibrar agregação/score com referência revisada e reservar áreas distintas para teste. Nenhum segundo peso ou API foi acrescentado nesta entrega.
 

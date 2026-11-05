@@ -5,9 +5,9 @@ from unittest.mock import MagicMock
 import numpy as np
 from rasterio.transform import Affine
 
-from .analysis import locate
-from .cambridge import deduplicate, pixel_size_m, tile_windows
-from .detectree import CambridgeDetector
+from backend.analysis import locate
+from backend.cambridge import deduplicate, pixel_size_m, tile_windows
+from backend.detectree import CambridgeDetector
 
 
 def box(coords, score):

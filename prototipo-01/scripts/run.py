@@ -5,8 +5,8 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import webbrowser
 
-ROOT = Path(__file__).resolve().parents[1]
-PUBLIC_FILES = {"index.html", "styles.css", "app.js", "map.js", "points.js"}
+ROOT = Path(__file__).resolve().parents[1] / "frontend"
+PUBLIC_FILES = {"index.html", "css/styles.css", "js/app.js", "js/map.js", "js/points.js"}
 
 
 class InterfaceHandler(SimpleHTTPRequestHandler):

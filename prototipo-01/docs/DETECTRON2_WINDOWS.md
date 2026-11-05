@@ -16,7 +16,7 @@ Validado em 05/11/2026 no Windows 10, com RTX 5070 de 12 GB. Este documento regi
 
 O Detectron2 foi compilado do [código oficial](https://github.com/facebookresearch/detectron2/tree/247691a1c292654867deb35cabb27f18d75a1363), **sem patches no código-fonte**. A versão curta 0.6 não identifica sozinha a revisão utilizada. O projeto não oferece suporte oficial completo ao Windows; o resultado aqui é uma validação desta combinação local. [Instalação oficial](https://detectron2.readthedocs.io/en/latest/tutorials/install.html).
 
-As versões Python foram fixadas em `requirements-detectron2-lock.txt`, separado dos requisitos DeepForest. A interface/F5 continuam usando `.venv`; não foi criado servidor novo.
+As versões Python foram fixadas em `requirements/requirements-detectron2-lock.txt`, separado dos requisitos DeepForest. A interface/F5 continuam usando `.venv`; não foi criado servidor novo.
 
 Os componentes finais do Build Tools são `Microsoft.VisualStudio.Component.VC.CoreBuildTools`, `Microsoft.VisualStudio.Component.VC.Tools.x86.x64` e `Microsoft.VisualStudio.Component.VC.14.38.17.8.x86.x64`. O pacote padrão instala também o toolset 14.44; o script seleciona explicitamente **14.38**, compatível com a combinação proposta. O componente IDE testado durante o diagnóstico foi removido desta instalação de Build Tools.
 
@@ -36,7 +36,7 @@ O teste verifica CUDA disponível, extensão Detectron2 com CUDA, NMS comum/rota
 
 Resultado registrado: `resultados/detectron2-windows-marco-01/check-20261105T173229Z.json`. O teste passou e usou pico de 266,2 MiB alocados/274 MiB reservados pelo PyTorch. Isso não estima memória ou velocidade do futuro processamento de ortofotos com pesos treinados.
 
-Nessa execução, o upstream emitiu um aviso de depreciação de `torch.meshgrid`, sem impedir o resultado. Os seis testes existentes em `backend.test_analysis` também passaram. Os hashes dos arquivos de interface/launcher amostrados e o `pip freeze` do ambiente original permaneceram iguais. O F5 não foi novamente exercitado pela interface gráfica nesta entrega.
+Nessa execução, o upstream emitiu um aviso de depreciação de `torch.meshgrid`, sem impedir o resultado. Os seis testes existentes em `tests.test_analysis` também passaram. Os hashes dos arquivos de interface/launcher amostrados e o `pip freeze` do ambiente original permaneceram iguais. O F5 não foi novamente exercitado pela interface gráfica nesta entrega.
 
 ## Recriar o ambiente Python
 
@@ -44,7 +44,7 @@ Os componentes de sistema acima precisam estar instalados antes destes comandos.
 
 ```powershell
 python -m venv .envs/detectree2
-.\.envs\detectree2\Scripts\python.exe -m pip install -r requirements-detectron2-lock.txt
+.\.envs\detectree2\Scripts\python.exe -m pip install -r requirements/requirements-detectron2-lock.txt
 git init .cache/sources/detectron2
 git -C .cache/sources/detectron2 remote add origin https://github.com/facebookresearch/detectron2.git
 git -C .cache/sources/detectron2 fetch --depth 1 origin 247691a1c292654867deb35cabb27f18d75a1363

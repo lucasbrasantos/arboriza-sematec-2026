@@ -116,4 +116,4 @@ Os pontos automáticos representam possíveis árvores e precisam de revisão. Q
 
 ## 9. Contexto técnico existente
 
-Consultar o [resumo de decisões da fase 2](RESUMO_DECISOES_ESCOPO_FASE_2.md), o [guia do protótipo](../prototipo-01/README.md) e o [relatório do experimento](../prototipo-01/EXPERIMENTO.md) para distinguir a implementação atual deste escopo pretendido. As decisões desta conversa ampliam o produto desejado; não registram conclusão automática das integrações, da administração ou do diagnóstico por trechos.
+Consultar o [resumo de decisões da fase 2](RESUMO_DECISOES_ESCOPO_FASE_2.md), o [guia do protótipo](../prototipo-01/README.md) e o [relatório do experimento](../prototipo-01/docs/EXPERIMENTO.md) para distinguir a implementação atual deste escopo pretendido. As decisões desta conversa ampliam o produto desejado; não registram conclusão automática das integrações, da administração ou do diagnóstico por trechos.

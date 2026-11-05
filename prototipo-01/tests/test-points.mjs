@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { PointLayer, readPoints } from '../points.js';
+import { PointLayer, readPoints } from '../frontend/js/points.js';
 
 const feature = (numero, id) => ({ type: 'Feature', ...(id === undefined ? {} : { id }),
   geometry: { type: 'Point', coordinates: [-50.4384, -21.2082] },

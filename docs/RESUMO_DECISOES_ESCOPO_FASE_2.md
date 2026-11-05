@@ -352,7 +352,7 @@ O roteiro também exige, para a entrega final, README com execução/limites/pr�
 - [Canvas, escopo e papéis iniciais](Arboriza_Canvas_Escopo.pptx).
 - [Pitch inicial](pitch_arboriza_2min.docx).
 - [Guia da interface do Protótipo 01](../prototipo-01/README.md).
-- [Guia e relatório do experimento DeepForest](../prototipo-01/EXPERIMENTO.md).
+- [Guia e relatório do experimento DeepForest](../prototipo-01/docs/EXPERIMENTO.md).
 - [Dados do IGC/DataGEO utilizados nos recortes](https://datageo.ambiente.sp.gov.br/geoportal/catalog/search/resource/details.page?uuid=%7B7665C108-A2FF-49D8-A1EF-A6968BA6016A%7D).
 - [OpenStreetMap e atribuição](https://www.openstreetmap.org/copyright).
 - [DeepForest: pesos oficiais e licença](https://huggingface.co/weecology/deepforest-tree).

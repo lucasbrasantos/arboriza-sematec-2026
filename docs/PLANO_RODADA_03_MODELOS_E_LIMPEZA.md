@@ -214,7 +214,7 @@ Passaram: kernel CUDA compilado localmente; NMS comum/rotacionado; ROIAlign comu
 
 O marco ocupa aproximadamente 5,98 GiB no projeto e 3,64 GiB nos diretórios das ferramentas de sistema. Na medição final, X: tinha 60,6 GiB livres e C: 61,8 GiB. Os pesos Cambridge/flexi ainda não foram baixados.
 
-Instruções e versões: `prototipo-01/DETECTRON2_WINDOWS.md`. Resultados, manifesto, recibos e logs: `prototipo-01/resultados/detectron2-windows-marco-01/`. O piloto Cambridge foi posteriormente autorizado e executado, conforme seção 13.
+Instruções e versões: `prototipo-01/docs/DETECTRON2_WINDOWS.md`. Resultados, manifesto, recibos e logs: `prototipo-01/resultados/detectron2-windows-marco-01/`. O piloto Cambridge foi posteriormente autorizado e executado, conforme seção 13.
 
 ## 13. Piloto Cambridge executado — aguardando revisão
 
@@ -226,4 +226,4 @@ Na inspeção visual, houve uma proposta para a copa escura grande antes omitida
 
 Foram gerados seis GeoJSONs, diagnósticos, comparações visuais, configurações e máscaras RLE das 89 propostas pós-NMS nativo. A validação conferiu alinhamento, máscaras, contrato de importação/edição/exportação da interface e preservação de 106 arquivos. Os 11 testes do ambiente novo e os seis testes de regressão no ambiente DeepForest passaram. A interface/API não foram alteradas.
 
-Documentação da entrega: `prototipo-01/EXPERIMENTO_CAMBRIDGE.md`. Resultados: `prototipo-01/resultados/detectree2-cambridge-piloto/20261105T175332Z-9697ec/`. A próxima comparação/alteração de estratégia aguarda feedback do usuário.
+Documentação da entrega: `prototipo-01/docs/EXPERIMENTO_CAMBRIDGE.md`. Resultados: `prototipo-01/resultados/detectree2-cambridge-piloto/20261105T175332Z-9697ec/`. A próxima comparação/alteração de estratégia aguarda feedback do usuário.
