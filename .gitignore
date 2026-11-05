@@ -1,0 +1,26 @@
+# Ambientes e caches locais de Python
+**/.venv/
+**/venv/
+**/__pycache__/
+*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+.coverage
+htmlcov/
+
+# Dados e saídas geradas dos experimentos do Protótipo 01
+prototipo-01/.cache/
+prototipo-01/.models/
+prototipo-01/data/
+prototipo-01/resultados/
+prototipo-01/lightning_logs/
+prototipo-01/logs/
+prototipo-01/debug/
+
+# Checkpoints e logs gerados; código-fonte e testes Python continuam versionáveis
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.log

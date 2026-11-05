@@ -1,0 +1,15 @@
+{
+	"model_id": "weecology/deepforest-tree",
+	"revision": "cc21436bc5d572dde8ff5f93c1e71a32f563cace",
+	"license": "MIT",
+	"source": "https://huggingface.co/weecology/deepforest-tree/tree/cc21436bc5d572dde8ff5f93c1e71a32f563cace",
+	"files": {
+		"config.json": "521e0149f0b060237c6994a69bffdff53ce5deb3beb854dad2752a3f8dd49bc4",
+		"model.safetensors": "d37a7af0b5ba2754282a80d41b4c7b66e8c7149234df5bf3f41bdaf57d329fc8"
+	},
+	"backbone": {
+		"url": "https://download.pytorch.org/models/resnet50-0676ba61.pth",
+		"file": "resnet50-0676ba61.pth",
+		"sha256": "0676ba61b6795bbe1773cffd859882e5e297624d384b6993f7c9e683e722fb8a"
+	}
+}

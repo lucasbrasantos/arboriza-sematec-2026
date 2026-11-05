@@ -8,7 +8,7 @@ Para servir os arquivos localmente, execute nesta pasta:
 py -m http.server 5175 --bind 127.0.0.1
 ```
 
-Abra <http://127.0.0.1:5175>. Esse comando apenas serve os arquivos estáticos; a aplicação Python e os modelos serão integrados na segunda parte.
+Abra <http://127.0.0.1:5175>. Esse comando apenas serve os arquivos estáticos. O [experimento Python com DeepForest](EXPERIMENTO.md) já gera GeoJSONs para importação manual; a API e o botão de análise ficam para a segunda entrega, após sua avaliação.
 
 - Alterne entre ruas (OpenStreetMap) e imagem aérea (IGC/DataGEO, levantamento 2023/2024).
 - Escolha um dos dois recortes ou use o enquadramento atual como área de estudo.
@@ -25,6 +25,6 @@ Abra <http://127.0.0.1:5175>. Esse comando apenas serve os arquivos estáticos; 
 
 As três imagens em `assets/` são prévias JPEG leves das mesmas ortofotos IGC/DataGEO: cidade (768×768) e dois recortes (512×512), cerca de 252 KiB no total. Permanecem sob os blocos detalhados durante o carregamento. Fora dessa área não há prévia local. Os blocos WMS usam 512 pixels e nível máximo de detalhe 19; acima dele o mapa amplia a imagem existente, sem solicitar resolução adicional. Isso reduz requisições e espaços vazios; a velocidade dos detalhes ainda depende do serviço externo. Não há cache persistente de blocos nem download em lote.
 
-Não há detecção automática nem dados de árvores simulados. A área delimitada é uma área de estudo, não uma área já analisada. Internet é necessária para as bibliotecas e os mapas; os serviços externos podem ficar indisponíveis.
+A interface ainda não dispara detecção automática e não contém dados de árvores simulados. A área delimitada é uma área de estudo, não uma área já analisada. Os pontos do experimento Python são possíveis árvores, sujeitos à revisão. Internet é necessária para as bibliotecas e os mapas; os serviços externos podem ficar indisponíveis.
 
 Fontes: [IGC/DataGEO](https://datageo.ambiente.sp.gov.br/geoportal/catalog/search/resource/details.page?uuid=%7B7665C108-A2FF-49D8-A1EF-A6968BA6016A%7D), [OpenStreetMap](https://www.openstreetmap.org/copyright), [política dos mapas públicos](https://operations.osmfoundation.org/policies/tiles/). Os mapas são usados para visualização, sem download em lote.
