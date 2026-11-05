@@ -132,7 +132,12 @@
 		</aside>
 
 		<section class="map-area" aria-label="Área do mapa">
-			<div id="map" role="region" aria-label="Mapa navegável de Araçatuba"></div>
+			<div id="map" role="region" aria-label="Mapa navegável de Araçatuba">
+				<button id="mouse-coordinates" class="glass" type="button" aria-label="Copiar coordenadas do cursor" title="Copiar latitude e longitude" disabled>
+					<span>Lat <strong id="mouse-lat">—</strong></span>
+					<span>Lon <strong id="mouse-lng">—</strong></span>
+				</button>
+			</div>
 			<section id="point-browser" class="glass" aria-label="Lista de pontos" hidden>
 				<header>
 					<div>

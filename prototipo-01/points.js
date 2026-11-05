@@ -2,7 +2,7 @@
 export class PointLayer {
   constructor(name, features = []) {
     this.name = name;
-    this.sequence = 0;
+    this.sequence = Math.max(0, ...features.map(f => f.properties?.numero).filter(Number.isSafeInteger));
     this.points = features.map(feature => this.wrap(feature));
     this.selected = new Set();
     this.past = [];
@@ -10,7 +10,10 @@ export class PointLayer {
   }
 
   wrap(feature) {
-    return { key: crypto.randomUUID(), number: ++this.sequence, feature };
+    const key = crypto.randomUUID();
+    const number = feature.properties?.numero ?? ++this.sequence;
+    return { key, number, feature: { ...feature, id: feature.id ?? key,
+      properties: { ...feature.properties, numero: number } } };
   }
 
   snapshot(label) { return { points: this.points, selected: new Set(this.selected), label }; }
@@ -67,5 +70,9 @@ export function readPoints(data) {
     return f?.type !== 'Feature' || f.geometry?.type !== 'Point' || !Array.isArray(c) || c.length < 2
       || !Number.isFinite(c[0]) || !Number.isFinite(c[1]) || Math.abs(c[0]) > 180 || Math.abs(c[1]) > 90;
   })) throw new Error('Envie até 10.000 pontos GeoJSON em longitude/latitude (WGS84).');
+  const numbers = features.map(f => f.properties?.numero).filter(n => n !== undefined);
+  if (numbers.some(n => !Number.isSafeInteger(n) || n <= 0) || new Set(numbers).size !== numbers.length) {
+    throw new Error('Os números dos pontos devem ser inteiros positivos e únicos na camada.');
+  }
   return features;
 }

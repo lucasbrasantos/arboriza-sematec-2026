@@ -356,7 +356,7 @@ dd {
 	border-top: 1px solid var(--border);
 }
 
-.map- {
+.map-area {
 	position: relative;
 	min-width: 0;
 	min-height: 0;
@@ -389,7 +389,7 @@ dd {
 	position: absolute;
 	z-index: 600;
 	left: 50%;
-	bottom: 28px;
+	bottom: 16px;
 	transform: translateX(-50%);
 	width: min(680px, calc(100% - 32px));
 	padding: 6px 10px;
@@ -583,6 +583,46 @@ dd {
 	font-size: .7rem;
 	color: var(--muted);
 	font-variant-numeric: tabular-nums;
+}
+
+#mouse-coordinates {
+	display: flex;
+	gap: 12px;
+	padding: 6px 10px;
+	min-height: 28px;
+	font-size: .7rem;
+	font-variant-numeric: tabular-nums;
+	user-select: text;
+}
+
+.point-info .leaflet-popup-content-wrapper,
+.point-info .leaflet-popup-tip {
+	background: var(--glass);
+	color: var(--text);
+	box-shadow: var(--shadow);
+	backdrop-filter: blur(var(--glass-blur));
+}
+
+.point-info .leaflet-popup-content {
+	margin: 12px;
+	font-family: "Segoe UI", sans-serif;
+	font-size: .75rem;
+	overflow-wrap: anywhere;
+}
+
+.point-info p {
+	white-space: pre-line;
+	margin: 8px 0;
+}
+
+.point-info button {
+	min-height: 32px;
+	padding: 5px 7px;
+	font-size: .7rem;
+}
+
+.point-info a.leaflet-popup-close-button {
+	color: var(--muted);
 }
 
 #more-points {

@@ -38,7 +38,7 @@ def read_image(path):
         return rgb, valid, src.transform, src.crs, metadata
 
 
-def locate(boxes, affine, crs, valid, recorte, min_score):
+def locate(boxes, affine, crs, valid, recorte, min_score, model_id=MODEL_ID, origin="deepforest"):
     """Centros em coordenadas contínuas de pixel; sem adicionar meio pixel outra vez."""
     features, diagnostics = [], []
     height, width = valid.shape
@@ -60,10 +60,23 @@ def locate(boxes, affine, crs, valid, recorte, min_score):
         lng, lat = project(crs, "EPSG:4326", [x], [y])
         features.append({"type": "Feature", "id": ident,
                          "geometry": {"type": "Point", "coordinates": [lng[0], lat[0]]},
-                         "properties": {"score": score, "modelo": MODEL_ID, "recorte": recorte,
-                                        "origem": "deepforest", "revisado": False,
+                         "properties": {"score": score, "modelo": model_id, "recorte": recorte,
+                                        "origem": origin, "revisado": False,
                                         "bbox_px": [x1, y1, x2, y2]}})
     return {"type": "FeatureCollection", "features": features}, diagnostics
+
+
+def save_preview(rgb, diagnostics, title, path):
+    picture = Image.fromarray(rgb)
+    draw = ImageDraw.Draw(picture)
+    for item in diagnostics:
+        if item["reason"] == "selecionada":
+            draw.rectangle(item["bbox_px"], outline="#18e2a2", width=2)
+            x, y = item["center_px"]
+            draw.ellipse((x-3, y-3, x+3, y+3), fill="#1971c2", outline="white")
+    draw.rectangle((0, 0, picture.width, 25), fill="#163322")
+    draw.text((8, 6), title, fill="white")
+    picture.save(path)
 
 
 def analyze(detector, recorte, patch_size, min_score, output):
@@ -75,17 +88,8 @@ def analyze(detector, recorte, patch_size, min_score, output):
     prefix = f"deepforest-{recorte}-p{patch_size}-c{min_score:.2f}"
     output.mkdir(parents=True, exist_ok=True)
     write_json(output / f"{prefix}.geojson", geojson)
-    picture = Image.fromarray(rgb)
-    draw = ImageDraw.Draw(picture)
-    for item in diagnostics:
-        if item["reason"] == "selecionada":
-            draw.rectangle(item["bbox_px"], outline="#18e2a2", width=2)
-            x, y = item["center_px"]
-            draw.ellipse((x-3, y-3, x+3, y+3), fill="#1971c2", outline="white")
-    draw.rectangle((0, 0, picture.width, 25), fill="#163322")
-    draw.text((8, 6), f'{recorte} | p{patch_size} | score >= {min_score:.2f} | '
-              f'{len(geojson["features"])} possiveis arvores', fill="white")
-    picture.save(output / f"{prefix}.png")
+    save_preview(rgb, diagnostics, f'{recorte} | p{patch_size} | score >= {min_score:.2f} | '
+                 f'{len(geojson["features"])} possiveis arvores', output / f"{prefix}.png")
     source_path = path.with_name(path.name.replace("_rgb8.tif", "_fonte.json"))
     report = {"recorte": recorte, "created_at_utc": datetime.now(timezone.utc).isoformat(),
               "image": {"file": path.name, "sha256": sha256(path), **image_info,

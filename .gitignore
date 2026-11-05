@@ -11,6 +11,7 @@ htmlcov/
 
 # Dados e saídas geradas dos experimentos do Protótipo 01
 prototipo-01/.cache/
+prototipo-01/.envs/
 prototipo-01/.models/
 prototipo-01/data/
 prototipo-01/resultados/

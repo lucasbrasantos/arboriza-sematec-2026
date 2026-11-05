@@ -23,6 +23,13 @@ function start() {
 	const storageKey = 'arboriza-prototipo-01-manual';
 	const layers = [new PointLayer('Marcação manual')];
 	const circles = new Map();
+	const pointPopup = L.popup({ className: 'point-info', autoPan: false, closeOnClick: false, maxWidth: 280 });
+	const coordinateButton = $('mouse-coordinates');
+	const coordinateControl = L.control({ position: 'bottomleft' });
+	coordinateControl.onAdd = () => coordinateButton;
+	coordinateControl.addTo(map);
+	L.DomEvent.disableClickPropagation(coordinateButton);
+	L.DomEvent.disableScrollPropagation(coordinateButton);
 	let active = 0, tool = 'select', gesture = null, ignoreClickUntil = 0, listLimit = 50;
 	const current = () => layers[active];
 	const latLng = point => L.latLng(point.feature.geometry.coordinates[1], point.feature.geometry.coordinates[0]);
@@ -30,6 +37,9 @@ function start() {
 		const saved = localStorage.getItem(storageKey);
 		if (saved) layers[0] = new PointLayer('Marcação manual', readPoints(JSON.parse(saved)));
 	} catch { message('As marcações locais não puderam ser recuperadas. Importe um GeoJSON para restaurá-las.', true); }
+	try {
+		if (layers[0].points.length) localStorage.setItem(storageKey, JSON.stringify(layers[0].geojson()));
+	} catch { message('Não foi possível salvar os IDs locais. Exporte a camada para preservá-los.', true); }
 
 	function changed(text) {
 		render();
@@ -59,6 +69,34 @@ function start() {
 			input.checked = layer.selected.has(input.value);
 			input.closest('li').classList.toggle('selected', input.checked);
 		});
+		if (layer.selected.size === 1 && $('show-points').checked) {
+			const point = layer.points.find(p => layer.selected.has(p.key));
+			pointPopup.setLatLng(latLng(point)).setContent(pointInfo(point)).openOn(map);
+		} else map.closePopup(pointPopup);
+	}
+
+	function pointInfo(point) {
+		const box = document.createElement('div');
+		const heading = document.createElement('strong'); heading.textContent = `Ponto ${point.number}`;
+		const details = document.createElement('p');
+		const feature = point.feature, p = latLng(point);
+		details.textContent = `Latitude: ${p.lat.toFixed(7)}\nLongitude: ${p.lng.toFixed(7)}\nID: ${feature.id}`;
+		details.textContent += `\nOrigem: ${feature.properties.origem || 'não informada'}`;
+		if (feature.properties.modelo) details.textContent += `\nModelo: ${feature.properties.modelo}`;
+		if (Number.isFinite(feature.properties.score)) details.textContent += `\nScore: ${feature.properties.score.toFixed(3)}`;
+		const actions = document.createElement('div'); actions.className = 'row';
+		for (const [label, text] of [['Copiar coordenadas', `${p.lat}, ${p.lng}`],
+			['Copiar informações', JSON.stringify(feature, null, 2)]]) {
+			const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
+			button.onclick = () => copyText(text, label);
+			actions.append(button);
+		}
+		box.append(heading, details, actions); return box;
+	}
+
+	async function copyText(text, label) {
+		try { await navigator.clipboard.writeText(text); message(`${label}: copiado.`); }
+		catch { message('Não foi possível copiar. Selecione o texto exibido e copie manualmente.', true); }
 	}
 
 	function togglePoint(key, additive = false) {
@@ -87,8 +125,12 @@ function start() {
 			const p = latLng(point); detail.textContent = `${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}`;
 			button.append(title, detail);
 			button.onclick = event => {
+				cancelGesture();
 				togglePoint(point.key, event.ctrlKey || event.metaKey || event.shiftKey);
-				map.panTo(p);
+				$('show-points').checked = true; markers.addTo(map);
+				map.setView(latLng(point), Math.max(map.getZoom(), 19), { animate: false });
+				if (container.clientWidth < 640) showList(false);
+				selection();
 			};
 			row.append(checkbox, button); list.append(row);
 		});
@@ -161,7 +203,7 @@ function start() {
 	}
 
 	container.addEventListener('pointerdown', event => {
-		if (event.button !== 0 || !event.isPrimary || event.target.closest('.leaflet-control') || gesture) return;
+		if (event.button !== 0 || !event.isPrimary || event.target.closest('.leaflet-control, .leaflet-popup') || gesture) return;
 		const start = map.mouseEventToContainerPoint(event);
 		const point = hitPoint(start);
 		if (tool === 'add' || (tool === 'select' && !point && !event.shiftKey)) return;
@@ -216,7 +258,7 @@ function start() {
 				render(); message('O grupo precisa permanecer dentro do mapa.', true); return;
 			}
 			current().move(finished.coordinates); changed(`${finished.coordinates.size} pontos movidos. Ctrl+Z desfaz a ação.`);
-		}
+		} else selection(); // Reabre a ficha também no clique de um ponto já selecionado.
 	});
 	container.addEventListener('pointercancel', cancelGesture);
 	map.on('click', event => {
@@ -229,6 +271,13 @@ function start() {
 			current().selected.clear(); selection();
 		}
 	});
+	map.on('mousemove', event => {
+		if (event.originalEvent.target.closest('.leaflet-control, .leaflet-popup')) return;
+		$('mouse-lat').textContent = event.latlng.lat.toFixed(6);
+		$('mouse-lng').textContent = event.latlng.lng.toFixed(6);
+		coordinateButton.disabled = false;
+	});
+	coordinateButton.onclick = () => copyText(`${$('mouse-lat').textContent}, ${$('mouse-lng').textContent}`, 'Coordenadas do cursor');
 
 	const undo = redo => { cancelGesture(); if (current().history(redo)) changed(redo ? 'Ação refeita.' : 'Ação desfeita.'); };
 	const remove = () => { const count = current().selected.size; if (count) { current().remove(); changed(`${count} pontos apagados. Ctrl+Z restaura a seleção.`); } };
@@ -276,7 +325,10 @@ function start() {
 		message('Mapa de fundo alterado.');
 	});
 	$('dataset').onchange = () => { cancelGesture(); active = Number($('dataset').value); current().selected.clear(); listLimit = 50; setTool('select'); render(); };
-	$('show-points').onchange = event => event.target.checked ? markers.addTo(map) : map.removeLayer(markers);
+	$('show-points').onchange = event => {
+		event.target.checked ? markers.addTo(map) : map.removeLayer(markers);
+		selection();
+	};
 	$('show-density').disabled = !heat;
 	$('show-density').onchange = event => event.target.checked ? heat.addTo(map) : map.removeLayer(heat);
 	$('import').onchange = async event => {
@@ -292,8 +344,12 @@ function start() {
 		event.target.value = '';
 	};
 	$('export').onclick = () => {
+		const recorte = $('area').selectedOptions[0].textContent.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+		const now = new Date(), pad = value => String(value).padStart(2, '0');
+		const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+		const time = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
 		const url = URL.createObjectURL(new Blob([JSON.stringify(current().geojson(), null, 2)], { type: 'application/geo+json' }));
-		const link = document.createElement('a'); link.href = url; link.download = 'arboriza-pontos.geojson'; link.click();
+		const link = document.createElement('a'); link.href = url; link.download = `arboriza-pontos_${recorte}_${date}_${time}.geojson`; link.click();
 		setTimeout(() => URL.revokeObjectURL(url), 1000); message('Camada inteira exportada em GeoJSON.');
 	};
 
