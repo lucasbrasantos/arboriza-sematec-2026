@@ -2,13 +2,17 @@
 
 Interface de teste do Arboriza: HTML, CSS e JavaScript, com Leaflet 1.9.4 e Leaflet.heat 0.2.0 carregados por CDN. Sem instalação de pacotes ou etapa de build.
 
-Para servir os arquivos localmente, execute nesta pasta:
+Para iniciar pela raiz do repositório:
 
 ```powershell
-py -m http.server 5175 --bind 127.0.0.1
+.\prototipo-01\.venv\Scripts\python.exe .\prototipo-01\scripts\run.py
 ```
 
-Abra <http://127.0.0.1:5175>. Esse comando apenas serve os arquivos estáticos. O [experimento Python com DeepForest](EXPERIMENTO.md) já gera GeoJSONs para importação manual; a API e o botão de análise ficam para a segunda entrega, após sua avaliação.
+O script abre <http://127.0.0.1:5175/> no navegador padrão. Ctrl+C encerra o servidor. Dentro de `prototipo-01`, use `.\.venv\Scripts\python.exe .\scripts\run.py`. Para outra porta ou sem abrir o navegador, acrescente `--port 5176` ou `--no-browser`. Se a porta estiver ocupada, encerre o servidor anterior.
+
+No **VS Code**, abra a raiz `arboriza-sematec`, escolha **Protótipo 01: interface** em Executar e Depurar e pressione **F5**. A configuração em `.vscode/launch.json` usa o ambiente `.venv` já preparado; requer a extensão Python Debugger, instalada nesta máquina. Shift+F5 encerra a execução.
+
+O servidor utiliza apenas a biblioteca padrão do Python e publica os arquivos da interface e `assets/`, sem expor dados, resultados, modelos ou código do backend. O [experimento Python com DeepForest](EXPERIMENTO.md) continua separado e gera GeoJSONs para importação manual; a API e o botão de análise ficam para a segunda entrega, após sua avaliação.
 
 - Alterne entre ruas (OpenStreetMap) e imagem aérea (IGC/DataGEO, levantamento 2023/2024).
 - Escolha um dos dois recortes ou use o enquadramento atual como área de estudo.
