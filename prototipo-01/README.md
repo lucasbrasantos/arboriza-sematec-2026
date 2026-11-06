@@ -14,6 +14,8 @@ No **VS Code**, abra a raiz `arboriza-sematec`, escolha **Protótipo 01: interfa
 
 O mesmo processo serve API e `frontend/` em 127.0.0.1, sem publicar dados, pesos, ambientes ou diagnósticos como arquivos estáticos. A API fornece apenas os pontos de análises concluídas. O [fluxo local integrado](docs/FLUXO_LOCAL.md) explica os perfis, resultados e dependências. O [experimento DeepForest](docs/EXPERIMENTO.md) permanece separado.
 
+Ao abrir o endereço inicial, a página de boas-vindas apresenta o projeto. Use **Conheça o projeto** para ler sobre a regra 3-30-300 e a detecção, ou **Explorar mapa** para abrir a interface existente. O mapa permanece acessível diretamente em `/index.html`; os links no cabeçalho permitem voltar às novas páginas. A imagem e os pontos decorativos na abertura não representam resultados de uma análise. As novas páginas usam `frontend/css/paginas.css`, separado dos estilos do mapa; as fontes externas têm alternativas locais caso não carreguem.
+
 A [preparação Detectron2 no Windows](docs/DETECTRON2_WINDOWS.md) foi validada em ambiente separado. O [piloto Detectree2 Cambridge](docs/EXPERIMENTO_CAMBRIDGE.md) já processou os dois recortes e gerou pontos para revisão; não há precisão global validada.
 
 A [revisão dos novos arquivos manuais](docs/REVISAO_CAMBRIDGE_2026-11-05.md) compara 64 pontos do Centro e 36 do Centro-norte com novas execuções Cambridge, separando corte de score, escala e agregação.
