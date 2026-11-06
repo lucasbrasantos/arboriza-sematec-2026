@@ -1,6 +1,6 @@
 # Arboriza — plano de implementação do app
 
-**Situação:** planejamento para validação; desenvolvimento ainda não autorizado nesta etapa.  
+**Situação:** etapa 1 validada pelo usuário. Amostras da etapa 2 implementadas e verificadas, aguardando sua avaliação; a área Início definitiva ainda não foi iniciada.
 **Contexto:** complementa o [escopo funcional](ESCOPO_WEBSITE_PRIMEIRA_ENTREGA.md). O prazo anteriormente informado para a primeira entrega foi 09/11/2026; este plano não garante viabilidade nesse prazo.
 
 ## Acordo de trabalho e validação
@@ -10,6 +10,7 @@
 - Correções solicitadas durante a validação pertencem à etapa atual. Decisões pendentes e mudanças de direção devem ser anotadas com o usuário, sem presumir aprovação por silêncio.
 - O usuário poderá criar as pastas ou iniciar o projeto por conta própria. Quando avisar, examinar o estado real, ler os arquivos e regras locais, preservar alterações existentes e alinhar a continuação com ele; não recriar nem sobrescrever sua estrutura automaticamente.
 - Manter arquitetura simples e organizada; aplicar os princípios de separação de responsabilidades conforme a necessidade, evitando camadas e dependências sem uso concreto.
+- Decisão atualizada pelo usuário em 06/11/2026: frontend em **TypeScript com tipagem estrita**, substituindo o JavaScript da proposta inicial. Componentes e contratos devem ser tipados; verificações de tipos fazem parte do build.
 
 ## Direção acordada
 
@@ -18,7 +19,7 @@
 - Página inicial expressiva, com interações de mouse e animações a discutir; mapa e administração claros e confortáveis para operar.
 - Glassmorphism nos componentes principais e cartões, com identidade própria do Arboriza: transparência, cor e desfoque equilibrados com a temática de natureza e cidade. Não reproduzir integralmente o estilo visual da Apple.
 - Área piloto de Araçatuba para a primeira entrega e visão de expansão para a cidade toda; regra 3-30-300 como conteúdo educativo. Dados e diagnósticos demonstrativos devem ser identificados como tais.
-- Estrutura proposta: `app/frontend` em React, `app/backend` para a API Python/FastAPI e, se necessário, `app/scripts` e README. `prototipo-01` segue como referência e laboratório existente.
+- Estrutura proposta: `app/frontend` em React + TypeScript, `app/backend` para a API Python/FastAPI e, se necessário, `app/scripts` e README. `prototipo-01` segue como referência e laboratório existente.
 
 ## Etapa 0 — Preparação conjunta
 
@@ -32,7 +33,7 @@
 
 **Objetivo:** entregar uma aplicação limpa e navegável, ainda sem design final.
 
-- Criar ou aproveitar `app/frontend`, com React + Vite e JavaScript, conforme a proposta anterior, verificando antes o que o usuário já fez.
+- Criar ou aproveitar `app/frontend`, com React + Vite e TypeScript estrito, conforme a decisão atualizada do usuário, verificando antes o que ele já fez.
 - Remover conteúdo de demonstração gerado pelo template e organizar uma estrutura inicial pequena por área e código compartilhado, sem criar componentes complexos antecipadamente.
 - Configurar navegação e rotas: `/` (Início), `/mapa` (Mapa público), `/admin` (Administração) e `/login` (Login), além de tratamento simples para rota inexistente.
 - Criar links funcionais entre áreas e placeholders simples com o nome da página. Os placeholders não representam autenticação, mapa, análise ou publicação funcionando.
@@ -40,6 +41,16 @@
 - Verificar inicialização, navegação pelos links e URLs diretas, retorno do navegador, rota inexistente e build; observar comportamento básico em desktop e viewport móvel. Registrar limites se o ambiente impedir alguma verificação.
 
 **Validação:** demonstrar a aplicação navegável, estrutura, arquivos alterados e verificações. Aguardar o usuário aprovar antes de iniciar identidade visual.
+
+### Registro da entrega técnica — 06/11/2026
+
+- Criado `app/frontend` com React + Vite, React Router declarativo e TypeScript estrito. A tipagem foi uma escolha explícita do usuário durante a implementação, substituindo JavaScript.
+- Organizados `src/app`, `src/features` por área e `src/shared`, com caminhos tipados centralizados. Removidos o conteúdo e os assets de demonstração do template.
+- Rotas `/`, `/mapa`, `/admin` e `/login` com placeholders identificados pelo nome, cabeçalho compartilhado, indicação de rota ativa e títulos no navegador. Caminhos desconhecidos oferecem retorno ao início.
+- Criados README de execução e organização em `app/` e `app/frontend/`, e README de reserva em `app/backend/`. O backend não foi implementado.
+- Verificados: `npm run lint`, build com `tsc -b`, links, histórico Voltar, acesso direto às quatro rotas no preview do build, recarga de `/mapa`, rota inexistente, foco por teclado e link para pular ao conteúdo.
+- Layout conferido no navegador em desktop e viewport 375 × 812, sem transbordamento horizontal. Não houve teste em dispositivo físico. O console não apresentou erros nas interações verificadas.
+- Servidor de desenvolvimento local configurado em `http://127.0.0.1:5173/`. Estilo básico provisório, sem autenticação, dados, mapa ou integração de API. A etapa 2 segue aguardando validação.
 
 ## Etapa 2 — Identidade visual e componentes compartilhados
 
@@ -53,6 +64,14 @@
 - Considerar teclado, foco visível, legenda que não dependa somente de cor, preferência por movimento reduzido e alternativas quando transparência/desfoque não forem adequados.
 
 **Validação:** mostrar amostras concretas da identidade, dos componentes, do vidro e dos movimentos propostos. Aguardar escolhas e aprovação antes de construir a área Início.
+
+### Registro das amostras — 06/11/2026
+
+- O usuário autorizou uma rota separada, a comparação de três direções e a exploração de vidro com profundidade, com preferência inicial pela combinação entre natural e profundo.
+- Criado o laboratório em `/laboratorio` com variantes Natural, Profundidade e Equilíbrio; tema restrito ao experimento e componentes compartilhados tipados.
+- Adicionados Motion, Radix Slider/Switch, Lucide e Manrope local para os usos concretos das amostras. O vidro é construído em CSS, sem refração física.
+- Controles ajustam material e movimento; mapa, busca e botão de teste são identificados como demonstração.
+- Referências, assets, escolhas e próximos pontos de avaliação estão em [Laboratório visual](LABORATORIO_VISUAL.md).
 
 ## Etapa 3 — Área Início
 
