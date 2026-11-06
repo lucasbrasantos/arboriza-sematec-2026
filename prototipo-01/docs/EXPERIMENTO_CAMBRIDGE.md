@@ -1,5 +1,7 @@
 # Piloto Detectree2 Cambridge — 05/11/2026
 
+**Revisão mais recente:** [comparação com os novos 64/36 pontos manuais](REVISAO_CAMBRIDGE_2026-11-05.md). Os relatos e números anteriores abaixo registram o histórico do piloto.
+
 Os dois recortes atuais foram processados no Windows, na RTX 5070, com o peso urbano Cambridge. A saída principal é um ponto WGS84 no centro de cada caixa, representando uma **possível copa**, sem confirmar árvore individual ou localização de tronco. A interface/F5 permanecem os mesmos, com importação manual dos GeoJSONs.
 
 ## Resultados para revisar

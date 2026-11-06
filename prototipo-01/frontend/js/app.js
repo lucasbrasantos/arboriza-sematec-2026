@@ -69,7 +69,7 @@ function start() {
 			input.checked = layer.selected.has(input.value);
 			input.closest('li').classList.toggle('selected', input.checked);
 		});
-		if (layer.selected.size === 1 && $('show-points').checked) {
+		if (tool === 'select' && layer.selected.size === 1 && $('show-points').checked) {
 			const point = layer.points.find(p => layer.selected.has(p.key));
 			pointPopup.setLatLng(latLng(point)).setContent(pointInfo(point)).openOn(map);
 		} else map.closePopup(pointPopup);
@@ -137,13 +137,17 @@ function start() {
 		$('more-points').hidden = listLimit >= current().points.length;
 	}
 
+	function updateHeat() {
+		if (heat && map.hasLayer(heat)) heat.setLatLngs(current().points.map(point => [latLng(point).lat, latLng(point).lng, 1]));
+	}
+
 	function render() {
 		const layer = current();
 		markers.clearLayers(); circles.clear();
 		layer.points.forEach(point => {
 			circles.set(point.key, L.circleMarker(latLng(point), { interactive: false }).addTo(markers));
 		});
-		heat?.setLatLngs(layer.points.map(point => [latLng(point).lat, latLng(point).lng, 1]));
+		updateHeat();
 		const bounds = area.getBounds();
 		const inside = layer.points.filter(point => bounds.contains(latLng(point))).length;
 		const r = Math.PI / 180;
@@ -177,6 +181,7 @@ function start() {
 
 	function setTool(next) {
 		cancelGesture(); tool = next; ignoreClickUntil = 0;
+		if (tool !== 'select') map.closePopup(pointPopup);
 		container.dataset.tool = tool;
 		document.querySelectorAll('[data-tool]').forEach(button => {
 			if (button.tagName === 'BUTTON') button.setAttribute('aria-pressed', String(button.dataset.tool === tool));
@@ -330,7 +335,10 @@ function start() {
 		selection();
 	};
 	$('show-density').disabled = !heat;
-	$('show-density').onchange = event => event.target.checked ? heat.addTo(map) : map.removeLayer(heat);
+	$('show-density').onchange = event => {
+		if (event.target.checked) { heat.addTo(map); updateHeat(); }
+		else map.removeLayer(heat);
+	};
 	$('import').onchange = async event => {
 		for (const file of event.target.files) {
 			try {

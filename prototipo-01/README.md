@@ -16,12 +16,16 @@ O servidor utiliza apenas a biblioteca padrão do Python e publica somente os ar
 
 A [preparação Detectron2 no Windows](docs/DETECTRON2_WINDOWS.md) foi validada em ambiente separado. O [piloto Detectree2 Cambridge](docs/EXPERIMENTO_CAMBRIDGE.md) já processou os dois recortes e gerou pontos para revisão; não há precisão global validada.
 
+A [revisão dos novos arquivos manuais](docs/REVISAO_CAMBRIDGE_2026-11-05.md) compara 64 pontos do Centro e 36 do Centro-norte com novas execuções Cambridge, separando corte de score, escala e agregação.
+
+A [pesquisa de fontes e rodada de múltiplas escalas](docs/FONTES_IMAGENS_E_MULTIESCALA_2026-11-05.md) explica 100/200 m, diferencia os fundos DataGEO e Sentinel-2 e registra as variantes experimentais de agregação por máscaras. Elas permanecem separadas do padrão atual.
+
 - Alterne entre ruas (OpenStreetMap) e imagem aérea (IGC/DataGEO, levantamento 2023/2024).
 - Escolha um dos dois recortes ou use o enquadramento atual como área de estudo.
 - Use a barra inferior para adicionar pontos, selecionar por clique ou retângulo, mover em grupo e apagar a seleção. Ctrl/Shift + clique combina pontos; Shift + arraste também seleciona por retângulo. Arrastar um ponto selecionado move o grupo. A ferramenta **Mover (M)** permite iniciar o arraste em qualquer lugar do mapa, mantendo a seleção; use **Selecionar (V)** para voltar a navegar pelo mapa.
 - **Selecionar todos**, **Inverter seleção** e **Limpar seleção** atuam sobre a camada inteira, incluindo os pontos fora do enquadramento ou ainda não exibidos na lista.
 - A lista mostra os pontos do mais recente ao mais antigo; as caixas combinam a seleção e o nome aproxima o mapa até o ponto. Em telas estreitas, a lista se fecha para liberar a visualização.
-- Ao selecionar um único ponto, uma ficha no mapa mostra número, ID, coordenadas, origem e dados do modelo quando disponíveis. Ela permanece aberta após soltar o mouse; clicar novamente no ponto selecionado reabre a ficha. Use **Copiar coordenadas** ou **Copiar informações**; o segundo copia o objeto GeoJSON completo do ponto. Para seleção múltipla, a ficha fecha.
+- Na ferramenta **Selecionar (V)**, selecionar um único ponto abre uma ficha no mapa com número, ID, coordenadas, origem e dados do modelo quando disponíveis. Ela permanece aberta após soltar o mouse; clicar novamente no ponto selecionado reabre a ficha. Use **Copiar coordenadas** ou **Copiar informações**; o segundo copia o objeto GeoJSON completo do ponto. A ficha fecha na seleção múltipla ou ao trocar para outra ferramenta; adicionar pontos não abre a ficha.
 - O botão de coordenadas no canto inferior esquerdo do canvas, junto à escala de distância, mostra latitude e longitude sob o cursor. Clique para copiar os valores exibidos. A posição fica congelada ao passar o mouse pelos controles, para conseguir copiar o último local apontado no mapa.
 - Atalhos: Ctrl+A seleciona todos da camada; Delete apaga; Ctrl+Z desfaz; Ctrl+Y ou Ctrl+Shift+Z refaz; Esc limpa a seleção e volta à ferramenta Selecionar. V/M/P/B escolhem selecionar/mover/adicionar/retângulo; L abre ou fecha a lista. Os atalhos aparecem nos botões. No macOS, Command substitui Ctrl.
 - O histórico guarda até 50 ações por camada, apenas durante a sessão. Mover ou apagar vários pontos conta como uma ação. Pontos manuais ficam salvos neste navegador, incluindo alterações desfeitas/refeitas.
