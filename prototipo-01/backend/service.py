@@ -19,6 +19,19 @@ class AnalysisService:
     def __init__(self):
         self.detector = None
 
+    def run_sectors(self, territory, ids, score, folder, progress):
+        from .sector_analysis import run_sector_analysis
+        loaded_now = self.detector is None
+        started = perf_counter()
+        if loaded_now:
+            progress('Conferindo pesos e carregando Cambridge na GPU')
+            self.detector = CambridgeDetector(.05)
+        load_seconds = perf_counter() - started if loaded_now else 0
+        result = run_sector_analysis(self.detector, territory, ids, score, folder, progress)
+        result.update(modelo_carregado_agora=loaded_now, carregamento_modelo_s=load_seconds)
+        write_json(folder / 'resumo.json', result)
+        return result
+
     def run(self, recorte, perfil, score, folder, progress):
         loaded_now = self.detector is None
         load_started = perf_counter()

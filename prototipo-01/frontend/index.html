@@ -97,6 +97,7 @@
 					<button id="territory-toggle" class="territory-launch" type="button" aria-pressed="false">Selecionar setores</button>
 					<div id="territory-details" hidden>
 						<p id="territory-summary" aria-live="polite">Nenhum setor selecionado.</p>
+						<p id="territory-coverage" aria-live="polite"></p>
 						<label for="territory-sector">Setor pelo código</label>
 						<div class="row"><input id="territory-sector" type="text" inputmode="numeric" maxlength="15" placeholder="Código de 15 dígitos"><button id="territory-sector-toggle" type="button" disabled>Alternar</button></div>
 						<label for="territory-name">Nome da área</label>
@@ -105,7 +106,7 @@
 						<select id="territory-saved"><option value="">Selecione uma área</option></select>
 						<div class="row"><button id="territory-load" type="button" disabled>Carregar</button><button id="territory-delete" type="button" disabled>Excluir…</button></div>
 						<button id="territory-export" type="button" disabled>Exportar área em GeoJSON</button>
-						<p>O desenho seleciona setores inteiros. As áreas ficam salvas neste navegador. A seleção ainda não executa análise.</p>
+						<p>O desenho seleciona setores inteiros. Para analisá-los, mantenha a seleção ativa e use “Identificar possíveis árvores”. As áreas salvas ficam neste navegador.</p>
 					</div>
 					<p id="territory-sidebar-status" role="status" aria-live="polite"></p>
 				</section>
@@ -122,7 +123,7 @@
 
 					<dl class="area-stats">
 						<div class="area-stats__area">
-							<dt>Área aproximada</dt>
+							<dt>Área do retângulo</dt>
 							<dd id="area-size">
 								<span class="area-primary">—</span>
 								<small class="area-secondary"></small>
@@ -166,6 +167,14 @@
 					<span>Lat <strong id="mouse-lat">—</strong></span>
 					<span>Lon <strong id="mouse-lng">—</strong></span>
 				</button>
+			</div>
+			<div id="analysis-map-indicator" class="glass" aria-hidden="true" hidden>
+				<span class="analysis-map-dot"></span>
+				<div class="analysis-map-copy">
+					<strong id="analysis-map-label">Análise em andamento</strong>
+					<span id="analysis-map-stage">Iniciando análise…</span>
+				</div>
+				<span id="analysis-map-time">—</span>
 			</div>
 			<fieldset id="map-lists" disabled aria-label="Listas do mapa">
 				<legend class="sr-only">Camadas e pontos</legend>

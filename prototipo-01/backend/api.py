@@ -39,6 +39,15 @@ class TerritorySelection(BaseModel):
     ids: list[str] = Field(max_length=5000)
 
 
+class TerritoryBlockPlan(TerritorySelection):
+    block_m: int = Field(ge=50, le=2000)
+
+
+class SectorAnalysisRequest(TerritorySelection):
+    fonte_malha: str = Field(min_length=1, max_length=128)
+    score: float = Field(default=.15, ge=.05, le=1, allow_inf_nan=False)
+
+
 def create_app(service=None, output=ROOT / "resultados" / "interface", territory_path=TERRITORY_DATA):
     service = service or AnalysisService()
     tasks, lock, pool = {}, Lock(), ThreadPoolExecutor(max_workers=1)
@@ -77,6 +86,30 @@ def create_app(service=None, output=ROOT / "resultados" / "interface", territory
         except ValueError as error:
             raise HTTPException(422, str(error)) from error
 
+    @app.post("/api/territorio/cobertura-local")
+    def territory_local_coverage(request: TerritorySelection):
+        from .coverage import local_coverage
+        try:
+            return local_coverage(territory(), request.ids, RECORTES)
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+
+    @app.post("/api/territorio/cobertura-por-setor")
+    def territory_sector_coverage(request: TerritorySelection):
+        from .coverage import coverage_by_sector
+        try:
+            return coverage_by_sector(territory(), request.ids, RECORTES)
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+
+    @app.post("/api/territorio/plano-blocos")
+    def territory_block_plan(request: TerritoryBlockPlan):
+        from .block_plan import plan_blocks
+        try:
+            return plan_blocks(territory(), request.ids, request.block_m)
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+
     @app.post("/api/territorio/geojson")
     def territory_geojson(request: TerritorySelection):
         try:
@@ -106,7 +139,10 @@ def create_app(service=None, output=ROOT / "resultados" / "interface", territory
                 job.update(estado="processando", etapa=step)
         try:
             progress("Preparando análise")
-            summary = service.run(request.recorte, request.perfil, request.score, job["folder"], progress)
+            if isinstance(request, SectorAnalysisRequest):
+                summary = service.run_sectors(territory(), request.ids, request.score, job["folder"], progress)
+            else:
+                summary = service.run(request.recorte, request.perfil, request.score, job["folder"], progress)
             with lock:
                 job.update(estado="concluida", etapa="Concluída", resumo=summary)
         except Exception as error:
@@ -143,8 +179,7 @@ def create_app(service=None, output=ROOT / "resultados" / "interface", territory
             items.append(item)
         return {"recortes": items, "perfis": PROFILES, "score_padrao": .15, "score_minimo": .05}
 
-    @app.post("/api/analises", status_code=202)
-    def start(request: Request):
+    def enqueue(request):
         nonlocal active
         with lock:
             if active is not None:
@@ -157,6 +192,23 @@ def create_app(service=None, output=ROOT / "resultados" / "interface", territory
             active = ident
             pool.submit(work, ident, request)
         return {"analysis_id": ident}
+
+    @app.post("/api/analises", status_code=202)
+    def start(request: Request):
+        return enqueue(request)
+
+    @app.post("/api/analises/setores", status_code=202)
+    def start_sectors(request: SectorAnalysisRequest):
+        current = territory()
+        try:
+            selected = current.selected(request.ids)
+            if not selected:
+                raise ValueError('Selecione ao menos um setor.')
+            if request.fonte_malha != current.metadata['sha256_fonte']:
+                raise ValueError('A malha territorial mudou; recarregue a página e refaça a seleção.')
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+        return enqueue(request)
 
     @app.get("/api/analises/{ident}")
     def status(ident: str):

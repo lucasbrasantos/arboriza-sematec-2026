@@ -9,6 +9,7 @@ from threading import Event
 from fastapi.testclient import TestClient
 
 from backend.api import create_app
+from tests.test_territory import sample
 
 
 class FakeService:
@@ -24,6 +25,9 @@ class FakeService:
             raise RuntimeError("CUDA out of memory (simulado)")
         (folder / "pontos.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": []}))
         return {"candidatos": 0}
+
+    def run_sectors(self, territory, ids, score, folder, progress):
+        return self.run('setores', 'controle', score, folder, progress)
 
 
 class ApiTests(unittest.TestCase):
@@ -64,6 +68,26 @@ class ApiTests(unittest.TestCase):
             self.assertEqual(client.get("/").status_code, 200)
             for path in ("/data/", "/.envs/", "/backend/api.py", "/resultados/", "/../backend/api.py"):
                 self.assertEqual(client.get(path).status_code, 404)
+
+    def test_sector_request_validation_and_shared_busy_lock(self):
+        service = FakeService()
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'setores.json'
+            path.write_text(json.dumps(sample()), encoding='utf-8')
+            with TestClient(create_app(service, Path(temp) / 'resultados', path)) as client:
+                for body in ({'ids': [], 'fonte_malha': 'teste'}, {'ids': ['unknown'], 'fonte_malha': 'teste'},
+                             {'ids': ['a'], 'fonte_malha': 'desatualizada'}, {'ids': ['a'], 'fonte_malha': 'teste', 'perfil': 'multiescala'}):
+                    self.assertEqual(client.post('/api/analises/setores', json=body).status_code, 422)
+                response = client.post('/api/analises/setores', json={'ids': ['a'], 'fonte_malha': 'teste'})
+                self.assertEqual(response.status_code, 202)
+                ident = response.json()['analysis_id']
+                self.assertEqual(client.post('/api/analises', json={'recorte': 'centro'}).status_code, 409)
+                service.release.set()
+                for _ in range(200):
+                    job = client.get(f'/api/analises/{ident}').json()
+                    if job['estado'] in ('concluida', 'erro'): break
+                    time.sleep(.01)
+                self.assertEqual(job['estado'], 'concluida')
 
 
 if __name__ == "__main__":

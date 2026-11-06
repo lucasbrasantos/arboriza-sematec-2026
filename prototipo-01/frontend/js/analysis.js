@@ -1,7 +1,7 @@
 import { readPoints } from './points.js';
 
 // Polling sequencial: só agenda a próxima consulta depois de receber a anterior.
-export function connectAnalysis(store, onLayer, isTerritoryActive = () => false) {
+export function connectAnalysis(store, onLayer, isTerritoryActive = () => false, onVisualState = () => {}, getTerritory = () => null) {
 	const $ = id => document.getElementById(id);
 	const ids = { centro: 'centro', norte: 'centro-norte' };
 	let catalog = null, running = null;
@@ -22,41 +22,58 @@ export function connectAnalysis(store, onLayer, isTerritoryActive = () => false)
 	}
 	function refresh() {
 		const recorte = catalog?.recortes.find(item => item.id === ids[$('area').value]);
-		$('analyze').disabled = !recorte?.disponivel || Boolean(running) || isTerritoryActive();
+		const selecting = isTerritoryActive(), territory = selecting && getTerritory();
+		$('analyze').disabled = Boolean(running) || !catalog || (selecting
+			? !territory || $('analysis-profile').value !== 'controle' : !recorte?.disponivel);
 		$('analysis-profile').disabled = !catalog || Boolean(running);
 		$('analysis-score').disabled = Boolean(running);
 		$('profile-help').textContent = catalog?.perfis.find(item => item.id === $('analysis-profile').value)?.descricao || 'Configurações do modelo Cambridge.';
-		if (!running && catalog && isTerritoryActive()) status('A seleção por setores ainda não está disponível para análise.');
-		else if (!running && catalog && !recorte) status('Análise disponível somente nos recortes Centro e Centro-norte.');
+		if (!running && catalog && selecting && !territory) status('A seleção por setores precisa conter ao menos um setor.');
+		else if (!running && catalog && selecting && $('analysis-profile').value !== 'controle') status('Para setores, escolha o perfil Controle · 200 m.');
+		else if (!running && catalog && selecting) status(`Pronto para analisar ${territory.ids.length} setor(es) completo(s).`);
+		else if (!running && catalog && !recorte) status('Selecione setores para analisá-los ou escolha um dos recortes disponíveis.');
 		else if (!running && recorte && !recorte.disponivel) status('A imagem local deste recorte não foi encontrada.', true);
-		else if (!running && catalog && ($('analysis-status').textContent.startsWith('Análise disponível somente')
+		else if (!running && catalog && ($('analysis-status').textContent.startsWith('Selecione setores para analisá-los')
 			|| $('analysis-status').textContent.startsWith('A seleção por setores'))) status('Pronto para analisar este recorte.');
 	}
 	async function monitor() {
 		$('retry-analysis').hidden = true;
+		onVisualState({ mode: 'running', stage: running.stage || `${running.name} · Acompanhando análise…`, seconds: running.seconds });
 		try {
 			while (running) {
 				const context = running;
 				const job = await request(`/api/analises/${context.id}`);
 				const seconds = job.duracao_s.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+				context.seconds = job.duracao_s; context.stage = `${context.name} · ${job.etapa}`;
+				onVisualState({ mode: 'running', stage: context.stage, seconds: context.seconds });
 				status(`${context.name} · ${job.etapa} · ${seconds} s`);
 				if (job.estado === 'erro') { running = null; refresh(); throw new Error(job.erro || 'A análise falhou.'); }
 				if (job.estado === 'concluida') {
+					onVisualState({ mode: 'running', stage: `${context.name} · Carregando resultado…`, seconds: context.seconds });
 					const points = readPoints(await request(`/api/analises/${context.id}/geojson`));
+					let completion;
 					// A limpeza pode acontecer durante o download; conferir antes de adicionar.
 					if (store.cleared === context.cleared) {
 						const activate = store.revision === context.revision && $('area').value === context.area && !isTerritoryActive();
 						const name = `${context.name} · ${context.profile} · score ${context.score.toLocaleString('pt-BR')} · ${new Date(job.criada_em).toLocaleString('pt-BR')}`;
-						onLayer(name, points, { analysisId: context.id, recorte: job.recorte }, activate);
-						status(`${points.length} possíveis árvores · ${seconds} s. ${activate ? 'Camada pronta para revisão.' : 'Camada adicionada; sua edição atual foi preservada.'}`);
-					} else status(`Análise concluída em ${seconds} s. O mapa foi limpo; o resultado ficou salvo no disco.`);
-					running = null; refresh(); return;
+						const metadata = { analysisId: context.id, recorte: job.recorte };
+						if (context.territory) metadata.studyArea = { recorte: 'custom', bounds: context.territory.bounds };
+						onLayer(name, points, metadata, activate);
+						const warning = job.resumo?.janelas_no_limite_deteccoes ? ' Algumas janelas atingiram o limite de detecções; revise o resultado.' : '';
+						const cache = Number.isInteger(job.resumo?.janelas_cache)
+							? ` Imagens: ${job.resumo.janelas_cache} do cache e ${job.resumo.janelas_download} baixadas.` : '';
+						completion = `${points.length} possíveis árvores · ${seconds} s. ${activate ? 'Camada pronta para revisão.' : 'Camada adicionada; sua edição atual foi preservada.'}${cache}${warning}`;
+					} else completion = `Análise concluída em ${seconds} s. O mapa foi limpo; o resultado ficou salvo no disco.`;
+					running = null; onVisualState({ mode: 'idle' }); refresh(); status(completion); return;
 				}
 				await new Promise(resolve => setTimeout(resolve, 1000));
 			}
 		} catch (error) {
 			// Falha HTTP pode ser transitória: permite acompanhar o mesmo pedido, sem reenviá-lo.
 			if (error.status === 404) { running = null; refresh(); }
+			onVisualState(running
+				? { mode: 'waiting', stage: 'A análise pode continuar. Retome no painel.', seconds: running.seconds }
+				: { mode: 'idle' });
 			status(`${error.message} As camadas anteriores foram preservadas.`, true);
 			$('retry-analysis').hidden = !running;
 		}
@@ -64,18 +81,23 @@ export function connectAnalysis(store, onLayer, isTerritoryActive = () => false)
 	$('analysis-profile').onchange = refresh;
 	$('retry-analysis').onclick = monitor;
 	$('analyze').onclick = async () => {
-		if (running || !catalog || isTerritoryActive() || !$('analysis-score').reportValidity()) return;
+		if (running || !catalog || !$('analysis-score').reportValidity()) return;
+		const territory = isTerritoryActive() ? getTerritory() : null;
+		if (isTerritoryActive() && (!territory || $('analysis-profile').value !== 'controle')) return;
 		const area = $('area').value, recorte = catalog.recortes.find(item => item.id === ids[area]);
-		if (!recorte?.disponivel) return;
+		if (!territory && !recorte?.disponivel) return;
 		const profile = $('analysis-profile').selectedOptions[0];
-		running = { area, revision: store.revision, cleared: store.cleared, name: recorte.nome,
+		running = { area, revision: store.revision, cleared: store.cleared, name: territory ? `${territory.ids.length} setor(es)` : recorte.nome, territory,
 			profile: profile.textContent, score: Number($('analysis-score').value) };
+		onVisualState({ mode: 'running', stage: `${running.name} · Iniciando análise…` });
 		refresh(); status('Iniciando análise…');
 		try {
-			const data = await request('/api/analises', { recorte: recorte.id, perfil: profile.value, score: running.score });
+			const data = territory
+				? await request('/api/analises/setores', { ids: territory.ids, fonte_malha: territory.source, score: running.score })
+				: await request('/api/analises', { recorte: recorte.id, perfil: profile.value, score: running.score });
 			running.id = data.analysis_id;
 			await monitor();
-		} catch (error) { running = null; refresh(); status(error.message, true); }
+		} catch (error) { running = null; onVisualState({ mode: 'idle' }); refresh(); status(error.message, true); }
 	};
 	request('/api/recortes').then(data => {
 		catalog = data;

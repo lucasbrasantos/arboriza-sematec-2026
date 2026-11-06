@@ -2,6 +2,7 @@ import { readPoints } from './points.js';
 import { createMap, recortes, readStudyArea, studyAreaFor } from './map.js';
 import { createLayers, confirmAction } from './layers.js';
 import { connectAnalysis } from './analysis.js';
+import { createAnalysisVisual } from './analysis-visual.js';
 import { connectTerritory } from './territory.js';
 
 const $ = id => document.getElementById(id);
@@ -415,8 +416,8 @@ function start() {
 		if (activate) setTool('select');
 		const saved = store.add(name, features, metadata, activate);
 		if (saved) message('Nova camada de possíveis árvores disponível. Revise os pontos antes de usar as contagens.');
-	}, () => Boolean(territory?.active));
-	territory = connectTerritory({ map, confirmAction, onActiveChange(active) {
+	}, () => Boolean(territory?.active), createAnalysisVisual(), () => territory?.selection);
+	territory = connectTerritory({ map, confirmAction, onSelectionChange() { analysis?.refresh(); }, onActiveChange(active) {
 		if (active) {
 			cancelGesture(); map.closePopup(pointPopup);
 			container.dataset.tool = 'select';

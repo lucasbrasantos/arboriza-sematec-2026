@@ -1,5 +1,5 @@
 // Seleção territorial separada das camadas e do histórico de pontos.
-export function connectTerritory({ map, confirmAction, onActiveChange }) {
+export function connectTerritory({ map, confirmAction, onActiveChange, onSelectionChange = () => {} }) {
 	const $ = id => document.getElementById(id);
 	const container = map.getContainer();
 	const savedKey = 'arboriza-prototipo-01-areas-territoriais';
@@ -90,13 +90,15 @@ export function connectTerritory({ map, confirmAction, onActiveChange }) {
 		$('territory-save').disabled = !selected.size || needsSummary || savedUnavailable;
 		$('territory-export').disabled = !selected.size || needsSummary;
 		$('territory-load').disabled = !$('territory-saved').value || drawingRequest;
+		onSelectionChange();
 	}
 	async function updateSelection(next, fit = false) {
 		selected = new Set(next); summary = undefined;
 		const revision = ++summaryRevision;
 		renderSectors(); saveDraft(); renderButtons(Boolean(selected.size));
-		if (!selected.size) { $('territory-summary').textContent = 'Nenhum setor selecionado.'; return; }
+		if (!selected.size) { $('territory-summary').textContent = 'Nenhum setor selecionado.'; $('territory-coverage').textContent = ''; return; }
 		$('territory-summary').textContent = `Calculando a área de ${selected.size} setores…`;
+		$('territory-coverage').textContent = 'Conferindo as imagens locais…';
 		try {
 			const result = await request('/api/territorio/resumo', { ids: [...selected] });
 			if (revision !== summaryRevision) return;
@@ -106,9 +108,18 @@ export function connectTerritory({ map, confirmAction, onActiveChange }) {
 			$('territory-summary').textContent = `${result.setores} ${result.setores === 1 ? 'setor' : 'setores'} · ${km2} km² (${ha} ha). Prévia de setores inteiros.`;
 			renderButtons();
 			if (fit) fitSelection();
+			try {
+				const coverage = await request('/api/territorio/cobertura-local', { ids: [...selected] });
+				if (revision !== summaryRevision) return;
+				const percent = coverage.percentual.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+				$('territory-coverage').textContent = `Recortes locais antigos: ${percent}% da seleção (${coverage.imagens.length ? coverage.imagens.join(' e ') : 'nenhum'}). A análise usará o cache ou buscará imagens IGC 2023/2024 no DataGEO.`;
+			} catch {
+				if (revision === summaryRevision) $('territory-coverage').textContent = 'Não foi possível conferir a cobertura das imagens locais.';
+			}
 		} catch (error) {
 			if (revision !== summaryRevision) return;
 			$('territory-summary').textContent = 'Não foi possível calcular a área selecionada.';
+			$('territory-coverage').textContent = '';
 			renderButtons(true); status(error.message, true);
 		}
 	}
@@ -279,5 +290,10 @@ export function connectTerritory({ map, confirmAction, onActiveChange }) {
 			setTimeout(() => URL.revokeObjectURL(url), 1000); status('Área territorial exportada em GeoJSON.');
 		} catch (error) { status(error.message, true); }
 	};
-	return { get active() { return active; }, exit };
+	return { get active() { return active; }, get selection() {
+		if (!active || !summary?.bounds || !selected.size || drawingRequest) return null;
+		const [west, south, east, north] = summary.bounds;
+		return { ids: [...selected], source: collection.arboriza.sha256_fonte,
+			bounds: [[south, west], [north, east]] };
+	}, exit };
 }

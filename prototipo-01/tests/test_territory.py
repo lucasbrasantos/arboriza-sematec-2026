@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from backend.api import create_app
 from backend.territory import Territory
+from backend.coverage import coverage_by_sector, local_coverage
 from scripts.preparar_setores_ibge import prepare
 
 
@@ -62,6 +63,10 @@ class TerritoryTests(unittest.TestCase):
             response = client.post("/api/territorio/intersecoes", json={"geometry": rectangle(-50.45, -21.21, -50.44, -21.20)})
             self.assertEqual(response.json()["ids"], ["a"])
             self.assertEqual(client.post("/api/territorio/resumo", json={"ids": ["unknown"]}).status_code, 422)
+            self.assertEqual(client.post("/api/territorio/cobertura-local", json={"ids": ["unknown"]}).status_code, 422)
+            self.assertEqual(client.post("/api/territorio/cobertura-local", json={"ids": []}).json()["percentual"], 0)
+            self.assertEqual(client.post("/api/territorio/plano-blocos", json={"ids": [], "block_m": 500}).status_code, 422)
+            self.assertEqual(client.post("/api/territorio/plano-blocos", json={"ids": ["a"], "block_m": 5}).status_code, 422)
             exported = client.post("/api/territorio/geojson", json={"ids": ["a", "b"]}).json()
             self.assertEqual(exported["arboriza"]["setores"], ["a", "b"])
             self.assertEqual(exported["features"][0]["geometry"]["type"], "Polygon")
@@ -76,6 +81,47 @@ class TerritoryTests(unittest.TestCase):
         with self.assertRaises(FileExistsError):
             prepare(self.path)
         self.assertEqual(self.path.read_bytes(), before)
+
+    def test_coverage_uses_valid_mask_and_does_not_count_overlap_twice(self):
+        import numpy as np
+        import rasterio
+        from rasterio.transform import from_bounds
+        image = self.path.parent / 'test-rgb.tif'
+        with rasterio.open(image, 'w', driver='GTiff', width=2, height=2, count=3,
+                           dtype='uint8', crs='EPSG:4326', transform=from_bounds(-50.45, -21.21, -50.44, -21.20, 2, 2)) as dst:
+            dst.write(np.ones((3, 2, 2), dtype='uint8'))
+            dst.write_mask(np.array([[255, 0], [255, 0]], dtype='uint8'))
+        result = local_coverage(self.territory, ['a'], {'uma': image, 'duplicada': image})
+        self.assertAlmostEqual(result['percentual'], 50, delta=.1)
+        self.assertAlmostEqual(result['area_coberta_m2'] + result['area_pendente_m2'], result['area_total_m2'], delta=.01)
+        self.assertEqual(result['imagens'], ['uma', 'duplicada'])
+        sectors = coverage_by_sector(self.territory, ['a', 'b'], {'uma': image, 'duplicada': image})
+        self.assertEqual(sectors['contagem'], {'completo': 0, 'parcial': 1, 'sem_imagem': 1})
+        self.assertAlmostEqual(sectors['setores'][0]['percentual'], 50, delta=.1)
+        self.assertEqual(sectors['setores'][1]['percentual'], 0)
+        with self.assertRaises(ValueError):
+            coverage_by_sector(self.territory, [], {'uma': image})
+
+    def test_sector_coverage_http_rejects_invalid_ids(self):
+        with TestClient(create_app(territory_path=self.path)) as client:
+            for ids in ([], ['unknown'], ['a', 'a']):
+                self.assertEqual(client.post('/api/territorio/cobertura-por-setor', json={'ids': ids}).status_code, 422)
+            result = client.post('/api/territorio/cobertura-por-setor', json={'ids': ['a']})
+            self.assertEqual(result.status_code, 200)
+            self.assertEqual(result.json()['setores'][0]['id'], 'a')
+
+    def test_sector_coverage_detects_complete_image(self):
+        import numpy as np
+        import rasterio
+        from rasterio.transform import from_bounds
+        image = self.path.parent / 'full.tif'
+        with rasterio.open(image, 'w', driver='GTiff', width=2, height=2, count=3,
+                           dtype='uint8', crs='EPSG:4326',
+                           transform=from_bounds(-50.46, -21.22, -50.43, -21.19, 2, 2)) as dst:
+            dst.write(np.ones((3, 2, 2), dtype='uint8'))
+        result = coverage_by_sector(self.territory, ['a'], {'imagem': image})
+        self.assertEqual(result['contagem']['completo'], 1)
+        self.assertAlmostEqual(result['setores'][0]['percentual'], 100, delta=.001)
 
 
 if __name__ == "__main__":
