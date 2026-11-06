@@ -5,7 +5,7 @@
       "name": "Protótipo 01: interface",
       "type": "debugpy",
       "request": "launch",
-      "python": "${workspaceFolder}/prototipo-01/.venv/Scripts/python.exe",
+      "python": "${workspaceFolder}/prototipo-01/.envs/detectree2/Scripts/python.exe",
       "program": "${workspaceFolder}/prototipo-01/scripts/run.py",
       "cwd": "${workspaceFolder}/prototipo-01",
       "console": "integratedTerminal",

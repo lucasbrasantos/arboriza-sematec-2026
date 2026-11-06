@@ -74,7 +74,7 @@ def proposals(report, size, folder):
     return output
 
 
-def export(name, variant, kept, rejected, report, rgb, affine, crs, folder, seconds):
+def export(name, variant, kept, rejected, report, rgb, affine, crs, folder, seconds, threshold=.15):
     from rasterio.warp import transform as project
     features, diagnostics = [], []
     for row in kept:
@@ -88,10 +88,10 @@ def export(name, variant, kept, rejected, report, rgb, affine, crs, folder, seco
                                         'source_id': row['source_id'], 'bbox_px': row['bbox_px'],
                                         'agregacao': variant}})
         diagnostics.append({key: value for key, value in row.items() if key != 'mask'})
-    prefix = f'{name}-{variant}-c0.15'
+    prefix = f'{name}-{variant}-c{threshold:.2f}'
     write_json(folder / f'{prefix}.geojson', {'type': 'FeatureCollection', 'features': features})
     save_preview(rgb, [{**r, 'reason': 'selecionada'} for r in kept],
-                 f'{name} | {variant} | score >= 0.15 | {len(kept)} candidatos', folder/f'{prefix}.png')
+                 f'{name} | {variant} | score >= {threshold:.2f} | {len(kept)} candidatos', folder/f'{prefix}.png')
     write_json(folder/f'{prefix}.json', {'kept': diagnostics, 'rejected': rejected,
                                        'aggregation_seconds': seconds})
     return {'recorte': name, 'variant': variant, 'candidates': len(kept),

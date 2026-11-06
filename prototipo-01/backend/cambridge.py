@@ -55,11 +55,13 @@ def deduplicate(rows, iou):
             rows[index].update(reason="sobreposicao_nms", suppressed_by=rows[eligible[keep[winner]]]["id"])
 
 
-def analyze(detector, recorte, tile_m, overlap, iou, thresholds, output):
+def analyze(detector, recorte, tile_m, overlap, iou, thresholds, output, progress=None):
     import torch
     from pycocotools import mask as coco_mask
 
     started = perf_counter()
+    if progress:
+        progress(f"Preparando {recorte}: janelas de {tile_m:g} m")
     path = RECORTES[recorte]
     rgb, valid, affine, crs, image_info = read_image(path)
     height, width = valid.shape
@@ -76,6 +78,8 @@ def analyze(detector, recorte, tile_m, overlap, iou, thresholds, output):
             tile_info.append({**info, "skipped": "sem_pixels_validos"})
             continue
         print(f"{recorte}: janela {tile_id}/{len(windows)} {info['window_px']}", flush=True)
+        if progress:
+            progress(f"Analisando {tile_m:g} m: janela {tile_id}/{len(windows)}")
         tick = perf_counter()
         instances = detector.predict(rgb[y:bottom, x:right])
         torch.cuda.synchronize()
@@ -103,6 +107,8 @@ def analyze(detector, recorte, tile_m, overlap, iou, thresholds, output):
                "peak_reserved_mib": torch.cuda.max_memory_reserved() / 2**20,
                "model_load_seconds": detector.load_seconds}
     prefix = f"cambridge-{recorte}-t{tile_m:g}m"
+    if progress:
+        progress(f"Agregando e salvando diagnósticos de {tile_m:g} m")
     model_id = detector.manifest["model_id"]
     geojson, rows = locate(raw, affine, crs, valid, recorte, min(thresholds), model_id, "detectree2")
     for row, box in zip(rows, raw):
@@ -137,7 +143,7 @@ def analyze(detector, recorte, tile_m, overlap, iou, thresholds, output):
                              "window_px": [min(tw, width), min(th, height)], "overlap": overlap,
                              "edge_strategy": "anchor_last_full_window; overlap_can_increase_at_edges",
                              "input": "original_RGB8_to_BGR; no_color_enhancement_or_HSV",
-                             "score_floor": min(thresholds), "export_thresholds": thresholds,
+                             "score_floor": detector.score_floor, "export_thresholds": thresholds,
                              "mosaic_nms_box_iou": iou, "mosaic_method": "torchvision.ops.nms_cpu",
                              "native_nms": "Detectron2 RPN/ROI; see config.yaml",
                              "batch_size": 1, "workers": 0},

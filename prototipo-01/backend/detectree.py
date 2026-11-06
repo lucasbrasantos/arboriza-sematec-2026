@@ -25,6 +25,7 @@ class CambridgeDetector:
                         base_lr=.01709, weight_decay=.006519, batch_size_per_im=623,
                         out_dir=str(ROOT / ".cache" / "detectree2"))
         cfg.MODEL.DEVICE = "cuda"
+        self.score_floor = min_score
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = min_score
         self.max_detections = cfg.TEST.DETECTIONS_PER_IMAGE
         self.config = cfg.dump()

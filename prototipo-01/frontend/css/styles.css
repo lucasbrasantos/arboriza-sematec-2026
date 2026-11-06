@@ -433,7 +433,7 @@ dd {
 
 .tool-buttons {
 	display: grid;
-	grid-template-columns: repeat(8, 1fr);
+	grid-template-columns: repeat(7, 1fr);
 	gap: 4px;
 }
 
@@ -496,17 +496,30 @@ dd {
 	color: #ffb2a8;
 }
 
-#point-browser {
+#map-lists {
 	position: absolute;
 	z-index: 610;
 	right: 16px;
-	bottom: calc(var(--tools-height, 180px) + 40px);
-	width: 274px;
+	top: 88px;
+	width: 310px;
 	max-width: calc(100% - 32px);
-	max-height: calc(100% - var(--tools-height, 180px) - 140px);
+	max-height: calc(100% - var(--tools-height, 180px) - 120px);
+	display: flex;
+	flex-direction: column;
+}
+
+.list-launchers { display: flex; gap: 8px; flex-shrink: 0; }
+.list-launchers button { display: flex; flex: 1; align-items: center; justify-content: center; gap: 7px; }
+.list-launchers svg { width: 18px; height: 18px; }
+.list-launchers span, .list-launchers kbd { font: inherit; color: var(--muted); font-weight: 400; }
+.map-list-panel {
+	margin-top: 8px;
+	min-height: 0;
 	overflow-y: auto;
 	padding: 10px;
 }
+
+.map-list-panel h2 { margin: 0; font-size: .875rem; }
 
 #point-browser header {
 	display: flex;
@@ -683,6 +696,27 @@ dd {
 	display: block;
 }
 
+.analysis-controls { margin-top: 20px; }
+.analysis-controls > button { width: 100%; margin-top: 12px; }
+.analysis-controls p { margin: 0 0 12px; }
+.score-field { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.score-field input { width: 86px; padding: 7px; color: var(--text); background: var(--surface); border: 1px solid var(--control); border-radius: 6px; }
+#analysis-status { margin: 10px 0 0; font-variant-numeric: tabular-nums; }
+#analysis-status.error { color: #b53535; }
+[data-theme="dark"] #analysis-status.error { color: #ffb4ac; }
+#layer-list { display: grid; gap: 6px; padding: 0; margin: 0 0 10px; list-style: none; max-height: 250px; overflow-y: auto; }
+#layer-list li { display: flex; gap: 4px; min-width: 0; }
+.layer-select { flex: 1; min-width: 0; text-align: left; padding: 8px; }
+.layer-select strong, .layer-select span { display: block; overflow-wrap: anywhere; }
+.layer-select strong { font-size: .78rem; font-weight: 600; }
+.layer-select span { font-size: .72rem; font-weight: 400; margin-top: 3px; }
+.layer-remove { padding: 6px; flex: 0 0 34px; }
+.layer-remove svg { width: 17px; height: 17px; }
+#clear-map { min-height: 32px; padding: 5px 9px; font-size: .76rem; }
+#confirm-dialog { width: min(400px, calc(100% - 32px)); padding: 24px; color: var(--text); background: var(--surface); border: 0; border-radius: 14px; box-shadow: var(--shadow); }
+#confirm-dialog::backdrop { background: rgb(10 24 16 / 48%); }
+#confirm-dialog .row { margin-top: 22px; margin-bottom: 0; }
+
 .sr-only {
 	position: absolute;
 	width: 1px;
@@ -795,9 +829,9 @@ dd {
 		font-size: .7rem;
 	}
 
-	#point-browser {
+	#map-lists {
 		right: 10px;
-		width: 260px;
+		max-width: calc(100% - 20px);
 	}
 
 	#point-list {
@@ -823,6 +857,10 @@ dd {
 
 	[data-panel="floating"] aside section {
 		max-height: 40dvh;
+	}
+
+	[data-panel="floating"] aside:has(section.open) ~ .map-area #map-lists {
+		visibility: hidden;
 	}
 }
 
