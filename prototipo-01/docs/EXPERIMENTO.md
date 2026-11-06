@@ -35,11 +35,11 @@ Cada combinação salva três arquivos com o mesmo nome-base:
 4. Repita com **Centro-norte** e seus dois arquivos. Cada importação cria uma camada separada; suas marcações manuais são preservadas.
 5. Use as ferramentas existentes para corrigir e exportar os pontos. As edições ficam na camada da interface, não alteram o diagnóstico original nem significam validação automática das árvores.
 
-Para facilitar o primeiro teste, os cinco GeoJSONs gerados (quatro da bateria original e o Centro adicional em 0,15) também estão reunidos em [`resultados/entrega-01/`](resultados/entrega-01/). Essa pasta é uma cópia da entrega; novas execuções continuam nas suas próprias pastas.
+Para facilitar o primeiro teste, os cinco GeoJSONs gerados (quatro da bateria original e o Centro adicional em 0,15) também estão reunidos em [`resultados/entrega-01/`](../resultados/entrega-01/). Essa pasta é uma cópia da entrega; novas execuções continuam nas suas próprias pastas.
 
 ## Primeira execução real — 05/11/2026
 
-Arquivos em [`resultados/20261105T063853Z-2589c5/`](resultados/20261105T063853Z-2589c5/). Dados e resultados são locais, ignorados pelo Git.
+Arquivos em [`resultados/20261105T063853Z-2589c5/`](../resultados/20261105T063853Z-2589c5/). Dados e resultados são locais, ignorados pelo Git.
 
 | Recorte | Janela | Caixas após NMS, score ≥ 0,1 | Candidatos, score ≥ 0,5 | Inferência | Pico alocado PyTorch |
 |---|---:|---:|---:|---:|---:|
@@ -60,7 +60,7 @@ Validações: seis testes automatizados de coordenadas, CRS projetado, bordas, p
 
 O arquivo `data/arboriza-pontos_CENTRO_.geojson` contém **68 pontos** manuais, com `revisado: false`. Conforme informado pelo autor, inclui árvores, arbustos e outros verdes, com marcação ampla; não é uma referência revisada de árvores individuais. O arquivo original foi apenas lido.
 
-Foi executada uma análise adicional, mantendo os pesos e a janela 400, com confiança mínima **0,15**. Ela gerou **58 candidatos**. Arquivos em [`resultados/20261105T064446Z-f49246/`](resultados/20261105T064446Z-f49246/), com GeoJSON, PNG e registro completo. A bateria original em 0,50 foi preservada. Repetir:
+Foi executada uma análise adicional, mantendo os pesos e a janela 400, com confiança mínima **0,15**. Ela gerou **58 candidatos**. Arquivos em [`resultados/20261105T064446Z-f49246/`](../resultados/20261105T064446Z-f49246/), com GeoJSON, PNG e registro completo. A bateria original em 0,50 foi preservada. Repetir:
 
 ```powershell
 .\.venv\Scripts\python.exe -m backend.analysis --recorte centro --janelas 400 --confianca 0.15
@@ -78,13 +78,13 @@ Foi feita uma associação exploratória um-a-um em UTM 22S (EPSG:32722), maximi
 
 Esses números **não são precisão/recall nem classificação de acertos e erros**. Os conjuntos usam critérios diferentes, e centros de copas podem ficar afastados dos cliques manuais.
 
-A [imagem comparativa](resultados/20261105T064446Z-f49246/comparacao-manual-centro.png) mostra os 68 pontos manuais em amarelo, os 58 automáticos em azul e linhas verdes para pares até 3 m. O JSON de mesmo nome registra hash da referência, método, tolerâncias, pares e distâncias. A inspeção mostra copas omitidas e alguns pontos automáticos sobre telhados. Esta variante serve para sua revisão; não foi aprovada como configuração definitiva.
+A [imagem comparativa](../resultados/20261105T064446Z-f49246/comparacao-manual-centro.png) mostra os 68 pontos manuais em amarelo, os 58 automáticos em azul e linhas verdes para pares até 3 m. O JSON de mesmo nome registra hash da referência, método, tolerâncias, pares e distâncias. A inspeção mostra copas omitidas e alguns pontos automáticos sobre telhados. Esta variante serve para sua revisão; não foi aprovada como configuração definitiva.
 
 ## Rodada 2 — escala e triagem de cor, 05/11/2026
 
 Após o relato de pontos sobre telhados e ruas, foram repetidos os dois recortes com janelas **200, 300 e 400**, sobreposição 25% e corte 0,15, usando o mesmo modelo e o mesmo RGB original. Não foi aumentado o contraste ou a saturação da imagem enviada à IA.
 
-Os arquivos, o script que reproduz a rodada, os parâmetros e o log completo estão em [`resultados/rodada-02-20261105/`](resultados/rodada-02-20261105/). Foram restaurados os scripts do stash autorizado, sem excluir o stash; um `.gitignore` na raiz passou a proteger também caches, pesos, dados, logs, checkpoints e debug dos experimentos.
+Os arquivos, o script que reproduz a rodada, os parâmetros e o log completo estão em [`resultados/rodada-02-20261105/`](../resultados/rodada-02-20261105/). Foram restaurados os scripts do stash autorizado, sem excluir o stash; um `.gitignore` na raiz passou a proteger também caches, pesos, dados, logs, checkpoints e debug dos experimentos.
 
 Foi acrescentada uma triagem de cor **posterior à detecção**, separada da confiança: HSV OpenCV, H 25–95 (escala 0–179), S ≥ 35 e V ≥ 30 (escala 0–255), com pelo menos **10% dos pixels válidos da caixa** nessa faixa. Essa proporção é um parâmetro experimental, não probabilidade de ser árvore. Os candidatos que não passam são separados para revisão, não apagados. O filtro não conhece a geometria exata da copa e pode descartar árvores de outras cores, em sombra ou com caixa imprecisa.
 
@@ -112,12 +112,12 @@ O ambiente já está pronto nesta máquina. Para recriá-lo com Python 3.12:
 ```powershell
 & "$env:LOCALAPPDATA\Programs\Python\Python312\python.exe" -m venv .venv
 $env:PIP_CACHE_DIR = "$PWD\.cache\pip"
-.\.venv\Scripts\python.exe -m pip install -r requirements-lock.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements/requirements-lock.txt
 .\.venv\Scripts\python.exe -m backend.detector
-.\.venv\Scripts\python.exe -m unittest backend.test_analysis -v
+.\.venv\Scripts\python.exe -m unittest tests.test_analysis -v
 ```
 
-`requirements.txt` fixa as dependências principais; `requirements-lock.txt` registra todas as versões instaladas e validadas. O laboratório antigo não é modificado. A falha de CUDA interrompe o experimento; não há fallback automático para CPU.
+`requirements/requirements.txt` fixa as dependências principais; `requirements/requirements-lock.txt` registra todas as versões instaladas e validadas. O laboratório antigo não é modificado. A falha de CUDA interrompe o experimento; não há fallback automático para CPU.
 
 Os dados necessários são os dois `aracatuba-*_rgb8.tif` e seus respectivos `aracatuba-*_fonte.json`, já copiados para `data/ortofotos/` de `X:\-code-\segmentacao-teste\media\ortofotos`. Em outra instalação, copie esses quatro arquivos para a mesma pasta relativa. Eles são produtos RGB renderizados do WMS IGC/DataGEO 2023/2024, não os rasters originais do aerolevantamento. A procedência completa é preservada nos JSONs.
 

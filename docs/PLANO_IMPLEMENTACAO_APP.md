@@ -1,0 +1,127 @@
+# Arboriza — plano de implementação do app
+
+**Situação:** planejamento para validação; desenvolvimento ainda não autorizado nesta etapa.  
+**Contexto:** complementa o [escopo funcional](ESCOPO_WEBSITE_PRIMEIRA_ENTREGA.md). O prazo anteriormente informado para a primeira entrega foi 09/11/2026; este plano não garante viabilidade nesse prazo.
+
+## Acordo de trabalho e validação
+
+- O usuário quer acompanhar cada etapa, decisão, dúvida e implementação. Apresentar opções, implicações e recomendações antes de tomar decisões materiais; aguardar sua escolha quando necessário.
+- Ao terminar cada etapa, demonstrar o resultado, relatar arquivos alterados, verificações, pendências e limitações; parar e aguardar validação explícita do usuário antes de avançar à etapa seguinte.
+- Correções solicitadas durante a validação pertencem à etapa atual. Decisões pendentes e mudanças de direção devem ser anotadas com o usuário, sem presumir aprovação por silêncio.
+- O usuário poderá criar as pastas ou iniciar o projeto por conta própria. Quando avisar, examinar o estado real, ler os arquivos e regras locais, preservar alterações existentes e alinhar a continuação com ele; não recriar nem sobrescrever sua estrutura automaticamente.
+- Manter arquitetura simples e organizada; aplicar os princípios de separação de responsabilidades conforme a necessidade, evitando camadas e dependências sem uso concreto.
+
+## Direção acordada
+
+- Três **áreas** do produto: Início, Mapa público e Administração. Poderão existir páginas adicionais, como login; três áreas não limitam a quantidade de rotas.
+- UrbVerde é a referência principal para a estrutura do produto e a experiência do mapa. Community Greening, Lake Nona, a página de arborização de Araçatuba e as imagens enviadas complementam a identidade sustentável, orgânica e interativa.
+- Página inicial expressiva, com interações de mouse e animações a discutir; mapa e administração claros e confortáveis para operar.
+- Glassmorphism nos componentes principais e cartões, com identidade própria do Arboriza: transparência, cor e desfoque equilibrados com a temática de natureza e cidade. Não reproduzir integralmente o estilo visual da Apple.
+- Área piloto de Araçatuba para a primeira entrega e visão de expansão para a cidade toda; regra 3-30-300 como conteúdo educativo. Dados e diagnósticos demonstrativos devem ser identificados como tais.
+- Estrutura proposta: `app/frontend` em React, `app/backend` para a API Python/FastAPI e, se necessário, `app/scripts` e README. `prototipo-01` segue como referência e laboratório existente.
+
+## Etapa 0 — Preparação conjunta
+
+- Aguardar o usuário informar quando quiser iniciar e se criou alguma estrutura.
+- Inspecionar o repositório, as alterações existentes, dependências, instruções locais e o protótipo de mapa antes de qualquer modificação.
+- Apresentar a estrutura concreta encontrada e o plano da etapa 1. Validar com o usuário as decisões ainda abertas que afetem a execução.
+
+**Validação:** confirmar ponto de partida e autorizar a etapa 1. A aprovação deste plano, isoladamente, não autoriza iniciar a implementação.
+
+## Etapa 1 — Estrutura React, navegação e placeholders
+
+**Objetivo:** entregar uma aplicação limpa e navegável, ainda sem design final.
+
+- Criar ou aproveitar `app/frontend`, com React + Vite e JavaScript, conforme a proposta anterior, verificando antes o que o usuário já fez.
+- Remover conteúdo de demonstração gerado pelo template e organizar uma estrutura inicial pequena por área e código compartilhado, sem criar componentes complexos antecipadamente.
+- Configurar navegação e rotas: `/` (Início), `/mapa` (Mapa público), `/admin` (Administração) e `/login` (Login), além de tratamento simples para rota inexistente.
+- Criar links funcionais entre áreas e placeholders simples com o nome da página. Os placeholders não representam autenticação, mapa, análise ou publicação funcionando.
+- Documentar como instalar, executar e gerar a aplicação. Criar ou alterar somente os arquivos necessários para esta etapa.
+- Verificar inicialização, navegação pelos links e URLs diretas, retorno do navegador, rota inexistente e build; observar comportamento básico em desktop e viewport móvel. Registrar limites se o ambiente impedir alguma verificação.
+
+**Validação:** demonstrar a aplicação navegável, estrutura, arquivos alterados e verificações. Aguardar o usuário aprovar antes de iniciar identidade visual.
+
+## Etapa 2 — Identidade visual e componentes compartilhados
+
+**Objetivo:** estabelecer as fundações visuais antes de compor as áreas finais.
+
+- Apresentar para escolha uma direção visual baseada no UrbVerde, complementada pelas demais referências e imagens enviadas.
+- Propor paleta, tipografia, ícones, espaçamentos e formas orgânicas, com exemplos pequenos para avaliação; as cores discutidas anteriormente são ponto de partida, não valores finais aprovados.
+- Estudar variações de glassmorphism para cabeçalho, painéis e cartões, com gradações de transparência e desfoque e uma alternativa de fundo mais opaco quando necessário. Avaliar leitura sobre fotos e mapas, contraste, responsividade e custo visual/desempenho.
+- Apresentar exemplos de botões, campos, cartões, navegação e painéis compartilhados, criando apenas componentes necessários.
+- Levar para escolha as opções de movimento e bibliotecas da seção de pesquisa. Antes de instalar, apresentar dependência, benefício, limitações e onde será usada.
+- Considerar teclado, foco visível, legenda que não dependa somente de cor, preferência por movimento reduzido e alternativas quando transparência/desfoque não forem adequados.
+
+**Validação:** mostrar amostras concretas da identidade, dos componentes, do vidro e dos movimentos propostos. Aguardar escolhas e aprovação antes de construir a área Início.
+
+## Etapa 3 — Área Início
+
+**Objetivo:** construir uma apresentação responsiva e interativa do Arboriza.
+
+- Compor a página usando a identidade e os componentes compartilhados aprovados.
+- Desenvolver apresentação do projeto, chamada ao mapa, explicação do funcionamento, demonstração inicial do mapa, conteúdo educativo sobre 3-30-300 e informações de fontes/equipe.
+- Apresentar opções de imagem, vídeo, grafismos e interações de mouse/rolagem antes da escolha; usar apenas materiais cuja origem e uso estejam definidos.
+- Preparar uma prévia de mapa demonstrativa claramente identificada, sem apresentá-la como diagnóstico real ou integração pronta.
+- Avaliar navegação, links, acessibilidade básica, adaptação para celular e movimento reduzido.
+
+**Validação:** demonstrar desktop e celular, animações e interações; ajustar conforme feedback e aguardar aprovação para avançar.
+
+## Etapa 4 — Área Mapa público
+
+- Estudar o aproveitamento do `prototipo-01` com o usuário antes de escolher como integrá-lo ao React.
+- Construir estrutura do mapa, busca/seleção da área, camadas, legenda e painel de diagnóstico, usando os padrões compartilhados aprovados.
+- Na ausência de integração, usar apenas dados demonstrativos identificados e preparar estados de carregamento, vazio, erro e área sem dados.
+- Explicitar a área piloto e não equiparar pontos ou concentração de pontos a cobertura de copas.
+
+**Validação:** revisar aparência, navegação, painéis, responsividade, transparência dos dados e ferramentas; aguardar aprovação.
+
+## Etapa 5 — Área Administração
+
+- Projetar e construir a interface de acesso e administração, com seleção de área, análise, importação, revisão de pontos e prioridades, salvamento, exportação e publicação, conforme forem aprovados.
+- Sem API, representar ações e estados como demonstração e não como operações efetivamente concluídas; não tratar a tela de login como segurança real.
+- Comparar ferramentas disponíveis no protótipo e apresentar o que será reaproveitado.
+
+**Validação:** demonstrar o fluxo e estados, indicar claramente o que é simulado e aguardar aprovação.
+
+## Etapa 6 — Backend e integração progressiva
+
+- Propor e validar a estrutura concreta de `app/backend`, o contrato da API e o plano de reaproveitamento do processamento Python.
+- Integrar por partes: consulta pública, análise executada pelo site, importação, revisão e prioridade, persistência, autenticação/autorização e publicação. A ordem exata e as tecnologias de armazenamento são decisões a validar.
+- Resguardar os resultados publicados durante novas análises e tratar carregamento, falha e retomada quando definidos no contrato.
+- A classificação de trechos, os critérios, a associação dos pontos às ruas e a qualidade do detector dependem de investigação e validação; não presumir que o protótipo já os resolva.
+
+**Validação:** demonstrar cada integração com dados reais ou claramente identificados, compartilhar os resultados das verificações e aguardar aprovação a cada parte relevante e ao final da etapa.
+
+## Etapa 7 — Revisão da entrega piloto
+
+- Fazer percurso completo de cidadão e equipe; verificar dados reais, origem, estados, navegação, responsividade e autenticação no servidor.
+- Revisar documentação de execução, limites, fontes e preparação da demonstração.
+- Discutir disponibilidade da API, execução da análise, publicação do site e eventuais custos antes de definir infraestrutura ou implantação.
+
+**Validação final:** apresentar o que funciona, o que permanece pendente, como foi verificado e o que não foi testado. A publicação e quaisquer etapas adicionais serão tratadas conforme instruções do usuário.
+
+## Opções para pesquisar e validar juntos
+
+As opções abaixo são referências iniciais, não dependências aprovadas nem resultados de testes neste projeto.
+
+| Necessidade | Opção | Possível uso e ponto de atenção |
+|---|---|---|
+| Transições simples | CSS nativo | Hover, foco, pequenas entradas e abertura de painéis; solução simples para avaliar primeiro. |
+| Animações em React | [Motion for React](https://motion.dev/docs/react) | Gestos, hover, rolagem e transições de componentes; avaliar necessidade e tamanho antes de instalar. |
+| Sequências e rolagem mais elaboradas | [GSAP](https://gsap.com/docs/v3/) | Linha do tempo e animações mais complexas; maior complexidade de integração, a comparar com Motion e CSS. |
+| Vidro fosco | [CSS `backdrop-filter`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/backdrop-filter) | Transparência e desfoque personalizáveis; estudar legibilidade, fallback e desempenho sobre mapa e vídeo. |
+| Vidro com refração | [Liquid Glass for React](https://liquidglass.theatom.lk/docs) | Biblioteca independente inspirada no efeito da Apple; a própria documentação descreve diferenças por navegador. Avaliar maturidade, licença, compatibilidade e desempenho antes de adotar. |
+| Vidro com refração alternativo | [simple-liquid-glass](https://github.com/lucaperullo/simple-liquid-glass) | Abordagens com SVG/WebGL e fallback; verificar exigências, diferenças entre navegadores e custo de manutenção. |
+| Movimento reduzido | [`prefers-reduced-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion) | Respeitar a preferência do usuário e manter acesso ao conteúdo com movimentos reduzidos. |
+
+**Ponto de partida a avaliar:** testar vidro fosco com CSS e interações simples; comparar Motion se as animações desejadas justificarem uma biblioteca. Refração forte e GSAP podem ser avaliados em exemplos isolados, mediante interesse do usuário. Nenhuma opção foi instalada ou aprovada.
+
+## Decisões abertas
+
+- Quais efeitos, bibliotecas, fontes, ícones e imagens serão efetivamente adotados.
+- Intensidade e locais de aplicação do vidro; comportamento sobre vídeo e mapa.
+- Detalhes finais da estrutura criada pelo usuário, estratégia de execução e distribuição da equipe.
+- Área piloto exata, qualidade do detector, associação a trechos, critérios de prioridade e formato final dos dados.
+- Persistência, autenticação, infraestrutura e estratégia de publicação.
+
+Esses pontos serão apresentados no momento adequado para validação; não impedem o planejamento nem autorizam avançar automaticamente entre etapas.

@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Protótipo 01: interface",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${workspaceFolder}/prototipo-01/.envs/detectree2/Scripts/python.exe",
+      "program": "${workspaceFolder}/prototipo-01/scripts/run.py",
+      "cwd": "${workspaceFolder}/prototipo-01",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}

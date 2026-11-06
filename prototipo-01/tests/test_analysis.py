@@ -8,7 +8,7 @@ import numpy as np
 import rasterio
 from rasterio.transform import Affine
 
-from .analysis import locate, read_image, write_json
+from backend.analysis import locate, read_image, write_json
 
 
 def box(x1, y1, x2, y2, score=.5):
@@ -72,7 +72,7 @@ class GeographyTests(unittest.TestCase):
             self.assertEqual(metadata["valid_pixels"], 15)
 
     def test_cuda_unavailable_never_falls_back_to_cpu(self):
-        from .detector import Detector
+        from backend.detector import Detector
         with patch("torch.cuda.is_available", return_value=False):
             with self.assertRaisesRegex(RuntimeError, "CUDA indisponível"):
                 Detector()

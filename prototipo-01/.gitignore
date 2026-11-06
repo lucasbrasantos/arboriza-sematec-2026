@@ -6,3 +6,4 @@ resultados/
 lightning_logs/
 __pycache__/
 *.pyc
+.envs/

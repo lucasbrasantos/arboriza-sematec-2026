@@ -6,6 +6,39 @@ export const recortes = {
 	norte: [[-21.208, -50.442], [-21.2057, -50.4395]],
 };
 
+export function readStudyArea(value) {
+	const b = value?.bounds;
+	if (!Array.isArray(b) || b.length !== 2 || b.some(p => !Array.isArray(p) || p.length !== 2
+		|| !p.every(Number.isFinite) || Math.abs(p[0]) > 90 || Math.abs(p[1]) > 180)
+		|| b[0][0] >= b[1][0] || b[0][1] >= b[1][1]) return undefined;
+	const key = value.recorte === 'centro-norte' ? 'norte' : value.recorte;
+	// Limites personalizados não podem habilitar a análise de um recorte diferente.
+	const known = recortes[key]?.every((p, i) => p.every((n, j) => Math.abs(n - b[i][j]) < 1e-8));
+	return { recorte: known ? key : 'custom', bounds: b.map(p => [...p]) };
+}
+
+export function studyAreaFor(layer) {
+	let result = readStudyArea(layer.studyArea);
+	const points = layer.points.map(p => p.feature.geometry.coordinates);
+	if (!result) {
+		const sources = [...new Set(layer.points.map(p => p.feature.properties.recorte).filter(Boolean))];
+		const filename = layer.name.match(/^arboriza-pontos_(centro-norte|centro)(?:_|\.geojson$)/i)?.[1].toLowerCase();
+		const source = layer.recorte || (sources.length === 1 ? sources[0] : sources.length ? null : filename);
+		const key = source === 'centro-norte' ? 'norte' : source;
+		if (recortes[key]) result = { recorte: key, bounds: recortes[key].map(p => [...p]) };
+	}
+	if (!points.length) return result;
+	if (result && points.every(([lng, lat]) => lat >= result.bounds[0][0] && lat <= result.bounds[1][0]
+		&& lng >= result.bounds[0][1] && lng <= result.bounds[1][1])) return result;
+	// Camadas antigas sem recorte ou pontos movidos para fora dele: incluir todos os pontos.
+	const coordinates = points.map(([lng, lat]) => [lat, lng]).concat(result?.bounds || []);
+	const south = Math.min(...coordinates.map(p => p[0])), north = Math.max(...coordinates.map(p => p[0]));
+	const west = Math.min(...coordinates.map(p => p[1])), east = Math.max(...coordinates.map(p => p[1]));
+	const margin = result ? 0 : .0001;
+	return { recorte: 'custom', bounds: [[Math.max(-90, south-margin), Math.max(-180, west-margin)],
+		[Math.min(90, north+margin), Math.min(180, east+margin)]] };
+}
+
 export function createMap(onLoading, onError) {
 	const map = L.map('map', { zoomControl: false, maxZoom: 21, preferCanvas: true, boxZoom: false });
 	L.control.zoom({ position: 'topright' }).addTo(map);
