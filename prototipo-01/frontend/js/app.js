@@ -1,7 +1,8 @@
 import { readPoints } from './points.js';
 import { createMap, recortes, readStudyArea, studyAreaFor } from './map.js';
-import { createLayers } from './layers.js';
+import { createLayers, confirmAction } from './layers.js';
 import { connectAnalysis } from './analysis.js';
+import { connectTerritory } from './territory.js';
 
 const $ = id => document.getElementById(id);
 const message = (text, error = false) => {
@@ -30,7 +31,7 @@ function start() {
 	coordinateControl.addTo(map);
 	L.DomEvent.disableClickPropagation(coordinateButton);
 	L.DomEvent.disableScrollPropagation(coordinateButton);
-	let tool = 'select', gesture = null, ignoreClickUntil = 0, listLimit = 50, analysis;
+	let tool = 'select', gesture = null, ignoreClickUntil = 0, listLimit = 50, analysis, territory;
 	const store = createLayers(cancelGesture, focus => {
 		if (focus) restoreLayerArea();
 		listLimit = 50; render();
@@ -185,6 +186,7 @@ function start() {
 	}
 
 	function setTool(next) {
+		if (territory?.active) territory.exit();
 		cancelGesture(); tool = next; ignoreClickUntil = 0;
 		if (tool !== 'select') map.closePopup(pointPopup);
 		container.dataset.tool = tool;
@@ -213,6 +215,7 @@ function start() {
 	}
 
 	container.addEventListener('pointerdown', event => {
+		if (territory?.active) return;
 		if (event.button !== 0 || !event.isPrimary || event.target.closest('.leaflet-control, .leaflet-popup') || gesture) return;
 		const start = map.mouseEventToContainerPoint(event);
 		const point = hitPoint(start);
@@ -272,6 +275,7 @@ function start() {
 	});
 	container.addEventListener('pointercancel', cancelGesture);
 	map.on('click', event => {
+		if (territory?.active) return;
 		if (performance.now() < ignoreClickUntil) return;
 		if (tool === 'add') {
 			if (!area.getBounds().contains(event.latlng)) return message('Adicione dentro da área delimitada ou ajuste a área de estudo.', true);
@@ -317,6 +321,7 @@ function start() {
 	$('list-close').onclick = () => { showList(false); $('list-toggle').focus(); };
 	$('more-points').onclick = () => { listLimit += 50; renderList(); selection(); };
 	document.addEventListener('keydown', event => {
+		if (territory?.active) return;
 		if ($('confirm-dialog').open || event.target.closest('textarea, select, [contenteditable="true"], input:not([type="checkbox"]):not([type="radio"])')) return;
 		const key = event.key.toLowerCase(), command = event.ctrlKey || event.metaKey;
 		if (command && ['z', 'y', 'a'].includes(key)) {
@@ -398,14 +403,32 @@ function start() {
 		document.querySelectorAll('[data-section]').forEach(section => section.classList.toggle('open', open && section.dataset.section === button.dataset.tab));
 	});
 	new ResizeObserver(() => map.invalidateSize({ pan: false })).observe(container);
-	new ResizeObserver(([entry]) => container.parentElement.style.setProperty('--tools-height', `${entry.borderBoxSize[0].blockSize}px`)).observe($('point-tools'));
+	const toolsObserver = new ResizeObserver(() => {
+		const visible = $('territory-tools').hidden ? $('point-tools') : $('territory-tools');
+		container.parentElement.style.setProperty('--tools-height', `${visible.offsetHeight}px`);
+	});
+	toolsObserver.observe($('point-tools')); toolsObserver.observe($('territory-tools'));
 	theme(pref('arboriza-theme', 'light')); panel(pref('arboriza-panel', 'side'));
 	$('controls').disabled = false; $('point-tools').disabled = false; $('map-lists').disabled = false;
 	analysis = connectAnalysis(store, (name, features, metadata, activate) => {
-		activate = activate && !gesture;
+		activate = activate && !gesture && !territory?.active;
 		if (activate) setTool('select');
 		const saved = store.add(name, features, metadata, activate);
 		if (saved) message('Nova camada de possíveis árvores disponível. Revise os pontos antes de usar as contagens.');
-	});
+	}, () => Boolean(territory?.active));
+	territory = connectTerritory({ map, confirmAction, onActiveChange(active) {
+		if (active) {
+			cancelGesture(); map.closePopup(pointPopup);
+			container.dataset.tool = 'select';
+			if (map.hasLayer(area)) area.remove();
+			$('point-tools').hidden = true; $('point-tools').disabled = true;
+			$('territory-tools').hidden = false; $('territory-tools').disabled = false;
+		} else {
+			area.addTo(map); $('point-tools').hidden = false; $('point-tools').disabled = false;
+			$('territory-tools').hidden = true; $('territory-tools').disabled = true;
+			setTool('select');
+		}
+		analysis.refresh();
+	} });
 	restoreLayerArea(); fitArea(); render(); setTool('select');
 }

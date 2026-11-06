@@ -1,7 +1,7 @@
 import { readPoints } from './points.js';
 
 // Polling sequencial: só agenda a próxima consulta depois de receber a anterior.
-export function connectAnalysis(store, onLayer) {
+export function connectAnalysis(store, onLayer, isTerritoryActive = () => false) {
 	const $ = id => document.getElementById(id);
 	const ids = { centro: 'centro', norte: 'centro-norte' };
 	let catalog = null, running = null;
@@ -22,13 +22,15 @@ export function connectAnalysis(store, onLayer) {
 	}
 	function refresh() {
 		const recorte = catalog?.recortes.find(item => item.id === ids[$('area').value]);
-		$('analyze').disabled = !recorte?.disponivel || Boolean(running);
+		$('analyze').disabled = !recorte?.disponivel || Boolean(running) || isTerritoryActive();
 		$('analysis-profile').disabled = !catalog || Boolean(running);
 		$('analysis-score').disabled = Boolean(running);
 		$('profile-help').textContent = catalog?.perfis.find(item => item.id === $('analysis-profile').value)?.descricao || 'Configurações do modelo Cambridge.';
-		if (!running && catalog && !recorte) status('Análise disponível somente nos recortes Centro e Centro-norte.');
+		if (!running && catalog && isTerritoryActive()) status('A seleção por setores ainda não está disponível para análise.');
+		else if (!running && catalog && !recorte) status('Análise disponível somente nos recortes Centro e Centro-norte.');
 		else if (!running && recorte && !recorte.disponivel) status('A imagem local deste recorte não foi encontrada.', true);
-		else if (!running && catalog && $('analysis-status').textContent.startsWith('Análise disponível somente')) status('Pronto para analisar este recorte.');
+		else if (!running && catalog && ($('analysis-status').textContent.startsWith('Análise disponível somente')
+			|| $('analysis-status').textContent.startsWith('A seleção por setores'))) status('Pronto para analisar este recorte.');
 	}
 	async function monitor() {
 		$('retry-analysis').hidden = true;
@@ -43,7 +45,7 @@ export function connectAnalysis(store, onLayer) {
 					const points = readPoints(await request(`/api/analises/${context.id}/geojson`));
 					// A limpeza pode acontecer durante o download; conferir antes de adicionar.
 					if (store.cleared === context.cleared) {
-						const activate = store.revision === context.revision && $('area').value === context.area;
+						const activate = store.revision === context.revision && $('area').value === context.area && !isTerritoryActive();
 						const name = `${context.name} · ${context.profile} · score ${context.score.toLocaleString('pt-BR')} · ${new Date(job.criada_em).toLocaleString('pt-BR')}`;
 						onLayer(name, points, { analysisId: context.id, recorte: job.recorte }, activate);
 						status(`${points.length} possíveis árvores · ${seconds} s. ${activate ? 'Camada pronta para revisão.' : 'Camada adicionada; sua edição atual foi preservada.'}`);
@@ -62,7 +64,7 @@ export function connectAnalysis(store, onLayer) {
 	$('analysis-profile').onchange = refresh;
 	$('retry-analysis').onclick = monitor;
 	$('analyze').onclick = async () => {
-		if (running || !catalog || !$('analysis-score').reportValidity()) return;
+		if (running || !catalog || isTerritoryActive() || !$('analysis-score').reportValidity()) return;
 		const area = $('area').value, recorte = catalog.recortes.find(item => item.id === ids[area]);
 		if (!recorte?.disponivel) return;
 		const profile = $('analysis-profile').selectedOptions[0];

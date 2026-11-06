@@ -28,7 +28,7 @@ O corte começa em **0,15**, ajustável de 0,05 a 1. Score não é probabilidade
 - `backend/detectree.py`: modelo local e inferência CUDA.
 - `backend/cambridge.py` e `multiscale.py`: processamento e agregação já usados nos experimentos.
 - `backend/service.py`: executa um dos dois perfis, reutilizando o modelo.
-- `backend/api.py`: quatro endpoints, estado em memória e uma análise ativa por vez.
+- `backend/api.py`: endpoints das análises e da seleção territorial, estado das análises em memória e uma análise ativa por vez.
 - `frontend/js/analysis.js`: execução e consultas sequenciais a cada segundo.
 - `frontend/js/layers.js`: lista de camadas e persistência local.
 
@@ -40,6 +40,16 @@ As camadas e edições ficam no armazenamento deste navegador e desta origem (ho
 
 Os limites ficam em `studyArea` no armazenamento local e em `arboriza.area` no GeoJSON exportado. As camadas antigas recuperam os recortes conhecidos pelo identificador ou pelo nome padrão de exportação. Sem identificação, usa-se a extensão dos pontos com pequena margem, sem afirmar que esse era o retângulo original. Os IDs, scores e demais propriedades dos pontos são preservados. Uma marcação fora dos limites amplia a área da camada para incluí-la.
 
+## Seleção territorial — etapa 1
+
+O painel **Seleção territorial** carrega os setores urbanos de Araçatuba da malha definitiva do Censo 2022. Clique em **Selecionar setores** para trocar temporariamente a barra de pontos pela barra territorial. Clique em setores para alterná-los ou use retângulo/desenho livre com os modos **Substituir**, **Adicionar** e **Remover**. O desenho precisa ter área, e setores apenas tocados pela borda não entram. A prévia destaca o setor inteiro e informa a área da união.
+
+**Toda área urbana** seleciona todos os 499 setores classificados como urbanos no arquivo preparado, incluindo núcleos urbanos isolados. **Inverter** atua sobre esse conjunto; **Limpar** não apaga áreas salvas nem pontos. A fonte é um recorte estatístico de 2022 e não comprova o perímetro legal atual. A área é calculada em SIRGAS 2000 / UTM 22S; a geometria exibida e exportada é GeoJSON em WGS84.
+
+Áreas nomeadas e a seleção temporária ficam no armazenamento deste navegador e desta origem. **Exportar área em GeoJSON** guarda a união e os IDs dos setores, com metadados e hash da fonte; a importação de pontos não importa áreas. Mudanças da malha são detectadas ao carregar uma área salva. Use o botão **Voltar aos pontos** para encerrar a seleção e restaurar a edição. A seleção não altera `studyArea`, não alimenta os endpoints de análise e não executa o modelo.
+
+O arquivo da malha fica fora do Git em `data/territorial/`. O comando de preparação e os detalhes da fonte estão no [README](../README.md). A API informa erro recuperável se a malha não estiver disponível.
+
 O servidor usa um processo e uma instância do modelo, carregada na primeira análise. Pedidos concorrentes recebem HTTP 409. Consultas e exportações continuam disponíveis. Reiniciar o servidor perde o acompanhamento das tarefas em memória; resultados concluídos permanecem importáveis no disco. Não há fallback silencioso para CPU.
 
 | Endpoint | Função |
@@ -48,6 +58,10 @@ O servidor usa um processo e uma instância do modelo, carregada na primeira an�
 | `POST /api/analises` | `{recorte, perfil, score}` → `analysis_id` |
 | `GET /api/analises/{id}` | Estado, etapa, duração e resumo |
 | `GET /api/analises/{id}/geojson` | Pontos da análise concluída |
+| `GET /api/territorio/setores` | Malha urbana local e metadados do IBGE |
+| `POST /api/territorio/intersecoes` | IDs dos setores com interseção de área positiva com o desenho |
+| `POST /api/territorio/resumo` | Contagem, limites e área da união dos setores selecionados |
+| `POST /api/territorio/geojson` | GeoJSON da união e IDs dos setores selecionados |
 
 Estados: `pendente`, `processando`, `concluida`, `erro`.
 

@@ -4,6 +4,7 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 from threading import Lock
 from time import perf_counter
@@ -18,6 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .analysis import RECORTES, write_json
 from .detector import ROOT
 from .service import AnalysisService, PROFILES
+from .territory import DATA as TERRITORY_DATA, Territory
 
 
 class Request(BaseModel):
@@ -27,7 +29,17 @@ class Request(BaseModel):
     score: float = Field(default=.15, ge=.05, le=1, allow_inf_nan=False)
 
 
-def create_app(service=None, output=ROOT / "resultados" / "interface"):
+class TerritoryDrawing(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    geometry: dict
+
+
+class TerritorySelection(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    ids: list[str] = Field(max_length=5000)
+
+
+def create_app(service=None, output=ROOT / "resultados" / "interface", territory_path=TERRITORY_DATA):
     service = service or AnalysisService()
     tasks, lock, pool = {}, Lock(), ThreadPoolExecutor(max_workers=1)
     active = None
@@ -38,6 +50,45 @@ def create_app(service=None, output=ROOT / "resultados" / "interface"):
         pool.shutdown(wait=True)
 
     app = FastAPI(title="Arboriza — Protótipo 01", lifespan=lifespan)
+
+    @lru_cache(maxsize=1)
+    def territory():
+        try:
+            return Territory(territory_path)
+        except (OSError, KeyError, ValueError) as error:
+            logging.warning("Malha territorial indisponível: %s", error)
+            raise HTTPException(503, "Malha territorial indisponível. Prepare os setores do IBGE conforme o README.") from error
+
+    @app.get("/api/territorio/setores")
+    def territory_sectors():
+        return territory().collection
+
+    @app.post("/api/territorio/intersecoes")
+    def territory_intersections(request: TerritoryDrawing):
+        try:
+            return {"ids": territory().intersect(request.geometry)}
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+
+    @app.post("/api/territorio/resumo")
+    def territory_summary(request: TerritorySelection):
+        try:
+            return territory().summary(request.ids)
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+
+    @app.post("/api/territorio/geojson")
+    def territory_geojson(request: TerritorySelection):
+        try:
+            result = territory().summary(request.ids, include_geometry=True)
+            if not result["geometry"]:
+                raise ValueError("Selecione pelo menos um setor para exportar.")
+            return {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {},
+                                                                "geometry": result["geometry"]}],
+                    "arboriza": {"fonte": territory().metadata, "setores": request.ids,
+                                 "area_m2": result["area_m2"]}}
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
 
     def snapshot(ident):
         with lock:

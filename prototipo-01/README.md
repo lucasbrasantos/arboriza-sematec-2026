@@ -22,6 +22,10 @@ A [pesquisa de fontes e rodada de múltiplas escalas](docs/FONTES_IMAGENS_E_MULT
 
 - Alterne entre ruas (OpenStreetMap) e imagem aérea (IGC/DataGEO, levantamento 2023/2024).
 - Escolha um dos dois recortes ou use o enquadramento atual como área de estudo.
+- Em **Seleção territorial**, abra a malha urbana do IBGE de 2022 e selecione setores por clique, retângulo ou desenho livre. A barra inferior muda durante a seleção; **Voltar aos pontos** restaura a edição. O desenho seleciona setores inteiros que têm interseção de área positiva; tocar apenas a borda não seleciona o setor.
+- **Toda área urbana** seleciona os 499 setores de Araçatuba classificados como urbanos na fonte preparada, inclusive núcleos isolados. Inverter atua sobre essa mesma malha. A área exibida é a união dos setores em km² e hectares, não uma medida de cobertura arbórea. Esta é uma delimitação estatística do Censo 2022, não a confirmação do perímetro urbano legal atual.
+- Dê um nome e salve áreas territoriais neste navegador; carregue-as de novo pelo painel ou exporte a seleção em GeoJSON como cópia. Elas são independentes das camadas de pontos e ficam vinculadas à versão da malha. Limpar dados do navegador ou mudar de host/porta pode torná-las indisponíveis. A importação existente continua destinada a pontos, não a áreas territoriais.
+- A seleção territorial é uma prévia: não inicia inferência e não altera os recortes Centro/Centro-norte. O botão de análise fica desativado enquanto ela está aberta. A disponibilidade de ortofotos para toda a área ainda não foi verificada.
 - Use a barra inferior para adicionar pontos, selecionar por clique ou retângulo, mover em grupo e apagar a seleção. Ctrl/Shift + clique combina pontos; Shift + arraste também seleciona por retângulo. Arrastar um ponto selecionado move o grupo. A ferramenta **Mover (M)** permite iniciar o arraste em qualquer lugar do mapa, mantendo a seleção; use **Selecionar (V)** para voltar a navegar pelo mapa.
 - **Selecionar todos**, **Inverter seleção** e **Limpar seleção** atuam sobre a camada inteira, incluindo os pontos fora do enquadramento ou ainda não exibidos na lista.
 - A lista mostra os pontos do mais recente ao mais antigo; as caixas combinam a seleção e o nome aproxima o mapa até o ponto. Em telas estreitas, a lista se fecha para liberar a visualização.
@@ -38,6 +42,16 @@ A [pesquisa de fontes e rodada de múltiplas escalas](docs/FONTES_IMAGENS_E_MULT
 - A densidade é uma visualização de concentração de pontos, não uma medida de cobertura de copas nem uma avaliação da regra 3-30-300.
 
 As três imagens em `frontend/assets/` são prévias JPEG leves das mesmas ortofotos IGC/DataGEO: cidade (768×768) e dois recortes (512×512), cerca de 252 KiB no total. Permanecem sob os blocos detalhados durante o carregamento. Fora dessa área não há prévia local. Os blocos WMS usam 512 pixels e nível máximo de detalhe 19; acima dele o mapa amplia a imagem existente, sem solicitar resolução adicional. Isso reduz requisições e espaços vazios; a velocidade dos detalhes ainda depende do serviço externo. Não há cache persistente de blocos nem download em lote.
+
+### Preparar a malha territorial em outra instalação
+
+O arquivo preparado fica em `prototipo-01/data/territorial/`, fora do Git. Para recriá-lo com o ambiente Detectree2 existente:
+
+```powershell
+.\prototipo-01\.envs\detectree2\Scripts\python.exe .\prototipo-01\scripts\preparar_setores_ibge.py
+```
+
+O script baixa temporariamente a malha definitiva do IBGE de São Paulo (aproximadamente 80 MB), extrai somente setores com município `3502804` e situação `Urbana`, registra a origem e o SHA-256 e remove o download temporário. Ele não sobrescreve um arquivo territorial existente. Reinicie o servidor após preparar o arquivo. Sem ele, a interface de pontos continua disponível e a seleção territorial informa como preparar os dados.
 
 A interface analisa somente Centro e Centro-norte, usando os GeoTIFFs locais detalhados. “Usar enquadramento” continua disponível para edição manual, mas áreas personalizadas ainda não podem ser analisadas. Os pontos são possíveis árvores, sujeitos à revisão. A inferência usa pesos locais e CUDA; internet é necessária para bibliotecas e mapas da interface.
 
@@ -56,6 +70,7 @@ Fontes: [IGC/DataGEO](https://datageo.ambiente.sp.gov.br/geoportal/catalog/searc
 Execute os testes dentro de `prototipo-01`:
 
 ```powershell
-node --test tests/test-points.mjs tests/test-areas.mjs
+node --test tests/test-points.mjs tests/test-areas.mjs tests/test-territory-analysis.mjs
 .\.envs\detectree2\Scripts\python.exe -m unittest tests.test_analysis tests.test_cambridge tests.test_multiscale tests.test_api
+.\.envs\detectree2\Scripts\python.exe -m unittest tests.test_territory
 ```

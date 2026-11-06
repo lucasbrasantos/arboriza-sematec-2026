@@ -76,6 +76,7 @@
 		<aside id="settings" aria-label="Ferramentas de análise">
 			<nav class="panel-tabs" aria-label="Painel flutuante">
 				<button type="button" data-tab="map" aria-expanded="false">Mapa</button>
+				<button type="button" data-tab="territory" aria-expanded="false">Setores</button>
 				<button type="button" data-tab="area" aria-expanded="false">Área de estudo</button>
 				<button type="button" data-tab="layers" aria-expanded="false">Arquivos e visualização</button>
 			</nav>
@@ -89,6 +90,24 @@
 					</div>
 					<p id="source">IGC / DataGEO, levantamento 2023/2024. Resolução declarada: 25 cm.</p>
 					<p id="loading" role="status" hidden>Carregando os blocos detalhados…</p>
+				</section>
+				<section data-section="territory">
+					<h2>Seleção territorial</h2>
+					<p>Escolha setores urbanos de Araçatuba pela malha do IBGE de 2022.</p>
+					<button id="territory-toggle" class="territory-launch" type="button" aria-pressed="false">Selecionar setores</button>
+					<div id="territory-details" hidden>
+						<p id="territory-summary" aria-live="polite">Nenhum setor selecionado.</p>
+						<label for="territory-sector">Setor pelo código</label>
+						<div class="row"><input id="territory-sector" type="text" inputmode="numeric" maxlength="15" placeholder="Código de 15 dígitos"><button id="territory-sector-toggle" type="button" disabled>Alternar</button></div>
+						<label for="territory-name">Nome da área</label>
+						<div class="row"><input id="territory-name" type="text" maxlength="80" placeholder="Ex.: Região central"><button id="territory-save" type="button" disabled>Salvar</button></div>
+						<label for="territory-saved">Áreas salvas neste navegador</label>
+						<select id="territory-saved"><option value="">Selecione uma área</option></select>
+						<div class="row"><button id="territory-load" type="button" disabled>Carregar</button><button id="territory-delete" type="button" disabled>Excluir…</button></div>
+						<button id="territory-export" type="button" disabled>Exportar área em GeoJSON</button>
+						<p>O desenho seleciona setores inteiros. As áreas ficam salvas neste navegador. A seleção ainda não executa análise.</p>
+					</div>
+					<p id="territory-sidebar-status" role="status" aria-live="polite"></p>
 				</section>
 				<section data-section="area">
 					<h2>Área de estudo</h2>
@@ -218,6 +237,24 @@
 						</svg><span>Refazer</span></button>
 				</div>
 				<p id="status" role="status" aria-live="polite">Carregando o mapa…</p>
+			</fieldset>
+			<fieldset id="territory-tools" class="glass" disabled hidden aria-label="Ferramentas de seleção territorial">
+				<legend class="sr-only">Seleção territorial</legend>
+				<div class="tool-heading"><strong>Seleção territorial</strong><span id="territory-count">0 setores</span>
+					<button id="territory-exit" type="button">Voltar aos pontos</button>
+				</div>
+				<div class="territory-tool-buttons" role="group" aria-label="Como selecionar setores">
+					<button type="button" data-territory-tool="click" aria-pressed="true">Clicar no setor</button>
+					<button type="button" data-territory-tool="box" aria-pressed="false">Retângulo</button>
+					<button type="button" data-territory-tool="free" aria-pressed="false">Desenho livre</button>
+					<button id="territory-fit" type="button" disabled>Ver seleção</button>
+				</div>
+				<div class="territory-actions">
+					<label for="territory-operation">Ao desenhar</label>
+					<select id="territory-operation"><option value="replace">Substituir</option><option value="add">Adicionar</option><option value="remove">Remover</option></select>
+					<button id="territory-all" type="button">Toda área urbana</button><button id="territory-invert" type="button">Inverter</button><button id="territory-clear" type="button">Limpar</button>
+				</div>
+				<p id="territory-map-status" role="status" aria-live="polite">Clique em um setor para selecionar ou remover.</p>
 			</fieldset>
 			<noscript>Ative o JavaScript para usar o mapa.</noscript>
 		</section>
