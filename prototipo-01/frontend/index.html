@@ -62,6 +62,8 @@
 			<h1>Arboriza <span>Protótipo 01</span></h1>
 		</div>
 		<div class="header-actions">
+			<a class="page-link" href="inicio.html">Início</a>
+			<a class="page-link" href="regra.html">Projeto</a>
 			<span class="location">Araçatuba, SP</span>
 			<button id="theme-toggle" type="button" aria-pressed="false"><svg aria-hidden="true">
 					<use href="#i-moon" />
@@ -94,19 +96,28 @@
 				<section data-section="territory">
 					<h2>Seleção territorial</h2>
 					<p>Escolha setores urbanos de Araçatuba pela malha do IBGE de 2022.</p>
-					<button id="territory-toggle" class="territory-launch" type="button" aria-pressed="false">Selecionar setores</button>
+					<button id="territory-toggle" class="territory-launch" type="button" aria-pressed="false">Selecionar
+						setores</button>
 					<div id="territory-details" hidden>
 						<p id="territory-summary" aria-live="polite">Nenhum setor selecionado.</p>
 						<p id="territory-coverage" aria-live="polite"></p>
 						<label for="territory-sector">Setor pelo código</label>
-						<div class="row"><input id="territory-sector" type="text" inputmode="numeric" maxlength="15" placeholder="Código de 15 dígitos"><button id="territory-sector-toggle" type="button" disabled>Alternar</button></div>
+						<div class="row"><input id="territory-sector" type="text" inputmode="numeric" maxlength="15"
+								placeholder="Código de 15 dígitos"><button id="territory-sector-toggle" type="button"
+								disabled>Alternar</button></div>
 						<label for="territory-name">Nome da área</label>
-						<div class="row"><input id="territory-name" type="text" maxlength="80" placeholder="Ex.: Região central"><button id="territory-save" type="button" disabled>Salvar</button></div>
+						<div class="row"><input id="territory-name" type="text" maxlength="80"
+								placeholder="Ex.: Região central"><button id="territory-save" type="button"
+								disabled>Salvar</button></div>
 						<label for="territory-saved">Áreas salvas neste navegador</label>
-						<select id="territory-saved"><option value="">Selecione uma área</option></select>
-						<div class="row"><button id="territory-load" type="button" disabled>Carregar</button><button id="territory-delete" type="button" disabled>Excluir…</button></div>
+						<select id="territory-saved">
+							<option value="">Selecione uma área</option>
+						</select>
+						<div class="row"><button id="territory-load" type="button" disabled>Carregar</button><button
+								id="territory-delete" type="button" disabled>Excluir…</button></div>
 						<button id="territory-export" type="button" disabled>Exportar área em GeoJSON</button>
-						<p>O desenho seleciona setores inteiros. Para analisá-los, mantenha a seleção ativa e use “Identificar possíveis árvores”. As áreas salvas ficam neste navegador.</p>
+						<p>O desenho seleciona setores inteiros. Para analisá-los, mantenha a seleção ativa e use
+							“Identificar possíveis árvores”. As áreas salvas ficam neste navegador.</p>
 					</div>
 					<p id="territory-sidebar-status" role="status" aria-live="polite"></p>
 				</section>
@@ -139,9 +150,11 @@
 						<select id="analysis-profile" aria-describedby="profile-help" disabled></select>
 						<p id="profile-help">Carregando configurações…</p>
 						<label class="score-field" for="analysis-score">Corte de score
-							<input id="analysis-score" type="number" min="0.05" max="1" step="0.01" value="0.15" aria-describedby="score-help">
+							<input id="analysis-score" type="number" min="0.05" max="1" step="0.01" value="0.15"
+								aria-describedby="score-help">
 						</label>
-						<p id="score-help">Corte menor aceita mais propostas, inclusive erros. Score não é probabilidade de acerto.</p>
+						<p id="score-help">Corte menor aceita mais propostas, inclusive erros. Score não é probabilidade
+							de acerto.</p>
 						<button id="analyze" type="button" disabled>Identificar possíveis árvores</button>
 						<p id="analysis-status" role="status" aria-live="polite">Conectando à análise local…</p>
 						<button id="retry-analysis" type="button" hidden>Acompanhar novamente</button>
@@ -163,7 +176,8 @@
 
 		<section class="map-area" aria-label="Área do mapa">
 			<div id="map" role="region" aria-label="Mapa navegável de Araçatuba">
-				<button id="mouse-coordinates" class="glass" type="button" aria-label="Copiar coordenadas do cursor" title="Copiar latitude e longitude" disabled>
+				<button id="mouse-coordinates" class="glass" type="button" aria-label="Copiar coordenadas do cursor"
+					title="Copiar latitude e longitude" disabled>
 					<span>Lat <strong id="mouse-lat">—</strong></span>
 					<span>Lon <strong id="mouse-lng">—</strong></span>
 				</button>
@@ -179,11 +193,17 @@
 			<fieldset id="map-lists" disabled aria-label="Listas do mapa">
 				<legend class="sr-only">Camadas e pontos</legend>
 				<div class="list-launchers">
-					<button id="layers-toggle" class="glass" type="button" aria-expanded="false" aria-controls="layer-browser">
-						<svg aria-hidden="true"><use href="#i-layers" /></svg>Camadas <span id="layer-count">1</span>
+					<button id="layers-toggle" class="glass" type="button" aria-expanded="false"
+						aria-controls="layer-browser">
+						<svg aria-hidden="true">
+							<use href="#i-layers" />
+						</svg>Camadas <span id="layer-count">1</span>
 					</button>
-					<button id="list-toggle" class="glass" type="button" aria-expanded="false" aria-controls="point-browser" title="Abrir ou fechar pontos (L)" aria-keyshortcuts="L">
-						<svg aria-hidden="true"><use href="#i-list" /></svg>Pontos <kbd>L</kbd>
+					<button id="list-toggle" class="glass" type="button" aria-expanded="false"
+						aria-controls="point-browser" title="Abrir ou fechar pontos (L)" aria-keyshortcuts="L">
+						<svg aria-hidden="true">
+							<use href="#i-list" />
+						</svg>Pontos <kbd>L</kbd>
 					</button>
 				</div>
 				<section id="layer-browser" class="glass map-list-panel" aria-label="Gerenciar camadas" hidden>
@@ -192,19 +212,19 @@
 					<ul id="layer-list" aria-label="Camadas do mapa"></ul>
 					<button id="clear-map" type="button" class="danger">Limpar mapa…</button>
 				</section>
-			<section id="point-browser" class="glass map-list-panel" aria-label="Lista de pontos" hidden>
-				<header>
-					<div>
-						<h2>Pontos da camada</h2>
-						<p id="list-count">0 pontos</p>
-					</div><button id="list-close" type="button" aria-label="Fechar lista"><svg aria-hidden="true">
-							<use href="#i-close" />
-						</svg></button>
-				</header>
-				<p class="list-hint">Mais recentes primeiro. Clique para localizar.</p>
-				<ol id="point-list"></ol>
-				<button id="more-points" type="button" hidden>Carregar mais pontos</button>
-			</section>
+				<section id="point-browser" class="glass map-list-panel" aria-label="Lista de pontos" hidden>
+					<header>
+						<div>
+							<h2>Pontos da camada</h2>
+							<p id="list-count">0 pontos</p>
+						</div><button id="list-close" type="button" aria-label="Fechar lista"><svg aria-hidden="true">
+								<use href="#i-close" />
+							</svg></button>
+					</header>
+					<p class="list-hint">Mais recentes primeiro. Clique para localizar.</p>
+					<ol id="point-list"></ol>
+					<button id="more-points" type="button" hidden>Carregar mais pontos</button>
+				</section>
 			</fieldset>
 			<fieldset id="point-tools" class="glass" disabled aria-label="Ferramentas de pontos">
 				<legend class="sr-only">Edição de pontos</legend>
@@ -247,9 +267,11 @@
 				</div>
 				<p id="status" role="status" aria-live="polite">Carregando o mapa…</p>
 			</fieldset>
-			<fieldset id="territory-tools" class="glass" disabled hidden aria-label="Ferramentas de seleção territorial">
+			<fieldset id="territory-tools" class="glass" disabled hidden
+				aria-label="Ferramentas de seleção territorial">
 				<legend class="sr-only">Seleção territorial</legend>
-				<div class="tool-heading"><strong>Seleção territorial</strong><span id="territory-count">0 setores</span>
+				<div class="tool-heading"><strong>Seleção territorial</strong><span id="territory-count">0
+						setores</span>
 					<button id="territory-exit" type="button">Voltar aos pontos</button>
 				</div>
 				<div class="territory-tool-buttons" role="group" aria-label="Como selecionar setores">
@@ -260,10 +282,16 @@
 				</div>
 				<div class="territory-actions">
 					<label for="territory-operation">Ao desenhar</label>
-					<select id="territory-operation"><option value="replace">Substituir</option><option value="add">Adicionar</option><option value="remove">Remover</option></select>
-					<button id="territory-all" type="button">Toda área urbana</button><button id="territory-invert" type="button">Inverter</button><button id="territory-clear" type="button">Limpar</button>
+					<select id="territory-operation">
+						<option value="replace">Substituir</option>
+						<option value="add">Adicionar</option>
+						<option value="remove">Remover</option>
+					</select>
+					<button id="territory-all" type="button">Toda área urbana</button><button id="territory-invert"
+						type="button">Inverter</button><button id="territory-clear" type="button">Limpar</button>
 				</div>
-				<p id="territory-map-status" role="status" aria-live="polite">Clique em um setor para selecionar ou remover.</p>
+				<p id="territory-map-status" role="status" aria-live="polite">Clique em um setor para selecionar ou
+					remover.</p>
 			</fieldset>
 			<noscript>Ative o JavaScript para usar o mapa.</noscript>
 		</section>
@@ -272,7 +300,8 @@
 		<form method="dialog">
 			<h2 id="confirm-title"></h2>
 			<p id="confirm-text"></p>
-			<div class="row"><button value="cancel" autofocus>Cancelar</button><button id="confirm-action" class="danger" value="confirm"></button></div>
+			<div class="row"><button value="cancel" autofocus>Cancelar</button><button id="confirm-action"
+					class="danger" value="confirm"></button></div>
 		</form>
 	</dialog>
 </body>

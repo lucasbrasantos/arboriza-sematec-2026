@@ -65,7 +65,13 @@ class ApiTests(unittest.TestCase):
             for body in ({"recorte": "custom"}, {"recorte": "centro", "score": .01},
                          {"recorte": "centro", "score": 2}, {"recorte": "centro", "perfil": "outro"}):
                 self.assertEqual(client.post("/api/analises", json=body).status_code, 422)
-            self.assertEqual(client.get("/").status_code, 200)
+            welcome = client.get("/")
+            self.assertEqual(welcome.status_code, 200)
+            self.assertIn("Um olhar para as árvores da cidade", welcome.text)
+            self.assertIn("regra.html", welcome.text)
+            self.assertIn("index.html", welcome.text)
+            self.assertIn("3-30-300", client.get("/regra.html").text)
+            self.assertIn("Ferramentas de análise", client.get("/index.html").text)
             for path in ("/data/", "/.envs/", "/backend/api.py", "/resultados/", "/../backend/api.py"):
                 self.assertEqual(client.get(path).status_code, 404)
 

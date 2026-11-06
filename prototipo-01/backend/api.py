@@ -220,5 +220,9 @@ def create_app(service=None, output=ROOT / "resultados" / "interface", territory
             raise HTTPException(409, "O resultado ainda não está disponível.")
         return FileResponse(tasks[ident]["folder"] / "pontos.geojson", media_type="application/geo+json")
 
+    @app.get("/", include_in_schema=False)
+    def welcome():
+        return FileResponse(ROOT / "frontend" / "inicio.html")
+
     app.mount("/", StaticFiles(directory=ROOT / "frontend", html=True), name="interface")
     return app
