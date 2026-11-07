@@ -1,6 +1,6 @@
 # Arboriza — plano de implementação do app
 
-**Situação:** etapa 1 validada pelo usuário. Amostras da etapa 2 implementadas e verificadas, aguardando sua avaliação; a área Início definitiva ainda não foi iniciada.
+**Situação:** etapas 1 e 2 validadas. Mistura visual, animações e nova escala dos grafismos da área Início aprovadas; Mel escolhido como destaque predominante, com Coral e Azul-céu pontuais. Aplicação dessas escolhas na página concluída para validação do conjunto antes da área Mapa.
 **Contexto:** complementa o [escopo funcional](ESCOPO_WEBSITE_PRIMEIRA_ENTREGA.md). O prazo anteriormente informado para a primeira entrega foi 09/11/2026; este plano não garante viabilidade nesse prazo.
 
 ## Acordo de trabalho e validação
@@ -85,6 +85,32 @@
 
 **Validação:** demonstrar desktop e celular, animações e interações; ajustar conforme feedback e aguardar aprovação para avançar.
 
+### Implementação da área Início — 06/11/2026
+
+- O usuário aprovou a direção Equilíbrio, a paleta, os componentes, a interação com o vidro, os pontos e os estados de botões. Pediu mistura com a fotografia e a profundidade da outra amostra.
+- Corrigido o foco duplicado da busca no laboratório: o contêiner mantém o destaque e o campo interno não cria outro outline.
+- Construída a página `/` com tema compartilhado aprovado, floresta de referência, vidro claro e profundo, grafismos vetoriais de apoio, conteúdo do projeto, processo de detecção, prévia ilustrativa do mapa, regra 3-30-300 e fontes.
+- Componentes `RuleSection` e `IllustrativeMap` são compartilhados com o laboratório. `AnimatedNumber`, `Reveal` e `BotanicalGraphic` organizam a contagem por entrada na tela, movimentos moderados e elementos gráficos. A preferência por movimento reduzido é respeitada.
+- Cabeçalho compartilhado adaptado ao tema, com menu móvel e fechamento por Escape. Mudanças de área retornam ao início da página; comparações entre amostras mantêm a posição de rolagem.
+- Imagens e pontos são explicitamente identificados como referência ou demonstração. Não houve integração com a API ou implementação das ferramentas da área Mapa.
+- Lint, build com checagem de tipos e `git diff --check` aprovados. Busca com foco externo único, contagem por rolagem, menu móvel, seleção dos pontos e movimento reduzido conferidos no Chromium. Os limites da verificação estão registrados no [laboratório visual](LABORATORIO_VISUAL.md).
+
+### Refinamento de grafismos e destaque — 06/11/2026
+
+- Mistura visual, intensidade das animações e ajustes gerais aprovados. Usuário pediu aumentar muito a presença e interação dos elementos de apoio e adicionar uma cor de destaque.
+- Confirmada mistura de vetores com recortes botânicos. Criada comparação no laboratório, com Mel, Coral e Azul-céu, três composições, entrada por rolagem, resposta ao ponteiro e repetição por botão acessível por teclado/toque. Sem dependências adicionais.
+- O ramo transparente é gerado com IA e identificado como tal; não constitui foto local, espécie identificada ou dado ambiental.
+- Validar a escolha concreta antes de aplicá-la à área Início e aos futuros estados de apoio do Mapa e Administração. As ferramentas de mapa não recebem grafismos decorativos sobre a área de dados.
+
+### Aplicação da escolha aprovada — 06/11/2026
+
+- Usuário aprovou a presença dos grafismos para aplicar à área Início e escolheu Mel como destaque principal; autorizou Coral e Azul-céu em detalhes pontuais.
+- Tokens de destaque adicionados ao tema compartilhado. Ações, foco, estados e pontos ilustrativos do mapa mantêm seus próprios papéis de cor.
+- Ramos com textura fotográfica, copas e folhas vetoriais distribuídos pela abertura, apresentação, processo, seção fotográfica, chamada da prévia, regra educativa e encerramento. Não há elementos decorativos sobre a área de dados da prévia do mapa.
+- Componente compartilhado `BotanicalCutout` reutiliza o asset aprovado, responde ao ponteiro e à rolagem e respeita movimento reduzido. Botão “Animar folhas” repete a composição da abertura por teclado, toque ou clique. Sem dependências novas.
+- Avaliar o resultado integrado da área Início antes de iniciar a área Mapa.
+- Verificação no Chromium: desktop, viewport 375 × 812, teclado, imagens e movimento reduzido conferidos. Sem transbordamento horizontal ou erros no console nos percursos examinados. Aparelhos físicos, outros navegadores e desempenho em rede móvel não foram medidos.
+
 ## Etapa 4 — Área Mapa público
 
 - Estudar o aproveitamento do `prototipo-01` com o usuário antes de escolher como integrá-lo ao React.
@@ -121,7 +147,7 @@
 
 ## Opções para pesquisar e validar juntos
 
-As opções abaixo são referências iniciais, não dependências aprovadas nem resultados de testes neste projeto.
+As opções abaixo registram a pesquisa inicial. Após a avaliação do laboratório, Motion, Radix Slider/Switch, Lucide e Manrope passaram a integrar a base aprovada. As alternativas de refração e GSAP continuam como opções não adotadas.
 
 | Necessidade | Opção | Possível uso e ponto de atenção |
 |---|---|---|
@@ -133,12 +159,12 @@ As opções abaixo são referências iniciais, não dependências aprovadas nem 
 | Vidro com refração alternativo | [simple-liquid-glass](https://github.com/lucaperullo/simple-liquid-glass) | Abordagens com SVG/WebGL e fallback; verificar exigências, diferenças entre navegadores e custo de manutenção. |
 | Movimento reduzido | [`prefers-reduced-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion) | Respeitar a preferência do usuário e manter acesso ao conteúdo com movimentos reduzidos. |
 
-**Ponto de partida a avaliar:** testar vidro fosco com CSS e interações simples; comparar Motion se as animações desejadas justificarem uma biblioteca. Refração forte e GSAP podem ser avaliados em exemplos isolados, mediante interesse do usuário. Nenhuma opção foi instalada ou aprovada.
+**Base aprovada no laboratório:** vidro fosco com CSS e movimentos moderados com Motion. Refração forte e GSAP podem ser avaliados em exemplos isolados, mediante interesse do usuário.
 
 ## Decisões abertas
 
-- Quais efeitos, bibliotecas, fontes, ícones e imagens serão efetivamente adotados.
-- Intensidade e locais de aplicação do vidro; comportamento sobre vídeo e mapa.
+- Ajustes finais de composição, imagens e intensidade dos movimentos na área Início.
+- Intensidade e locais de aplicação do vidro nas próximas áreas; comportamento sobre o mapa.
 - Detalhes finais da estrutura criada pelo usuário, estratégia de execução e distribuição da equipe.
 - Área piloto exata, qualidade do detector, associação a trechos, critérios de prioridade e formato final dos dados.
 - Persistência, autenticação, infraestrutura e estratégia de publicação.

@@ -20,7 +20,7 @@ npm run dev
 
 Abra <http://127.0.0.1:5173/>. O servidor usa uma porta fixa e informa erro se já estiver ocupada. Ctrl+C encerra a execução.
 
-As rotas `/`, `/mapa`, `/admin` e `/login` apresentam placeholders; o conteúdo é apenas o nome da área. A rota `/laboratorio` abre uma área separada de comparação visual, com componentes interativos e dados fictícios, documentada no [laboratório visual](../docs/LABORATORIO_VISUAL.md). Não há autenticação nem integração com a API.
+A rota `/` apresenta a área Início, com conteúdo do projeto, prévia ilustrativa e regra 3-30-300. `/mapa`, `/admin` e `/login` ainda apresentam placeholders. `/laboratorio` abre a área separada de comparação visual, documentada no [laboratório visual](../docs/LABORATORIO_VISUAL.md). Não há autenticação nem integração com a API.
 
 Para conferir qualidade e gerar o build:
 
@@ -34,9 +34,9 @@ npm run build
 
 ## Próxima validação
 
-A estrutura, as rotas e a navegação foram validadas pelo usuário. As amostras de identidade visual e dos componentes compartilhados estão agora em avaliação, antes da construção da área Início.
+A estrutura, as rotas e a direção visual Equilíbrio foram validadas pelo usuário. A área Início incorpora os refinamentos pedidos e está em avaliação, antes da construção da área Mapa.
 
 - [Plano por etapas](../docs/PLANO_IMPLEMENTACAO_APP.md).
 - [Escopo funcional](../docs/ESCOPO_WEBSITE_PRIMEIRA_ENTREGA.md).
 
-UrbVerde segue como referência principal de produto, acompanhado das referências de sustentabilidade já discutidas. O tema do laboratório é uma proposta em validação; as rotas principais ainda usam a base provisória da etapa 1.
+UrbVerde segue como referência principal de produto, acompanhado das referências de sustentabilidade já discutidas. A área Início e o cabeçalho usam o tema compartilhado aprovado; o laboratório preserva as três variantes para comparação.

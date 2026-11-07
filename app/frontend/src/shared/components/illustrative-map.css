@@ -1,0 +1,16 @@
+.ar-map-preview { position: relative; min-height: 440px; border-radius: 22px; overflow: hidden; background: var(--ar-mint); }
+.ar-map-preview > img { width: 100%; height: 100%; position: absolute; object-fit: cover; }
+.ar-map-tint { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(9 39 22 / .05), rgb(9 39 22 / .55)); pointer-events: none; }
+.ar-map-layer { position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 9px; background: #f7faf2; border: 1px solid #d5e1cf; color: #23452e; padding: 12px 15px; border-radius: 10px; font: inherit; font-size: .78rem; font-weight: 650; cursor: pointer; }
+.ar-map-point { position: absolute; transform: translate(-50%, -50%); display: grid; place-items: center; width: 42px; height: 42px; border: 2px solid #fff; border-radius: 50%; color: white; background: #246b45; box-shadow: 0 5px 18px rgb(0 0 0 / .25); cursor: pointer; transition: transform .2s, background-color .2s; }
+.ar-map-point:hover { transform: translate(-50%, -50%) scale(1.12); }
+.ar-map-point.is-selected { outline: 5px solid rgb(242 255 219 / .4); background: #163f2b; }
+.ar-map-detail { position: absolute; left: 24px; right: 24px; bottom: 55px; display: flex; align-items: center; gap: 14px; padding: 20px; }
+.ar-map-detail-icon { display: grid; place-items: center; width: 42px; height: 42px; flex-shrink: 0; border-radius: 50%; border: 1px solid currentColor; }
+.ar-map-detail strong { font-size: .9rem; font-weight: 650; }
+.ar-map-detail p { font-size: .78rem; margin-top: 3px; }
+.ar-map-source { position: absolute; bottom: 15px; left: 24px; max-width: calc(100% - 48px); color: white; font-size: .7rem; background: rgb(11 35 22 / .8); border-radius: 5px; padding: 3px 7px; }
+.ar-theme[data-motion='off'] .ar-map-point { transition: none; }
+.ar-theme[data-motion='off'] .ar-map-point:hover { transform: translate(-50%, -50%); }
+@media(max-width:600px) { .ar-map-preview { min-height: 390px; } .ar-map-detail { left: 16px; right: 16px; padding: 16px; } .ar-map-detail p { font-size: .72rem; } .ar-map-source { left: 16px; max-width: calc(100% - 32px); } }
+@media(prefers-reduced-motion:reduce) { .ar-map-point { transition: none; } .ar-map-point:hover { transform: translate(-50%, -50%); } }

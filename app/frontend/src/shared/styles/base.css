@@ -1,4 +1,4 @@
-/* Base provisória da etapa 1. A identidade visual será validada na etapa 2. */
+/* Reset, acessibilidade e placeholders. O tema aprovado fica em theme.css. */
 :root {
 	color-scheme: light;
 	font-family: system-ui, sans-serif;

@@ -1,0 +1,39 @@
+/* Base aprovada: Equilíbrio, com profundidade aplicada a superfícies selecionadas. */
+@layer theme {
+.ar-theme {
+  --ar-forest: #143f2b;
+  --ar-green: #246b45;
+  --ar-leaf: #b9d594;
+  --ar-mint: #e6eee1;
+  --ar-paper: #f7f9f3;
+  /* Destaques decorativos aprovados; ações e estados mantêm suas próprias cores. */
+  --ar-highlight: #e9b949;
+  --ar-highlight-coral: #ee9c82;
+  --ar-highlight-sky: #91bfe0;
+  --ar-ink: #203c2c;
+  --ar-muted: #536957;
+  --ar-line: #d6e0d1;
+  --ar-radius: 16px;
+  --ar-panel-rgb: 255 255 248;
+  --ar-panel-ink: #183d29;
+  --ar-glass-opacity: .65;
+  --ar-glass-blur: 22px;
+  font-family: 'Manrope Variable', sans-serif;
+  color: var(--ar-ink);
+  background: var(--ar-paper);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.ar-theme[data-variant='natural'] { --ar-glass-opacity: .88; --ar-glass-blur: 10px; }
+.ar-theme[data-variant='profundo'] { --ar-panel-rgb: 16 49 32; --ar-panel-ink: #fffef3; --ar-glass-opacity: .5; --ar-glass-blur: 30px; }
+.ar-theme ::selection { background: #cfdfac; color: #143f2b; }
+.ar-theme :focus-visible { outline: 3px solid #70a34d; outline-offset: 5px; }
+.ar-theme * { scrollbar-color: #91ab80 transparent; scrollbar-width: thin; }
+.ar-theme a { text-underline-offset: .25em; }
+.ar-theme input { caret-color: var(--ar-green); }
+.ar-theme h1, .ar-theme h2, .ar-theme h3, .ar-theme p { margin: 0; }
+.ar-theme h1, .ar-theme h2, .ar-theme h3 { line-height: 1.12; letter-spacing: -.035em; text-wrap: balance; }
+.ar-theme h1 { font-size: clamp(2.7rem, 5.2vw, 4.8rem); font-weight: 650; }
+.ar-theme h2 { font-size: clamp(1.8rem, 3.2vw, 2.8rem); font-weight: 600; }
+.ar-theme h3 { font-size: 1.15rem; font-weight: 650; }
+}

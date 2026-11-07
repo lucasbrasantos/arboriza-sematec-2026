@@ -44,7 +44,7 @@ src/
 
 | Caminho | Conteúdo |
 |---|---|
-| `/` | Início |
+| `/` | Landing page Início, em validação |
 | `/mapa` | Mapa público |
 | `/admin` | Administração |
 | `/login` | Login |
@@ -67,9 +67,9 @@ O cabeçalho é compartilhado e indica a rota ativa. Cada página tem seu própr
 
 ## Limites desta etapa
 
-As quatro páginas principais são placeholders. Acesso a `/admin` não representa uma sessão autenticada. O laboratório tem controles de demonstração: a busca não consulta API, os pontos são fictícios e o botão de teste não salva dados. Não há análise de imagens ou publicação. O backend será criado posteriormente.
+A área Início usa a identidade aprovada, componentes compartilhados, prévia ilustrativa e números animados da regra 3-30-300. Mapa público, Administração e Login ainda são placeholders. Acesso a `/admin` não representa uma sessão autenticada. A busca do laboratório não consulta API, os pontos são fictícios e o botão de teste não salva dados. Não há análise de imagens ou publicação. O backend será criado posteriormente.
 
-O laboratório é carregado sob demanda. Tokens propostos, componentes tipados, imagens locais e instruções de validação estão descritos no [levantamento das amostras](../../docs/LABORATORIO_VISUAL.md).
+O laboratório é carregado sob demanda. Tokens aprovados e componentes tipados são compartilhados com a área Início. Imagens locais, interações e instruções de validação estão descritas no [levantamento das amostras](../../docs/LABORATORIO_VISUAL.md). O tema usa uma camada CSS de fundação para que os estilos de cada componente tenham precedência previsível.
 
 Para hospedar a SPA, o servidor precisará encaminhar URLs de páginas ao `index.html`, preservando caminhos de arquivos e, quando existir, da API. Vite dev e preview já atendem os acessos diretos usados nesta validação; `preview` não é servidor de produção.
 

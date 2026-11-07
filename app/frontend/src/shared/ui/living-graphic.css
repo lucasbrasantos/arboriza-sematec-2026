@@ -1,0 +1,3 @@
+.ar-living-graphic { display: block; width: 100%; height: auto; overflow: visible; }
+.ar-living-graphic g { transform-box: fill-box; }
+@media (prefers-reduced-motion: reduce) { .ar-living-graphic { transform: none !important; } }
