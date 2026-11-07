@@ -1,5 +1,6 @@
 """Piloto territorial: janelas RGB em cache, inferência e pontos na seleção."""
 import math
+import hashlib
 from time import perf_counter
 
 import httpx
@@ -58,7 +59,8 @@ def suppress_duplicates(rows, iou=.5):
 
 
 def run_sector_analysis(detector, territory, ids, score, folder, progress,
-                        fetch=fetch_orthophoto, temporary=temporary_images, cache_root=CACHE_DIR):
+                        fetch=fetch_orthophoto, temporary=temporary_images, cache_root=CACHE_DIR,
+                        image_provider=None, profile='controle', metric_grid=False):
     selected = territory.selected(ids)
     if not selected:
         raise ValueError('Selecione ao menos um setor.')
@@ -81,21 +83,33 @@ def run_sector_analysis(detector, territory, ids, score, folder, progress,
             _, top = to_metric.transform(mid_lon, north)
             width = math.ceil(abs(right - left) / GSD_M)
             height = math.ceil(abs(top - bottom) / GSD_M)
+            image_bounds = geo_bounds
+            if metric_grid:
+                image_bounds = context.bounds
+                width = height = round(WINDOW_M/GSD_M)
             temporary_path = scratch / f'{index}.tif'
             started = perf_counter()
-            path, metadata = cached_orthophoto(geo_bounds, width, height, temporary_path,
-                                               client=client, root=cache_root, fetch=fetch)
+            if image_provider is None:
+                path, metadata = cached_orthophoto(geo_bounds, width, height, temporary_path,
+                                                 client=client, root=cache_root, fetch=fetch)
+            else:
+                path, metadata = image_provider(image_bounds, width, height, temporary_path, client=client)
             with rasterio.open(path) as src:
                 rgb = src.read([1, 2, 3]).transpose(1, 2, 0).copy()
                 valid = src.read_masks([1, 2, 3]).all(axis=0)
                 affine = src.transform
+                raster_to_metric = Transformer.from_crs(src.crs, 'EPSG:31982', always_xy=True)
+                raster_to_geo = Transformer.from_crs(src.crs, 'EPSG:4326', always_xy=True)
+                metric_to_raster = Transformer.from_crs('EPSG:31982', src.crs, always_xy=True)
                 part = area.intersection(cell)
-                geographic = transform(part, to_geo.transform, interleaved=False)
-                required = geometry_mask([mapping(geographic)], out_shape=valid.shape, transform=affine,
+                raster_part = transform(part, metric_to_raster.transform, interleaved=False)
+                required = geometry_mask([mapping(raster_part)], out_shape=valid.shape, transform=affine,
                                          all_touched=True, invert=True)
                 if not required.any() or (required & ~valid).any():
                     raise ValueError(f'Imagem incompleta na janela {index}/{len(cells)}; análise interrompida.')
                 rgb[~valid] = 0
+                image_hash = hashlib.sha256(rgb.tobytes()+valid.tobytes()).hexdigest()
+            image_seconds = perf_counter()-started
             progress(f'Identificando copas: janela {index}/{len(cells)}')
             tick = perf_counter()
             instances = detector.predict(rgb)
@@ -110,8 +124,9 @@ def run_sector_analysis(detector, territory, ids, score, folder, progress,
                 cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
                 if not (0 <= cx < width and 0 <= cy < height and valid[int(cy), int(cx)]):
                     continue
-                lon, lat = affine * (cx, cy)
-                mx, my = to_metric.transform(lon, lat)
+                rx, ry = affine * (cx, cy)
+                lon, lat = raster_to_geo.transform(rx, ry)
+                mx, my = raster_to_metric.transform(rx, ry)
                 if not (x * STRIDE_M <= mx < (x + 1) * STRIDE_M and y * STRIDE_M <= my < (y + 1) * STRIDE_M):
                     continue
                 if not area.covers(Point(mx, my)):
@@ -119,14 +134,19 @@ def run_sector_analysis(detector, territory, ids, score, folder, progress,
                 left_lon, top_lat = affine * (x1, y1)
                 right_lon, bottom_lat = affine * (x2, y2)
                 geo_box = box(left_lon, bottom_lat, right_lon, top_lat)
-                metric_box = transform(geo_box, to_metric.transform, interleaved=False).envelope
+                metric_box = transform(geo_box, raster_to_metric.transform, interleaved=False).envelope
                 rows.append({'score': confidence, 'lon': lon, 'lat': lat, 'box': metric_box, 'janela': index})
             timings.append({'janela': index, 'aquisicao_s': metadata['aquisicao_s'],
                             'origem_imagem': metadata['origem_imagem'], 'leitura_cache_s': metadata['leitura_cache_s'],
                             'inferencia_s': inference_seconds, 'total_s': perf_counter() - started,
                             'deteccoes_brutas': len(boxes), 'limite_deteccoes_atingido': cap is not None and len(boxes) >= cap,
                             'pixels_validos': metadata['pixels_validos'], 'pixels_totais': metadata['pixels_totais'],
-                            'sha256_png': metadata['sha256_png']})
+                            'sha256_png': metadata['sha256_png'], 'sha256_rgb_validade': image_hash,
+                            'preparacao_imagem_s': image_seconds, 'bounds_lon_lat': list(geo_bounds),
+                            'bounds_imagem': list(image_bounds), 'crs_imagem': 'EPSG:31982' if metric_grid else 'EPSG:4674',
+                            'largura': width, 'altura': height, 'fontes_locais': metadata.get('fontes', []),
+                            'cache_janela_local': metadata.get('cache_janela_local', False),
+                            'leitura_local_s': metadata.get('leitura_local_s', 0.0)})
             temporary_path.unlink(missing_ok=True)
     progress('Consolidando possíveis copas')
     kept = suppress_duplicates(rows)
@@ -134,16 +154,22 @@ def run_sector_analysis(detector, territory, ids, score, folder, progress,
     features = [{'type': 'Feature', 'id': f'{folder.name}-{i}',
                  'geometry': {'type': 'Point', 'coordinates': [row['lon'], row['lat']]},
                  'properties': {'score': row['score'], 'modelo': model, 'origem': 'detectree2',
-                                'revisado': False, 'janela': row['janela'], 'analise_id': folder.name}}
+                                'revisado': False, 'janela': row['janela'], 'analise_id': folder.name, 'perfil': profile}}
                 for i, row in enumerate(kept, 1)]
     write_json(folder / 'pontos.geojson', {'type': 'FeatureCollection', 'features': features})
     result = {'candidatos': len(features), 'setores': len(ids), 'ids_setores': list(ids),
               'fonte_malha': territory.metadata['sha256_fonte'], 'area_m2': area.area,
-              'modelo': model, 'perfil': 'controle', 'corte_score': score,
+              'modelo': model, 'perfil': profile, 'corte_score': score,
               'janelas': len(cells), 'janela_m': WINDOW_M, 'passo_m': STRIDE_M,
               'resolucao_solicitada_m': GSD_M, 'cobertura': 'completa_por_mascara',
               'janelas_cache': sum(item['origem_imagem'] == 'cache' for item in timings),
               'janelas_download': sum(item['origem_imagem'] == 'download' for item in timings),
+              'janelas_cache_acervo': sum(item['cache_janela_local'] for item in timings),
+              'janelas_locais': sum(item['origem_imagem'] == 'acervo_local' for item in timings),
+              'preparacao_imagens_s': sum(item['preparacao_imagem_s'] for item in timings),
+              'download_total_s': sum(item['aquisicao_s'] for item in timings),
+              'leitura_local_total_s': sum(item['leitura_local_s'] for item in timings),
+              'inferencia_total_s': sum(item['inferencia_s'] for item in timings),
               'propostas_antes_nms': len(rows),
               'janelas_no_limite_deteccoes': sum(item['limite_deteccoes_atingido'] for item in timings),
               'medicoes_janelas': timings}

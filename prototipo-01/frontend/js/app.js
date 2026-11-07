@@ -90,6 +90,10 @@ function start() {
 		details.textContent = `Latitude: ${p.lat.toFixed(7)}\nLongitude: ${p.lng.toFixed(7)}\nID: ${feature.id}`;
 		details.textContent += `\nOrigem: ${feature.properties.origem || 'não informada'}`;
 		if (feature.properties.modelo) details.textContent += `\nModelo: ${feature.properties.modelo}`;
+		if (feature.properties.copa_id) {
+			const kinds = { copa_individual: 'Copa individual candidata', grupo_de_copas: 'Grupo de copas (não equivale a uma árvore)', complemento_pendente: 'Complemento Cambridge pendente' };
+			details.textContent += `\nTipo: ${kinds[feature.properties.tipo] || feature.properties.tipo}\nCopa vinculada: ${feature.properties.copa_id}`;
+		}
 		if (Number.isFinite(feature.properties.score)) details.textContent += `\nScore: ${feature.properties.score.toFixed(3)}`;
 		const actions = document.createElement('div'); actions.className = 'row';
 		for (const [label, text] of [['Copiar coordenadas', `${p.lat}, ${p.lng}`],

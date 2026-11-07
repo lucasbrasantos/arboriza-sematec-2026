@@ -21,6 +21,18 @@ def png(alpha=255):
 
 
 class WmsTests(unittest.TestCase):
+    def test_metric_request_preserves_easting_northing_axes(self):
+        bounds=(558000,7654000,558200,7654200)
+        def handler(request):
+            self.assertEqual(request.url.params['BBOX'],'558000,7654000,558200,7654200')
+            self.assertEqual(request.url.params['CRS'],'EPSG:31982')
+            return httpx.Response(200,headers={'Content-Type':'image/png'},content=png())
+        metadata=fetch_orthophoto(bounds,3,2,self.root/'utm.tif',self.client(handler),crs='EPSG:31982')
+        self.assertEqual(metadata['bounds_utm'],list(bounds))
+        with rasterio.open(self.root/'utm.tif') as raster:
+            self.assertEqual(raster.crs.to_string(),'EPSG:31982')
+            self.assertEqual(tuple(raster.bounds),bounds)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

@@ -31,10 +31,14 @@ def temporary_images(root=TEMP_ROOT):
         yield Path(folder)
 
 
-def fetch_orthophoto(bounds, width, height, target, client=None):
-    """Busca PNG WMS e grava GeoTIFF RGB8/mascara em EPSG:4674; bounds em lon/lat."""
+def fetch_orthophoto(bounds, width, height, target, client=None, crs='EPSG:4674'):
+    """PNG WMS para GeoTIFF RGB8/máscara; bounds no CRS informado (geográfico ou UTM)."""
+    if crs not in ('EPSG:4674', 'EPSG:31982'):
+        raise ValueError('CRS não suportado para aquisição.')
     if (len(bounds) != 4 or not all(math.isfinite(v) for v in bounds)
-            or not (-180 <= bounds[0] < bounds[2] <= 180 and -90 <= bounds[1] < bounds[3] <= 90)):
+            or not (bounds[0] < bounds[2] and bounds[1] < bounds[3])
+            or (crs == 'EPSG:4674' and not (-180 <= bounds[0] < bounds[2] <= 180 and -90 <= bounds[1] < bounds[3] <= 90))
+            or (crs == 'EPSG:31982' and not (0 <= bounds[0] < bounds[2] <= 1000000 and 0 <= bounds[1] < bounds[3] <= 10000000))):
         raise ValueError('Limites geográficos inválidos.')
     if (isinstance(width, bool) or isinstance(height, bool) or not isinstance(width, int)
             or not isinstance(height, int) or not 1 <= width <= MAX_DIMENSION or not 1 <= height <= MAX_DIMENSION):
@@ -43,8 +47,9 @@ def fetch_orthophoto(bounds, width, height, target, client=None):
     if target.exists():
         raise FileExistsError('O destino da imagem temporária já existe.')
     west, south, east, north = bounds
+    axis_bounds = (south, west, north, east) if crs == 'EPSG:4674' else bounds
     params = {'SERVICE': 'WMS', 'VERSION': '1.3.0', 'REQUEST': 'GetMap', 'LAYERS': LAYER,
-              'STYLES': '', 'CRS': 'EPSG:4674', 'BBOX': ','.join(map(str, (south, west, north, east))),
+              'STYLES': '', 'CRS': crs, 'BBOX': ','.join(map(str, axis_bounds)),
               'WIDTH': str(width), 'HEIGHT': str(height), 'FORMAT': 'image/png', 'TRANSPARENT': 'TRUE'}
     own_client = client is None
     client = client or httpx.Client(timeout=httpx.Timeout(30, connect=10), follow_redirects=True)
@@ -74,14 +79,15 @@ def fetch_orthophoto(bounds, width, height, target, client=None):
         try:
             with rasterio.Env(GDAL_TIFF_INTERNAL_MASK=True):
                 with rasterio.open(target, 'w', driver='GTiff', width=width, height=height, count=3,
-                                   dtype='uint8', crs='EPSG:4674', transform=from_bounds(*bounds, width, height),
+                                   dtype='uint8', crs=crs, transform=from_bounds(*bounds, width, height),
                                    compress='deflate') as output:
                     output.write(rgba[:, :, :3].transpose(2, 0, 1))
                     output.write_mask(valid.astype('uint8') * 255)
         except Exception:
             target.unlink(missing_ok=True)
             raise
-        return {'camada': LAYER, 'crs': 'EPSG:4674', 'bounds_lon_lat': list(bounds),
+        return {'camada': LAYER, 'crs': crs,
+                ('bounds_lon_lat' if crs == 'EPSG:4674' else 'bounds_utm'): list(bounds),
                 'largura': width, 'altura': height, 'pixels_validos': int(valid.sum()),
                 'pixels_totais': width * height, 'sha256_png': hashlib.sha256(content).hexdigest(),
                 'bytes_png': len(content), 'aquisicao_s': perf_counter() - started}

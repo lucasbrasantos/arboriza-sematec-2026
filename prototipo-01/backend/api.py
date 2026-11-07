@@ -25,7 +25,7 @@ from .territory import DATA as TERRITORY_DATA, Territory
 class Request(BaseModel):
     model_config = ConfigDict(extra="forbid")
     recorte: Literal["centro", "centro-norte"]
-    perfil: Literal["controle", "multiescala"] = "controle"
+    perfil: Literal["controle", "controle-datageo", "controle-local", "multiescala", "fusao"] = "controle"
     score: float = Field(default=.15, ge=.05, le=1, allow_inf_nan=False)
 
 
@@ -45,6 +45,7 @@ class TerritoryBlockPlan(TerritorySelection):
 
 class SectorAnalysisRequest(TerritorySelection):
     fonte_malha: str = Field(min_length=1, max_length=128)
+    perfil: Literal['controle', 'controle-datageo', 'controle-local', 'fusao'] = 'controle'
     score: float = Field(default=.15, ge=.05, le=1, allow_inf_nan=False)
 
 
@@ -140,7 +141,11 @@ def create_app(service=None, output=ROOT / "resultados" / "interface", territory
         try:
             progress("Preparando análise")
             if isinstance(request, SectorAnalysisRequest):
-                summary = service.run_sectors(territory(), request.ids, request.score, job["folder"], progress)
+                if request.perfil in ('controle-local', 'controle-datageo'):
+                    summary = service.run_control_source(territory(), request.ids, request.score, job['folder'], progress, request.perfil)
+                else:
+                    runner = service.run_fusion_sectors if request.perfil == 'fusao' else service.run_sectors
+                    summary = runner(territory(), request.ids, request.score, job["folder"], progress)
             else:
                 summary = service.run(request.recorte, request.perfil, request.score, job["folder"], progress)
             with lock:
@@ -219,6 +224,15 @@ def create_app(service=None, output=ROOT / "resultados" / "interface", territory
         if snapshot(ident)["estado"] != "concluida":
             raise HTTPException(409, "O resultado ainda não está disponível.")
         return FileResponse(tasks[ident]["folder"] / "pontos.geojson", media_type="application/geo+json")
+
+    @app.get('/api/analises/{ident}/camadas/{camada}')
+    def fusion_layer(ident: str, camada: Literal['copas', 'pontos-todos', 'pontos-grupos', 'pontos-complementos']):
+        if snapshot(ident)['estado'] != 'concluida':
+            raise HTTPException(409, 'O resultado ainda não está disponível.')
+        path = tasks[ident]['folder'] / (camada + '.geojson')
+        if not path.is_file():
+            raise HTTPException(404, 'Esta análise não produziu essa camada.')
+        return FileResponse(path, media_type='application/geo+json')
 
     @app.get("/", include_in_schema=False)
     def welcome():

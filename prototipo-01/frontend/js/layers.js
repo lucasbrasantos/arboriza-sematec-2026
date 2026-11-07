@@ -15,7 +15,7 @@ export function createLayers(beforeChange, onChange, message) {
 	try {
 		const saved = JSON.parse(localStorage.getItem(key) || 'null');
 		if (saved) {
-			layers = saved.layers.map(item => make(item.name, readPoints(item.geojson), { id: item.id, recorte: item.recorte, analysisId: item.analysisId, studyArea: item.studyArea }));
+			layers = saved.layers.map(item => make(item.name, readPoints(item.geojson), { id: item.id, recorte: item.recorte, analysisId: item.analysisId, analysisPart: item.analysisPart, studyArea: item.studyArea }));
 			active = Math.max(0, layers.findIndex(layer => layer.id === saved.active));
 		} else {
 			const old = JSON.parse(localStorage.getItem(legacy) || 'null');
@@ -29,7 +29,7 @@ export function createLayers(beforeChange, onChange, message) {
 		revision++;
 		try {
 			localStorage.setItem(key, JSON.stringify({ active: current().id, layers: layers.map(layer => ({
-				id: layer.id, name: layer.name, recorte: layer.recorte, analysisId: layer.analysisId, studyArea: layer.studyArea, geojson: layer.geojson(),
+				id: layer.id, name: layer.name, recorte: layer.recorte, analysisId: layer.analysisId, analysisPart: layer.analysisPart, studyArea: layer.studyArea, geojson: layer.geojson(),
 			})) }));
 			localStorage.removeItem(legacy);
 			return true;
@@ -75,7 +75,8 @@ export function createLayers(beforeChange, onChange, message) {
 	return { current, render, save,
 		get revision() { return revision; }, get cleared() { return cleared; },
 		add(name, features, metadata = {}, activate = true) {
-			if (metadata.analysisId && layers.some(layer => layer.analysisId === metadata.analysisId)) return;
+			if (metadata.analysisId && layers.some(layer => layer.analysisId === metadata.analysisId
+				&& (layer.analysisPart || '') === (metadata.analysisPart || ''))) return;
 			if (activate) beforeChange();
 			layers.push(make(name, features, metadata));
 			if (activate) active = layers.length - 1;

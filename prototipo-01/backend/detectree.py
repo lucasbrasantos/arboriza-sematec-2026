@@ -7,7 +7,7 @@ from .detector import ROOT, sha256
 
 
 class CambridgeDetector:
-    def __init__(self, min_score):
+    def __init__(self, min_score, max_detections=None):
         import torch
         from detectron2 import _C
         from detectron2.engine import DefaultPredictor
@@ -27,6 +27,8 @@ class CambridgeDetector:
         cfg.MODEL.DEVICE = "cuda"
         self.score_floor = min_score
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = min_score
+        if max_detections is not None:
+            cfg.TEST.DETECTIONS_PER_IMAGE = max_detections
         self.max_detections = cfg.TEST.DETECTIONS_PER_IMAGE
         self.config = cfg.dump()
         self.predictor = DefaultPredictor(cfg)
