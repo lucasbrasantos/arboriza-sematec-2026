@@ -47,9 +47,10 @@ src/
 | Caminho | Conteúdo |
 |---|---|
 | `/` | Landing page Início, validada |
-| `/mapa` | Mapa em toda a tela, painel flutuante e densidade demonstrativa, em validação |
-| `/admin` | Administração |
-| `/login` | Login |
+| `/mapa` | Mapa em toda a tela, painel flutuante e densidade demonstrativa, com refinamento aprovado |
+| `/admin` | Primeira amostra de áreas de trabalho, aguardando validação visual |
+| `/admin?area=centro` | Exemplo de área aberta; suporta acesso direto e recarga |
+| `/login` | Placeholder de Login |
 | `/laboratorio` | Redireciona para a combinação visual recomendada |
 | `/laboratorio/natural` | Amostra natural e leve |
 | `/laboratorio/profundo` | Amostra com vidro mais profundo |
@@ -69,7 +70,13 @@ O cabeçalho é compartilhado e indica a rota ativa nas áreas do site. `/mapa` 
 
 ## Limites desta etapa
 
-A área Início usa a identidade aprovada, componentes compartilhados, prévia ilustrativa e números animados da regra 3-30-300. O mapa público usa Leaflet/React Leaflet com bases cartográficas reais e resultados fictícios: busca local, grupos paginados, camadas e detalhes na lateral flutuante. Mapa de fundo e visualização são independentes; Leaflet.heat oferece densidade relativa demonstrativa com paletas prontas e duas cores personalizadas. Consulte [Mapa público](../../docs/MAPA_PUBLICO.md). Administração e Login continuam como placeholders; acesso a `/admin` não representa uma sessão autenticada. Não há análise de imagens, publicação ou integração com a API do Arboriza nesta etapa.
+A área Início usa a identidade aprovada, componentes compartilhados, prévia ilustrativa e números animados da regra 3-30-300. O mapa público usa Leaflet/React Leaflet com bases cartográficas reais e resultados fictícios: busca local, grupos paginados, camadas e detalhes na lateral flutuante. Mapa de fundo e visualização são independentes; Leaflet.heat oferece densidade relativa demonstrativa com paletas prontas e duas cores personalizadas. Consulte [Mapa público](../../docs/MAPA_PUBLICO.md).
+
+A organização administrativa por área de trabalho e a primeira amostra pequena foram aprovadas. `/admin` apresenta três áreas fictícias, busca sem distinção de acentos, filtro por situação e estado vazio. Cada área abre por `?area=`, com resumo, prévia de referência quando disponível e etapas orientativas de obtenção, revisão e preparação da publicação. Identificadores desconhecidos têm estado próprio. No retorno à lista, busca/filtro e foco no item são preservados enquanto a página permanece montada; a recarga não persiste busca/filtro. A área sem resultados indica “Aguardando resultados”.
+
+A amostra reutiliza `GlassPanel`, `Button` e o tema aprovado com Manrope, verdes, vidro e Mel, sem nova identidade ou dependências. Aguarda validação visual e de navegação antes dos formulários; o botão de configuração permanece indisponível com explicação visível. Login continua como placeholder e o acesso a `/admin` não representa uma sessão autenticada. Não há persistência, análise/importação/revisão/exportação/publicação reais ou integração com a API do Arboriza. Contagens fictícias não confirmam árvores nem cobertura de copas. Consulte [Administração](../../docs/ADMINISTRACAO.md).
+
+Lint e build com checagem de tipos aprovados para a amostra administrativa. Busca/filtro, vazio, abertura/retorno e foco, identificador desconhecido e recarga foram conferidos no Chromium desktop e em viewport 375 × 812, sem avisos ou erros de console observados. O CSS contempla movimento reduzido. Dispositivos físicos, outros navegadores, desempenho e API real não foram validados.
 
 O mapa e o laboratório são carregados sob demanda. Tokens aprovados e componentes tipados são compartilhados entre as áreas. Imagens locais, interações e instruções de validação estão descritas no [levantamento das amostras](../../docs/LABORATORIO_VISUAL.md). O tema usa uma camada CSS de fundação para que os estilos de cada componente tenham precedência previsível.
 

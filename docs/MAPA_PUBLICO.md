@@ -113,4 +113,4 @@ Os grupos e a paginação preparam a interação para listas maiores, mas não d
 
 ## Próxima validação
 
-Avaliar mapa em toda a tela, lateral flutuante, grupos e separação entre Mapa base/Visualização/Camadas antes de Administração ou integração. API, área piloto real, critérios, setores oficiais, agrupamento e dados revisados continuam pendentes.
+O usuário aprovou o refinamento imersivo em 07/11/2026 e autorizou iniciar a etapa de Administração. API, área piloto real, critérios, setores oficiais, agrupamento e dados revisados continuam pendentes. Proposta da próxima etapa em [Administração](ADMINISTRACAO.md).

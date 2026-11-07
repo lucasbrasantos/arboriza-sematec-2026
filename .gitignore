@@ -25,3 +25,6 @@ prototipo-01/debug/
 *.ckpt
 *.safetensors
 *.log
+
+arboriza_fusao/
+arboriza_fusao.7z

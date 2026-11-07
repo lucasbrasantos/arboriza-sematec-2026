@@ -1,6 +1,6 @@
 # Arboriza — plano de implementação do app
 
-**Situação:** etapas 1, 2 e área Início validadas. Usuário autorizou mapa navegável e painel lateral recolhível com detalhes na própria lateral. Etapa 4 implementada com resultados demonstrativos para avaliar a interface; próxima área aguarda validação.
+**Situação:** etapas 1, 2, área Início e refinamento imersivo do mapa público validados. Usuário escolheu Administração por área de trabalho com etapas internas e autorizou uma primeira amostra de estrutura, lista e abertura de área. Amostra implementada; avaliação visual pendente antes dos formulários.
 **Contexto:** complementa o [escopo funcional](ESCOPO_WEBSITE_PRIMEIRA_ENTREGA.md). O prazo anteriormente informado para a primeira entrega foi 09/11/2026; este plano não garante viabilidade nesse prazo.
 
 ## Acordo de trabalho e validação
@@ -139,9 +139,26 @@
 - Usuário aprovou incluir densidade fictícia agora: Leaflet.heat 0.2.0 com tipos compatíveis, três paletas e opção personalizada. Concentração relativa não representa cobertura de copas ou temperatura.
 - Agrupamento dinâmico por zoom e visualização por setores oficiais do Censo 2022 permanecem propostas para validar com dados reais. Não foram criados setores ou estimativas fictícios para a cidade inteira.
 - Lint, build e percursos no Chromium desktop/celular conferidos. Organização, evidências e limites em [Mapa público](MAPA_PUBLICO.md).
-- Próximo passo é avaliar este refinamento com o usuário antes de avançar para Administração ou integração.
+- Refinamento aprovado pelo usuário; a etapa seguinte de Administração foi autorizada. A integração continua pendente.
 
 ## Etapa 5 — Área Administração
+
+### Abertura da etapa — 07/11/2026
+
+- Usuário aprovou o refinamento imersivo do mapa público e autorizou prosseguir para a próxima etapa.
+- Conferidos os placeholders de Administração/Login e as ferramentas/rotas do protótipo.
+- Usuário escolheu organização por área de trabalho, com etapas internas, e a primeira amostra pequena de estrutura, lista e abertura da área. A validação da amostra precede os formulários.
+- Levantamento, decisões e limites em [Administração](ADMINISTRACAO.md).
+
+### Primeira amostra implementada — 07/11/2026
+
+- `/admin` apresenta três áreas fictícias, busca normalizada sem distinção de acentos, filtro por situação e estado sem resultados com limpeza de busca/filtro.
+- Abertura por `?area=` com recarga/acesso direto, estado para identificador desconhecido e retorno à lista. Busca/filtro e foco no item são preservados no retorno enquanto a página permanece montada; não há persistência após recarga.
+- Área aberta contém resumo, prévia de referência quando disponível e etapas orientativas de obtenção, revisão e preparação da publicação. Formulários ainda indisponíveis com explicação visível; área sem resultados mostra “Aguardando resultados”.
+- Reutilizados `GlassPanel`, `Button` e tema compartilhado aprovado: Manrope, verdes, vidro e Mel. Extensão da identidade existente, sem novas dependências; layout móvel e movimento reduzido contemplados no CSS.
+- Lint e build com checagem de tipos aprovados. Chromium desktop e viewport 375 × 812 conferidos nos percursos de busca/filtro, vazio, abertura/retorno/foco, identificador desconhecido e recarga, sem avisos ou erros de console observados.
+- Sem API, autenticação, persistência ou operações reais de análise/importação/revisão/publicação. As contagens são fictícias e não comprovam árvores ou cobertura de copas. Dispositivos físicos, outros navegadores, desempenho e API real não foram validados.
+- **Pendente:** avaliação visual e de navegação pelo usuário antes de definir e construir os formulários. Evidências e limites em [Administração](ADMINISTRACAO.md).
 
 - Projetar e construir a interface de acesso e administração, com seleção de área, análise, importação, revisão de pontos e prioridades, salvamento, exportação e publicação, conforme forem aprovados.
 - Sem API, representar ações e estados como demonstração e não como operações efetivamente concluídas; não tratar a tela de login como segurança real.
