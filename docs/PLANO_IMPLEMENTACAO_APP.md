@@ -1,6 +1,6 @@
 # Arboriza — plano de implementação do app
 
-**Situação:** etapas 1 e 2 validadas. Mistura visual, animações e nova escala dos grafismos da área Início aprovadas; Mel escolhido como destaque predominante, com Coral e Azul-céu pontuais. Aplicação dessas escolhas na página concluída para validação do conjunto antes da área Mapa.
+**Situação:** etapas 1, 2 e área Início validadas. Usuário autorizou mapa navegável e painel lateral recolhível com detalhes na própria lateral. Etapa 4 implementada com resultados demonstrativos para avaliar a interface; próxima área aguarda validação.
 **Contexto:** complementa o [escopo funcional](ESCOPO_WEBSITE_PRIMEIRA_ENTREGA.md). O prazo anteriormente informado para a primeira entrega foi 09/11/2026; este plano não garante viabilidade nesse prazo.
 
 ## Acordo de trabalho e validação
@@ -113,12 +113,33 @@
 
 ## Etapa 4 — Área Mapa público
 
+### Registro da implementação — 07/11/2026
+
+- Usuário aprovou Leaflet + React Leaflet, painel lateral recolhível e detalhes na própria lateral com “Voltar à exploração”; pediu uma organização mais compreensível que a do protótipo.
+- Reaproveitadas bases, prévias cartográficas e limites de recortes do protótipo, sem alterar o HTML/Python existente ou integrar a API do Arboriza.
+- Criados Explorar/Camadas, busca local, seleção de área e itens, detalhes explicativos, legenda, fontes, navegação, estados sem resultados/camadas e falha de rede com nova tentativa.
+- Pontos, traçados e prioridades são fictícios e identificados. Não há métricas de cobertura de copas ou cálculo da regra 3-30-300.
+- Interface e geometria em componentes tipados, rota sob demanda e reaproveitamento do tema e componentes compartilhados.
+- Decisões, verificação e limites em [Mapa público](MAPA_PUBLICO.md). A avaliação do usuário precede Administração e integração.
+
+### Escopo da etapa
+
 - Estudar o aproveitamento do `prototipo-01` com o usuário antes de escolher como integrá-lo ao React.
 - Construir estrutura do mapa, busca/seleção da área, camadas, legenda e painel de diagnóstico, usando os padrões compartilhados aprovados.
 - Na ausência de integração, usar apenas dados demonstrativos identificados e preparar estados de carregamento, vazio, erro e área sem dados.
 - Explicitar a área piloto e não equiparar pontos ou concentração de pontos a cobertura de copas.
 
 **Validação:** revisar aparência, navegação, painéis, responsividade, transparência dos dados e ferramentas; aguardar aprovação.
+
+### Refinamento aprovado para experimentar — 07/11/2026
+
+- Usuário escolheu mapa em toda a tela, navegação compacta e lateral flutuante recolhível, preservando o cabeçalho da área Início.
+- Implementados seletor de mapa base por miniatura e botão Visualização separado, junto a “Entenda o mapa”. Camadas controla os conjuntos sobrepostos.
+- Pontos e trechos organizados em grupos recolhíveis com contagem, busca e paginação de cinco itens. Retorno dos detalhes preserva grupo/página e recupera foco no item.
+- Usuário aprovou incluir densidade fictícia agora: Leaflet.heat 0.2.0 com tipos compatíveis, três paletas e opção personalizada. Concentração relativa não representa cobertura de copas ou temperatura.
+- Agrupamento dinâmico por zoom e visualização por setores oficiais do Censo 2022 permanecem propostas para validar com dados reais. Não foram criados setores ou estimativas fictícios para a cidade inteira.
+- Lint, build e percursos no Chromium desktop/celular conferidos. Organização, evidências e limites em [Mapa público](MAPA_PUBLICO.md).
+- Próximo passo é avaliar este refinamento com o usuário antes de avançar para Administração ou integração.
 
 ## Etapa 5 — Área Administração
 

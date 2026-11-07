@@ -2,7 +2,7 @@
 
 ## Situação
 
-Etapa 2 validada pelo usuário, com Equilíbrio como direção principal. O laboratório continua disponível para comparação; a área Início já utiliza as fundações aprovadas e está em avaliação. O laboratório não implementa os dados do produto.
+Etapa 2 e área Início validadas pelo usuário, com Equilíbrio como direção principal e Mel como destaque predominante. O laboratório continua disponível para comparação. A área Mapa público está em avaliação, conforme [registro da implementação](MAPA_PUBLICO.md). O laboratório não implementa os dados do produto.
 
 O usuário autorizou comparar uma direção natural, uma com vidro mais profundo e uma combinação de ambas, dando preferência inicial à combinação e pedindo exploração de profundidade, animações e interações de mouse.
 

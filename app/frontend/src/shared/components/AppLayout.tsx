@@ -5,13 +5,13 @@ import SiteHeader from './SiteHeader'
 import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 import '../styles/theme.css'
 
-export default function AppLayout() {
+export default function AppLayout({ mode = 'site' }: { mode?: 'site' | 'map' }) {
   const reduced = usePrefersReducedMotion()
   return (
-    <div className="ar-theme app-layout" data-motion={reduced ? 'off' : 'on'}>
+    <div className="ar-theme app-layout" data-layout={mode} data-motion={reduced ? 'off' : 'on'}>
       <MotionConfig reducedMotion={reduced ? 'always' : 'never'}>
       <a className="skip-link" href="#conteudo">Pular para o conteúdo</a>
-      <SiteHeader />
+      {mode === 'site' && <SiteHeader />}
       <main id="conteudo" tabIndex={-1}>
         <Outlet />
       </main>

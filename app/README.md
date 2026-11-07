@@ -20,7 +20,7 @@ npm run dev
 
 Abra <http://127.0.0.1:5173/>. O servidor usa uma porta fixa e informa erro se já estiver ocupada. Ctrl+C encerra a execução.
 
-A rota `/` apresenta a área Início, com conteúdo do projeto, prévia ilustrativa e regra 3-30-300. `/mapa`, `/admin` e `/login` ainda apresentam placeholders. `/laboratorio` abre a área separada de comparação visual, documentada no [laboratório visual](../docs/LABORATORIO_VISUAL.md). Não há autenticação nem integração com a API.
+A rota `/` apresenta a área Início validada. `/mapa` contém mapa navegável, painel lateral recolhível e resultados demonstrativos; veja [Mapa público](../docs/MAPA_PUBLICO.md). `/admin` e `/login` ainda apresentam placeholders. `/laboratorio` preserva a comparação visual, documentada no [laboratório visual](../docs/LABORATORIO_VISUAL.md). Não há autenticação nem integração com a API do Arboriza.
 
 Para conferir qualidade e gerar o build:
 
@@ -34,7 +34,7 @@ npm run build
 
 ## Próxima validação
 
-A estrutura, as rotas e a direção visual Equilíbrio foram validadas pelo usuário. A área Início incorpora os refinamentos pedidos e está em avaliação, antes da construção da área Mapa.
+A estrutura, a identidade e a área Início foram validadas. O mapa público incorpora as escolhas de navegação e painel aprovadas e está em avaliação antes de avançar à Administração e integração.
 
 - [Plano por etapas](../docs/PLANO_IMPLEMENTACAO_APP.md).
 - [Escopo funcional](../docs/ESCOPO_WEBSITE_PRIMEIRA_ENTREGA.md).
