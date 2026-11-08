@@ -81,7 +81,7 @@ export function createLayers(beforeChange, onChange, message) {
 		const saved = save(); onChange();
 		if (saved) message('Mapa limpo. Os arquivos de resultados no disco foram preservados.');
 	};
-	return { current, render, save,
+	return { current, render, save, all: () => [...layers],
 		async loadCrowns(layer = current(), retry = false) {
 			if (!layer.linkedCrowns || layer.crowns || layer.crownsLoading || (layer.crownsError && !retry)) return;
 			layer.crownsLoading = true; layer.crownsError = null;

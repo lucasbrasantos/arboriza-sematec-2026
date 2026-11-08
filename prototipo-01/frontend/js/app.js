@@ -3,8 +3,9 @@ import { createMap, recortes, readStudyArea, studyAreaFor } from './map.js';
 import { createLayers, confirmAction } from './layers.js';
 import { connectAnalysis } from './analysis.js';
 import { createAnalysisVisual } from './analysis-visual.js';
-import { connectTerritory } from './territory.js';
-import { createCrownOverlay, crownKinds, livingCrowns, pairCrowns } from './crowns.js';
+import { connectTerritory } from './territory.js?v=2';
+import { createCrownOverlay, crownKinds, livingCrowns, pairCrowns, crownAnalysisId } from './crowns.js?v=2';
+import { connectStreetAnalysis } from './street-analysis.js?v=6';
 
 const $ = id => document.getElementById(id);
 const message = (text, error = false) => {
@@ -34,7 +35,7 @@ function start() {
 	coordinateControl.addTo(map);
 	L.DomEvent.disableClickPropagation(coordinateButton);
 	L.DomEvent.disableScrollPropagation(coordinateButton);
-	let tool = 'select', gesture = null, ignoreClickUntil = 0, listLimit = 50, analysis, territory;
+	let tool = 'select', gesture = null, ignoreClickUntil = 0, listLimit = 50, analysis, territory, streets, restoreVersion = 0;
 	const store = createLayers(cancelGesture, focus => {
 		if (focus) restoreLayerArea();
 		listLimit = 50; render();
@@ -42,7 +43,7 @@ function start() {
 	const current = store.current;
 	let shownLayer;
 	const crownOverlay = createCrownOverlay(map, (id, additive) => {
-		if (territory?.active) return;
+		if (territory?.active || streets?.active) return;
 		const point = current().points.find(p => p.feature.properties.copa_id === id);
 		if (point) {
 			cancelGesture(); tool = 'select'; container.dataset.tool = tool;
@@ -58,11 +59,22 @@ function start() {
 		message(text); store.save();
 	}
 
-	function restoreLayerArea() {
+	async function restoreLayerArea() {
+		const layer = current(), version = ++restoreVersion;
 		const context = studyAreaFor(current());
 		if (!context) return;
 		current().studyArea = context;
-		$('area').value = context.recorte; area.setBounds(context.bounds); fitArea(); analysis?.refresh();
+		$('area').value = context.recorte; area.setBounds(context.bounds);
+		if ($('layer-auto-fit').checked) fitArea();
+		analysis?.refresh();
+		if (layer.analysisId && territory) {
+			try {
+				const response = await fetch(`/api/analises/${encodeURIComponent(layer.analysisId)}/territorio`);
+				if (!response.ok) return;
+				const data = await response.json();
+				if (version === restoreVersion && current().id === layer.id) await territory.restoreSelection(data.ids, data.fonte_malha);
+			} catch (error) { message(`Não foi possível recuperar os setores desta camada: ${error.message}`, true); }
+		}
 	}
 
 	const selectedArea = () => ({ recorte: $('area').value,
@@ -95,7 +107,7 @@ function start() {
 			input.checked = layer.selected.has(input.value);
 			input.closest('li').classList.toggle('selected', input.checked);
 		});
-		if (tool === 'select' && layer.selected.size === 1 && ($('show-points').checked || ($('show-crowns').checked && layer.crowns))) {
+		if (!streets?.active && tool === 'select' && layer.selected.size === 1 && ($('show-points').checked || ($('show-crowns').checked && layer.crowns))) {
 			const point = layer.points.find(p => layer.selected.has(p.key));
 			pointPopup.setLatLng(latLng(point)).setContent(pointInfo(point)).openOn(map);
 		} else map.closePopup(pointPopup);
@@ -192,9 +204,9 @@ function start() {
 		$('crown-load-status').textContent = layer.crownsLoading ? 'Carregando copas vinculadas…'
 			: layer.crownsError || (layer.crowns ? `${layer.points.length} pares nesta revisão. Excluir remove ponto e copa; Desfazer restaura ambos.` : 'Esta camada não possui copas disponíveis.');
 		$('crown-retry').hidden = !layer.crownsError || Boolean(layer.crowns);
-		$('crown-legend').hidden = !layer.linkedCrowns || Boolean(territory?.active);
+		$('crown-legend').hidden = !layer.linkedCrowns || Boolean(territory?.active) || Boolean(streets?.active);
 		$('crown-mode-label').textContent = $('show-crowns').checked ? 'Copas e pontos vinculados' : 'Pontos do modelo v2';
-		crownOverlay.render(layer, $('show-crowns').checked && !territory?.active);
+		crownOverlay.render(layer, $('show-crowns').checked && !territory?.active && !streets?.active);
 		container.dataset.tool = tool;
 		document.querySelectorAll('button[data-tool]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.tool === tool)));
 		markers.clearLayers(); circles.clear();
@@ -230,10 +242,11 @@ function start() {
 			? `${layer.points.length} pontos na camada; ${inside} na área. Marcações ainda não validadas.`
 			: 'Nenhum ponto. Use Adicionar na barra ou importe um GeoJSON.';
 		$('export').disabled = !layer.points.length;
-		store.render(); renderList(); selection();
+		store.render(); renderList(); selection(); streets?.refresh();
 	}
 
 	function setTool(next) {
+		if (streets?.active) return;
 		if (current().linkedCrowns && ['move', 'add'].includes(next)) {
 			message('No modelo v2, ponto e copa têm posição fixa. Selecione para excluir o par ou use uma camada manual.', true); return;
 		}
@@ -268,7 +281,7 @@ function start() {
 	}
 
 	container.addEventListener('pointerdown', event => {
-		if (territory?.active) return;
+		if (territory?.active || streets?.active) return;
 		if (event.button !== 0 || !event.isPrimary || event.target.closest('.leaflet-control, .leaflet-popup') || gesture) return;
 		const start = map.mouseEventToContainerPoint(event);
 		const point = hitPoint(start);
@@ -331,7 +344,7 @@ function start() {
 	});
 	container.addEventListener('pointercancel', cancelGesture);
 	map.on('click', event => {
-		if (territory?.active) return;
+		if (territory?.active || streets?.active) return;
 		if (performance.now() < ignoreClickUntil) return;
 		if (current().linkedCrowns && tool === 'select') {
 			const point = hitPoint(map.latLngToContainerPoint(event.latlng));
@@ -381,10 +394,12 @@ function start() {
 	const showList = show => showPanel(show ? 'points' : null);
 	$('list-toggle').onclick = () => showList($('point-browser').hidden);
 	$('layers-toggle').onclick = () => showPanel($('layer-browser').hidden ? 'layers' : null);
+	$('layer-auto-fit').checked = pref('arboriza-layer-auto-fit', 'true') === 'true';
+	$('layer-auto-fit').onchange = () => remember('arboriza-layer-auto-fit', String($('layer-auto-fit').checked));
 	$('list-close').onclick = () => { showList(false); $('list-toggle').focus(); };
 	$('more-points').onclick = () => { listLimit += 50; renderList(); selection(); };
 	document.addEventListener('keydown', event => {
-		if (territory?.active) return;
+		if (territory?.active || streets?.active) return;
 		if ($('confirm-dialog').open || event.target.closest('textarea, select, [contenteditable="true"], input:not([type="checkbox"]):not([type="radio"])')) return;
 		const key = event.key.toLowerCase(), command = event.ctrlKey || event.metaKey;
 		if (command && ['z', 'y', 'a'].includes(key)) {
@@ -433,7 +448,8 @@ function start() {
 				const crowns = data.arboriza?.copas ? pairCrowns(data.arboriza.copas, features) : undefined;
 				listLimit = 50; setTool('select');
 				const studyArea = readStudyArea(data.arboriza?.area);
-				const saved = store.add(file.name, features, { studyArea, crowns, modelVersion: data.arboriza?.versao_modelo });
+				const saved = store.add(file.name, features, { studyArea, crowns, modelVersion: data.arboriza?.versao_modelo,
+					...(crowns ? { analysisId: crownAnalysisId(data, features), analysisPart: data.arboriza?.parte } : {}) });
 				if (saved) message(`${features.length} pontos importados. Alterne a camada para comparar.`);
 			} catch (error) { message(`Não foi possível importar ${file.name}. ${error.message}`, true); }
 		}
@@ -447,7 +463,8 @@ function start() {
 		const time = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
 		if (current().linkedCrowns && !current().crowns) return message('Carregue as copas antes de exportar para preservar os vínculos do modelo v2.', true);
 		const data = { ...current().geojson(), arboriza: { area: context,
-			...(current().crowns ? { versao_modelo: 2, copas: livingCrowns(current()), revisao_local: true } : {}) } };
+			...(current().crowns ? { versao_modelo: 2, analise_id: current().analysisId, parte: current().analysisPart,
+				copas: livingCrowns(current()), revisao_local: true } : {}) } };
 		const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/geo+json' }));
 		const link = document.createElement('a'); link.href = url; link.download = `arboriza-pontos_${recorte}_${date}_${time}.geojson`; link.click();
 		setTimeout(() => URL.revokeObjectURL(url), 1000); message('Camada inteira exportada em GeoJSON.');
@@ -482,11 +499,34 @@ function start() {
 	theme(pref('arboriza-theme', 'light')); panel(pref('arboriza-panel', 'side'));
 	$('controls').disabled = false; $('point-tools').disabled = false; $('map-lists').disabled = false;
 	analysis = connectAnalysis(store, (name, features, metadata, activate) => {
-		activate = activate && !gesture && !territory?.active;
+		activate = activate && !gesture && !territory?.active && !streets?.active;
 		if (activate) setTool('select');
 		const saved = store.add(name, features, metadata, activate);
+		streets?.refresh();
 		if (saved) message('Nova camada de possíveis árvores disponível. Revise os pontos antes de usar as contagens.');
 	}, () => Boolean(territory?.active), createAnalysisVisual(), () => territory?.selection);
+	streets = connectStreetAnalysis({ map, current, getLayers: store.all, isTerritoryActive: () => Boolean(territory?.active),
+		exitTerritory: () => territory?.exit(), shouldFocus: () => $('layer-auto-fit').checked, onDiagnostic: showing => {
+			document.body.classList.toggle('street-mode', showing);
+			$('settings').hidden = showing; $('panel-toggle').disabled = showing;
+			$('point-tools').hidden = showing; $('point-tools').disabled = showing;
+			$('map-lists').hidden = showing; $('map-lists').disabled = showing;
+			if (showing) {
+				cancelGesture(); showPanel(null); map.closePopup(pointPopup);
+				container.dataset.tool = 'select';
+				map.removeLayer(area); map.removeLayer(markers); if (heat) map.removeLayer(heat);
+				crownOverlay.render(current(), false); $('crown-legend').hidden = true;
+				setBase('ortofoto');
+			} else {
+				if (!territory?.active && !map.hasLayer(area)) area.addTo(map);
+				if ($('show-points').checked) markers.addTo(map);
+				if (heat && $('show-density').checked) { heat.addTo(map); updateHeat(); }
+				container.dataset.tool = tool;
+				setBase(document.querySelector('[name="basemap"]:checked').value);
+				render();
+			}
+			requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+		} });
 	territory = connectTerritory({ map, confirmAction, onSelectionChange() { analysis?.refresh(); }, onActiveChange(active) {
 		if (active) {
 			cancelGesture(); map.closePopup(pointPopup);
@@ -501,7 +541,7 @@ function start() {
 			setTool('select');
 			render();
 		}
-		analysis.refresh();
+		analysis.refresh(); streets.refresh();
 	} });
 	restoreLayerArea(); fitArea(); render(); setTool('select');
 }

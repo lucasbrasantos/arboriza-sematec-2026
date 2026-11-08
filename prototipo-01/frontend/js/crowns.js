@@ -50,6 +50,14 @@ export function livingCrowns(layer) {
   return layer.crowns ? pairCrowns(layer.crowns, layer.points.map(p => p.feature)) : null;
 }
 
+export function crownAnalysisId(data, features) {
+  const ids = new Set([data.arboriza?.analise_id, data.arboriza?.copas?.arboriza?.analise_id,
+    ...features.map(f => f.properties?.analise_id)].filter(Boolean));
+  if (ids.size > 1) throw new Error('As copas importadas pertencem a análises diferentes. Importe uma execução por camada.');
+  const id = [...ids][0];
+  return typeof id === 'string' && /^\d{8}T\d{6}Z-[0-9a-f]{8}$/.test(id) ? id : undefined;
+}
+
 // IndexedDB evita colocar as geometrias grandes no localStorage dos pontos.
 async function database() {
   return new Promise((resolve, reject) => {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { PointLayer, readPoints } from '../frontend/js/points.js';
-import { readCrowns, pairCrowns, livingCrowns, createCrownOverlay } from '../frontend/js/crowns.js';
+import { readCrowns, pairCrowns, livingCrowns, createCrownOverlay, crownAnalysisId } from '../frontend/js/crowns.js';
 
 const point = (id, tipo = 'copa_individual') => ({ type:'Feature', id,
   properties:{copa_id:id,tipo}, geometry:{type:'Point',coordinates:[-50.44,-21.21]} });
@@ -11,6 +11,13 @@ const crown = (id, tipo = 'copa_individual') => ({ type:'Feature',id,
   ]]},
 });
 const data = features => ({type:'FeatureCollection',features});
+
+test('importação recupera a execução original e rejeita mistura de execuções', () => {
+  const id='20261108T010300Z-04ea89a4';
+  assert.equal(crownAnalysisId({arboriza:{analise_id:id}},[]),id);
+  assert.equal(crownAnalysisId({arboriza:{copas:{arboriza:{analise_id:id}}}},[]),id);
+  assert.throws(()=>crownAnalysisId({arboriza:{analise_id:id}},[{properties:{analise_id:'outra'}}]),/diferentes/);
+});
 
 test('exclusão e histórico mantêm o par e preservam a geometria original', () => {
   const layer = new PointLayer('v2',[point('a'),point('b','grupo_de_copas')]);

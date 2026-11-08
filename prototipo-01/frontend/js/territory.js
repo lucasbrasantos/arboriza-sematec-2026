@@ -290,7 +290,12 @@ export function connectTerritory({ map, confirmAction, onActiveChange, onSelecti
 			setTimeout(() => URL.revokeObjectURL(url), 1000); status('Área territorial exportada em GeoJSON.');
 		} catch (error) { status(error.message, true); }
 	};
-	return { get active() { return active; }, get selection() {
+	async function restoreSelection(ids, source) {
+		if (!collection) await initialize();
+		if (source !== collection.arboriza.sha256_fonte || ids.some(id => !collection.features.some(f => String(f.id) === id))) throw new Error('A malha da camada não corresponde aos setores atuais.');
+		await updateSelection(ids);
+	}
+	return { restoreSelection, get active() { return active; }, get selection() {
 		if (!active || !summary?.bounds || !selected.size || drawingRequest) return null;
 		const [west, south, east, north] = summary.bounds;
 		return { ids: [...selected], source: collection.arboriza.sha256_fonte,

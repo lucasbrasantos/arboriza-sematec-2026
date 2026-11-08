@@ -80,7 +80,7 @@ export function connectAnalysis(store, onLayer, isTerritoryActive = () => false,
 							? (job.resumo.fonte_imagens === 'acervo_local'
 								? ` Imagens: ${job.resumo.janelas_locais} janelas do acervo local, sem download; ${job.resumo.janelas_cache_acervo ?? 0} recortes prontos reutilizados. Inferência executada nesta análise.`
 								: ` Imagens: ${job.resumo.janelas_cache} do cache e ${job.resumo.janelas_download} baixadas${job.resumo.fonte_imagens === 'datageo_direto_sem_cache' ? ', sem usar cache' : ''}.`) : '';
-						completion = `${points.length} possíveis árvores · ${seconds} s. ${activate ? 'Camada pronta para revisão.' : 'Camada adicionada; sua edição atual foi preservada.'}${cache}${warning}`;
+						completion = `${points.length} possíveis árvores · ${seconds} s. ${activate ? 'Camada pronta para revisão.' : 'Camada adicionada; sua edição atual foi preservada. Selecione-a em Camadas para analisar ruas.'}${cache}${warning}`;
 						if (job.resumo?.perfil === 'fusao') completion = `${points.length} copas individuais · ${job.resumo.grupos_copas} grupos · ${job.resumo.complementos_pendentes} complementos pendentes · ${seconds} s. Modelo v2: pontos e copas vinculados; ative Mostrar copas para visualizar.${warning}`;
 					} else completion = `Análise concluída em ${seconds} s. O mapa foi limpo; o resultado ficou salvo no disco.`;
 					running = null; onVisualState({ mode: 'idle' }); refresh(); status(completion); return;

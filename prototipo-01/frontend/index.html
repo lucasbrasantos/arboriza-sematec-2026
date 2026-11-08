@@ -8,9 +8,10 @@
 	<title>Arboriza — Protótipo 01</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 	<link rel="stylesheet" href="css/styles.css">
+	<link rel="stylesheet" href="css/street-analysis.css?v=3">
 	<script defer src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 	<script defer src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-	<script type="module" src="js/app.js"></script>
+	<script type="module" src="js/app.js?v=7"></script>
 </head>
 
 <body data-panel="side">
@@ -159,6 +160,19 @@
 						<p id="analysis-status" role="status" aria-live="polite">Conectando à análise local…</p>
 						<button id="retry-analysis" type="button" hidden>Acompanhar novamente</button>
 					</div>
+					<div class="analysis-controls">
+						<h3>Diagnóstico de ruas</h3>
+						<p>Compare os pontos da camada ativa com a base local de ruas do OpenStreetMap. Ao analisar, a seleção territorial é fechada e permanece salva. Os trechos ainda não indicam locais de plantio.</p>
+						<label for="street-distance">Distância de comparação (m)</label>
+						<input id="street-distance" type="number" min="5" max="100" step="1" value="25">
+						<fieldset id="street-layer-picker" hidden>
+							<legend>Camadas do modelo v2</legend>
+							<p>Selecione camadas desta mesma análise. Indivíduos e grupos têm contagens separadas. Complementos pendentes ficam fora da cobertura-base.</p>
+							<div id="street-layer-options"></div>
+						</fieldset>
+						<button id="street-analyze" type="button" disabled>Analisar ruas próximas</button>
+						<p id="street-status" role="status" aria-live="polite">Selecione uma camada de pontos de uma análise de setores.</p>
+					</div>
 				</section>
 				<section data-section="layers">
 					<h2>Arquivos e visualização</h2>
@@ -178,6 +192,81 @@
 					<p>Camadas salvas neste navegador. Exporte para manter uma cópia dos pontos revisados.</p>
 				</section>
 			</fieldset>
+		</aside>
+		<aside id="street-workspace" aria-labelledby="street-title" hidden>
+			<header class="street-heading">
+				<button id="street-back" type="button">← Voltar à edição de pontos</button>
+				<h2 id="street-title">Diagnóstico de ruas</h2>
+				<p id="street-layer-name"></p>
+			</header>
+			<div id="street-loading" class="street-state" role="status" hidden>
+				<strong>Relacionando ruas e pontos…</strong>
+				<p>Preparando os trechos e conferindo os limites da área.</p>
+			</div>
+			<div id="street-failure" class="street-state" role="alert" hidden>
+				<strong>Não foi possível abrir o diagnóstico</strong><p id="street-error"></p>
+				<button id="street-retry" type="button">Tentar novamente</button>
+			</div>
+			<div id="street-results" hidden>
+				<div class="street-overview">
+					<p id="street-sector-summary"></p>
+					<p id="street-input-summary" hidden></p>
+					<div class="street-background" role="group" aria-label="Tratamento da imagem de fundo">
+						<button type="button" data-street-background="soft" aria-pressed="true">Imagem suavizada</button>
+						<button type="button" data-street-background="normal" aria-pressed="false">Imagem original</button>
+					</div>
+					<label class="check"><input id="street-boundary" type="checkbox" checked> Mostrar contorno dos setores</label>
+				</div>
+				<div class="street-browser">
+					<h3>Trechos de ruas <span id="street-source-kind" class="street-pilot">OSM local</span></h3>
+					<div class="street-filters" role="group" aria-label="Filtrar trechos por pontos associados">
+						<button type="button" data-street-filter="all" aria-pressed="true">Todos <strong id="street-count-all">0</strong></button>
+						<button type="button" data-street-filter="no-points" aria-pressed="false"><span id="street-filter-empty-label">Sem pontos</span> <strong id="street-count-no-points">0</strong></button>
+						<button type="button" data-street-filter="with-points" aria-pressed="false"><span id="street-filter-detected-label">Com pontos</span> <strong id="street-count-with-points">0</strong></button>
+					</div>
+					<p class="street-legend"><span class="street-key street-key-empty"></span> <span id="street-legend-empty-label">Sem pontos associados</span> <span class="street-key street-key-detected"></span> <span id="street-legend-detected-label">Com pontos</span> <span class="street-key street-key-selected"></span> Selecionado</p>
+					<p id="street-v2-explanation" hidden>No v2, as cores comparam pontos-base: indivíduos e grupos, sem incluir complementos pendentes. A cobertura das máscaras é uma medida separada, disponível no detalhe de cada trecho.</p>
+					<p id="street-point-type-legend" class="street-legend" hidden><span class="street-point-key street-point-individual"></span> Individuais <span class="street-point-key street-point-group"></span> Grupos <span class="street-point-key street-point-pending"></span> Pendentes</p>
+					<p>Sem pontos associados não significa rua sem árvores. Selecione um trecho para conferir a contagem e o entorno.</p>
+					<label for="street-search">Buscar rua</label>
+					<input id="street-search" type="search" placeholder="Nome da rua" autocomplete="off">
+					<div id="street-detail-empty" class="street-detail-empty">Selecione um trecho na lista ou no mapa para conferir seus pontos.</div>
+					<section id="street-detail" aria-label="Trecho selecionado" hidden>
+						<p id="street-detail-number" class="street-eyebrow"></p><h3 id="street-detail-name"></h3>
+						<dl class="street-metrics">
+							<div><dt id="street-detail-count-label">Pontos</dt><dd id="street-detail-count"></dd></div>
+							<div><dt>Comprimento</dt><dd id="street-detail-length"></dd></div>
+							<div><dt id="street-detail-rate-label">Pontos / 100 m</dt><dd id="street-detail-rate"></dd></div>
+						</dl>
+						<div id="street-detail-canopies" hidden>
+							<p id="street-detail-types"></p>
+							<h4>Cobertura estimada de copas</h4>
+							<p><strong id="street-canopy-percent"></strong> <span id="street-canopy-area"></span></p>
+							<p id="street-canopy-masks"></p>
+						</div>
+						<p>Distribuição ao longo do trecho</p>
+						<svg id="street-strip" viewBox="0 0 300 40" role="img" aria-label="Projeção dos pontos no eixo da rua"></svg>
+						<div class="street-strip-labels"><span>0 m</span><span id="street-strip-end"></span></div>
+						<p id="street-detail-coverage"></p><p id="street-detail-note"></p>
+						<button id="street-focus" type="button">Enquadrar trecho</button>
+					</section>
+					<p id="street-list-summary" role="status" aria-live="polite"></p>
+					<ul id="street-list" aria-label="Trechos de ruas"></ul>
+					<p id="street-list-empty" hidden>Nenhum trecho para esse filtro. Experimente outro nome ou “Todos”.</p>
+				</div>
+				<details class="street-method">
+					<summary>Como ler este diagnóstico</summary>
+					<p>Ao selecionar na lista, o enquadramento segue a opção “Enquadrar ao selecionar camada”, no menu Camadas. Use “Enquadrar trecho” para fazê-lo manualmente.</p>
+					<p>As vias do OpenStreetMap são recortadas pelos setores e divididas em trechos de até 100 m. Cada ponto entra no trecho mais próximo, uma única vez, até <strong id="street-method-distance">25 m</strong> do eixo.</p>
+					<p id="street-coverage-summary"></p><p id="street-points-summary"></p>
+					<p id="street-canopy-method" hidden>A cobertura estimada usa a união das máscaras individuais e de grupos na faixa dentro dos setores. Sobreposições contam uma vez; complementos ficam excluídos. É uma medida local, sem meta automática de 30% por trecho. Uma máscara pode cruzar faixas de vários trechos; suas áreas não devem ser somadas para calcular cobertura total do setor.</p>
+					<p>Entorno completo significa que a faixa ao redor do trecho está dentro dos setores. A porcentagem descreve a geometria disponível; não mede a qualidade das detecções nem a completude das ruas.</p>
+					<p>O tracejado marca o limite real dos setores. A imagem permanece clara por mais 20 m ao redor para facilitar a leitura das ruas da borda; essa margem é apenas visual.</p>
+					<p>O desenho linear projeta os pontos no eixo da rua para leitura. Os pontos no mapa mantêm suas posições originais.</p>
+					<p>Este diagnóstico ainda não define prioridade, disponibilidade de calçada, locais de plantio ou cumprimento da regra 3-30-300. O cadastro do OSM pode conter omissões.</p>
+					<p>Vias: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a> · ODbL.</p>
+				</details>
+			</div>
 		</aside>
 
 		<section class="map-area" aria-label="Área do mapa">
@@ -223,6 +312,7 @@
 					</button>
 				</div>
 				<section id="layer-browser" class="glass map-list-panel" aria-label="Gerenciar camadas" hidden>
+					<label><input id="layer-auto-fit" type="checkbox" checked> Enquadrar ao selecionar camada</label>
 					<h2>Camadas do mapa</h2>
 					<p class="list-hint">Selecione para mostrar os pontos e o recorte.</p>
 					<ul id="layer-list" aria-label="Camadas do mapa"></ul>
