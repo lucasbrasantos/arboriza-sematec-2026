@@ -3,9 +3,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from filelock import FileLock, Timeout
 from .analyses import router as analyses
+from .analyses import workspace
 from .access import auth
 from .streets import router as streets
 from .territory import router as territory
+from .imagery import router as imagery
 from .core.config import DATABASE, DATA_DIR, MODELS_DIR
 from .core.database import initialize
 
@@ -34,7 +36,9 @@ def create_app() -> FastAPI:
     app.include_router(auth.users_router)
     app.include_router(territory.router)
     app.include_router(analyses.router)
+    app.include_router(workspace.router)
     app.include_router(streets.router)
+    app.include_router(imagery.router)
 
     @app.get("/api/health")
     def health():

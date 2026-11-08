@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import type { FeatureCollection, Polygon } from 'geojson'
 import type { MapArea } from '../../map/data/map-data'
+import { api } from '../../auth/services/api'
 
 export type SectorProperties = { CD_SETOR: string; AREA_KM2: number }
-export type SectorCollection = FeatureCollection<Polygon, SectorProperties>
+export type SectorCollection = FeatureCollection<Polygon, SectorProperties> & { arboriza: { sha256_fonte: string } }
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value)
 
 export function readSectors(value: unknown): SectorCollection {
   if (!isObject(value) || value.type !== 'FeatureCollection' || !Array.isArray(value.features)) throw new Error('Arquivo territorial inválido.')
-  if (!isObject(value.arboriza) || value.arboriza.codigo_municipio !== '3502804' || value.arboriza.crs_geojson !== 'EPSG:4326' || value.arboriza.situacao !== 'Urbana') throw new Error('A malha precisa conter os setores urbanos de Araçatuba em coordenadas WGS84.')
+  if (!isObject(value.arboriza) || value.arboriza.codigo_municipio !== '3502804' || value.arboriza.crs_geojson !== 'EPSG:4326' || value.arboriza.situacao !== 'Urbana' || typeof value.arboriza.sha256_fonte !== 'string' || !value.arboriza.sha256_fonte) throw new Error('A malha precisa conter os setores urbanos de Araçatuba em coordenadas WGS84 e sua versão.')
   const seen = new Set<string>()
   const features: SectorCollection['features'] = value.features.map((feature: unknown) => {
     if (!isObject(feature) || feature.type !== 'Feature' || typeof feature.id !== 'string' || !/^\d{15}$/.test(feature.id) || seen.has(feature.id) || !isObject(feature.properties) || feature.properties.CD_SETOR !== feature.id || typeof feature.properties.AREA_KM2 !== 'number' || !Number.isFinite(feature.properties.AREA_KM2) || feature.properties.AREA_KM2 < 0 || !isObject(feature.geometry) || feature.geometry.type !== 'Polygon' || !Array.isArray(feature.geometry.coordinates) || !feature.geometry.coordinates.length) throw new Error('A malha contém setor inválido ou repetido.')
@@ -27,7 +28,7 @@ export function readSectors(value: unknown): SectorCollection {
     return { type: 'Feature', id: feature.id, properties: { CD_SETOR: feature.id, AREA_KM2: feature.properties.AREA_KM2 }, geometry: { type: 'Polygon', coordinates } }
   })
   if (!features.length) throw new Error('A malha territorial está vazia.')
-  return { type: 'FeatureCollection', features }
+  return { type: 'FeatureCollection', features, arboriza: { sha256_fonte: value.arboriza.sha256_fonte } }
 }
 
 export function useTerritoryData(enabled: boolean) {
@@ -37,8 +38,8 @@ export function useTerritoryData(enabled: boolean) {
   useEffect(() => {
     if (!enabled || collection) return
     const controller = new AbortController()
-    fetch(`${import.meta.env.BASE_URL}data/setores-urbanos-aracatuba-ibge-2022.geojson`, { signal: controller.signal })
-      .then(async (response) => { if (!response.ok) throw new Error('Não foi possível carregar a malha territorial.'); return readSectors(await response.json()) })
+    api<unknown>('/territorio/setores', { signal: controller.signal })
+      .then(readSectors)
       .then((data) => { if (!controller.signal.aborted) { setCollection(data); setError('') } })
       .catch((reason: unknown) => { if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : 'Falha ao carregar os setores.') })
     return () => controller.abort()

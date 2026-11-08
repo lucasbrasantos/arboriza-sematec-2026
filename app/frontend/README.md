@@ -4,7 +4,7 @@ Aplicação React com TypeScript estrito, Vite e React Router em modo declarativ
 
 ## Estado atual — acesso da equipe
 
-O login, a sessão e o logout usam a API real. As rotas `/admin`, `/admin/mapa` e `/admin/acervo` exigem sessão; administradores podem gerenciar usuários no portal. O token fica na sessão da aba e é validado pela API após recarregar. O servidor Vite encaminha `/api` para `127.0.0.1:8000`; o backend precisa estar em execução. `npm run preview` não configura esse proxy. O mapa administrativo e o acervo ainda usam dados demonstrativos; a integração deles será feita nas próximas etapas. As notas mais antigas abaixo descrevem a evolução da interface, não o estado atual do login.
+O login, a sessão e o logout usam a API real. As rotas `/admin`, `/admin/mapa` e `/admin/acervo` exigem sessão; administradores podem gerenciar usuários no portal. O token fica na sessão da aba e é validado pela API após recarregar. O servidor Vite encaminha `/api` para `127.0.0.1:8000`; o backend precisa estar em execução. `npm run preview` não configura esse proxy. No mapa administrativo, território, configuração, execução e carregamento das camadas reais usam a API. Os exemplos continuam disponíveis, identificados como demonstrativos. Revisão persistente, acervo e publicação ainda aguardam integração. As notas mais antigas abaixo descrevem a evolução da interface, não seu estado atual.
 
 No VS Code, use **Arboriza: frontend + backend** em Executar e Depurar para iniciar os dois processos. Há também configurações individuais e a opção anterior do protótipo.
 
@@ -107,13 +107,13 @@ SQLite permanece uma proposta para o backend local futuro, sem alterações de p
 Campos Usuário e Senha, mostrar/ocultar senha e validação de preenchimento. Envio com dados fictícios informa que não há autenticação e limpa a senha; não cria sessão, transmite credenciais ou persiste os campos. Não há cadastro público. Acesso ao portal demonstrativo é um link independente. Consulte [Login](../../docs/LOGIN.md).
 
 
-### Mapa administrativo — primeira amostra
+### Mapa administrativo — estrutura e demonstrações
 
-Rota sob demanda em layout de mapa. Contextos Área/Análise/Revisão/Camadas; seleção e propriedades de exemplos; camadas e densidade. Acompanhamento demonstrativo com confirmação, progresso por etapas, sucesso, erro e interrupção local. Não há IA, persistência, edição de pontos ou publicação conectadas. Organização e verificações em [Mapa administrativo](../../docs/MAPA_ADMINISTRATIVO.md).
+Registro histórico da primeira amostra. O estado atual está descrito no início deste README e em [Mapa administrativo](../../docs/MAPA_ADMINISTRATIVO.md).
 
 
 ### Camadas e setores censitários
 
-O mapa administrativo dispõe de gerenciador de resultados demonstrativos, visibilidade simultânea, camada ativa independente, enquadramento e modos Detalhado/Compacto. Propriedades da camada e da seleção ficam no inspetor. O estado permanece apenas na sessão em memória.
+O mapa administrativo tem gerenciador de resultados reais carregados da API e exemplos identificados, com visibilidade simultânea, camada ativa independente e enquadramento. A segmentação, grupos e complementos do modelo v2 aparecem em camadas separadas. Os controles de Pontos, Segmentação e Densidade ficam na barra do mapa. O estado visual continua na sessão em memória.
 
-A malha real do IBGE é servida por arquivo estático em `public/data`, com metadados preservados e atribuição. Seleção por clique/código, busca paginada, todos/inverter/limpar e área declarada disponíveis. Desenhos, união/interseção, edição e persistência ainda serão implementados. Consulte [Mapa administrativo](../../docs/MAPA_ADMINISTRATIVO.md).
+A malha urbana real do IBGE é fornecida pela API. A seleção por clique ou código, busca paginada e resumo visual de setores/área estão disponíveis. A área da UI é a soma declarada pelo IBGE; o backend calcula a geometria para o processamento. Ferramentas de desenho, edição e salvamento de revisão seguem pendentes. Consulte [Mapa administrativo](../../docs/MAPA_ADMINISTRATIVO.md).

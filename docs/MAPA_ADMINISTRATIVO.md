@@ -68,6 +68,25 @@ Não foi implementado cancelamento remoto: o botão interrompe apenas a demonstr
 
 Não houve teste de processamento real, cancelamento remoto, servidor, persistência, edição, arquivos, publicação, grande volume, aparelhos físicos ou auditoria completa de acessibilidade. Animações reduzidas estão contempladas no CSS/hook existente, sem emulação específica adicional nesta rodada.
 
+## Integração do mapa e seleção — 08/11/2026
+
+- A entrada do mapa começa em **Área**, com a malha oficial carregada pela API e a seleção por clique/código. O painel resumido destaca quantidade de setores e hectares declarados. No inspetor, a aba **Território** mostra os números da seleção e o setor de referência. A seleção de polígonos usa traço fino e perde o foco do SVG após clique, evitando o contorno azul de foco persistente.
+- As operações em lote, a lista por código, os detalhes da malha, os controles de mapa de fundo e os fluxos de arquivo ficam em seções recolhíveis. No celular, **Selecionar pelo mapa** recolhe as ferramentas para liberar o mapa ao toque.
+- A barra inferior expõe diretamente pontos, segmentação e densidade. A segmentação só habilita quando uma camada de copas real do Modelo v2 foi carregada. Resultados concluídos são lidos dos endpoints GeoJSON da API; pontos individuais, grupos, complementos pendentes e polígonos de copa preservam categorias distintas. Ao retornar à página, a última execução da sessão pode ser restaurada.
+- Pontos reais são desenhados em Canvas pelo Leaflet; os exemplos visuais continuam identificados. Controle não produz polígonos de segmentação.
+- O cache local de mapa mudou para WebP com transparência, tiles compostos persistidos sob `backend/cache/mapa-local-tiles` até 2 GB e consulta dinâmica durante o zoom. Uma medição pontual em Araçatuba registrou 0,61 s para a primeira composição (incluiu inicialização do leitor), retorno em menos de 0,1 ms no cache do processo e 25.062 bytes em WebP, 79,8% menos que o PNG equivalente. DataGEO continua carregando por baixo como fallback; a latência ponta a ponta em vários chunks e pelo ngrok ainda precisa ser validada.
+
+Não foram executados testes nesta rodada. O frontend foi compilado com TypeScript e Vite.
+
+## Sidebar V2 e seleção territorial — implementação em andamento
+
+- O cabeçalho alterna entre a sidebar anterior e a V2. Modelo, perfil, score, setores, visualização e camadas pertencem ao mesmo estado do mapa durante a troca.
+- A V2 oferece modos contínuo e por abas, seções recolhíveis e painel direito de Camadas/Pontos. Os espaços de diagnóstico de ruas, importação, exportação e acervo ainda estão desabilitados até sua integração.
+- A análise pela V2 inicia diretamente e tem acompanhamento fora da sidebar; é possível fechar e reabrir o diálogo durante o processamento. Ao concluir em segundo plano, a camada fica disponível sem mudar a ferramenta ou o foco territorial que o usuário estiver usando. Avisos de envio incerto exigem conferência das análises recentes.
+- No modo de setores, clique, retângulo e desenho livre usam a malha e a interseção da API. Os desenhos afetam setores inteiros; substituir, adicionar, remover, todos, inverter, limpar e enquadrar mantêm a seleção ao sair do modo.
+- A composição foi conferida com o usuário. Em ambiente isolado, foram verificados alternância com estado compartilhado, abas, operações em lote, desenhos, reabertura do acompanhamento e conclusão sem alterar o contexto em uso. O processamento da validação foi simulado e o banco principal não foi usado.
+- Edição de pontos, histórico, diagnóstico de ruas, arquivos, acervo, ajustes globais de visualização e paridade da densidade continuam nas próximas etapas.
+
 
 ## Revisão de prioridade — camadas e IBGE
 
@@ -96,3 +115,25 @@ Não houve teste de desempenho com milhares de resultados, aparelho físico, aud
 ### Próximas validações
 
 Validar o gerenciador, os modos e a seleção territorial antes de desenho/interseção/união geométrica, edição/histórico e arquivos locais. A organização dos resultados publicados no mapa público e o vínculo com o acervo continuam na sequência do plano. A API de IA, persistência, autenticação e publicação efetiva continuam pendentes.
+
+## Paridade do diagnóstico viário com o protótipo — 08/11/2026
+
+O modo de ruas agora troca completamente o espaço de edição por um painel próprio de 390 px (340 px em larguras intermediárias), sem abas nem organização contínua. O template, a lógica do painel, a classificação e o renderizador foram copiados para `app/frontend/src/features/admin/streets`, sem dependência de arquivos servidos pelo protótipo. As declarações TypeScript mantêm os contratos da integração React.
+
+Foram preservados máscara exterior com margem visual de 20 m, fundo suavizado/original, contorno duplo dos setores, cores e espessuras das vias, marcadores por categoria, pontos associados destacados, filtros com contagens, lista completa em ordem alfabética, detalhe de cobertura e entorno, diagrama linear, enquadramento manual/preferencial e explicações metodológicas. No v2, a classificação usa pontos-base, excluindo complementos pendentes.
+
+A navegação do mapa usa animação e inércia do Leaflet, com atualização de tiles após o zoom e buffer de três tiles, como no protótipo. Cada execução visível recebe a caixa laranja tracejada com preenchimento de referência, oculta no modo de seleção territorial; no diagnóstico, o limite real dos setores substitui a caixa.
+
+Conferência em banco isolado com resultado v2 real: duas categorias, 72 trechos, 4 sem pontos-base, detalhes e seleção de trecho, alternância de fundo, contorno e retorno à edição. Build e lint aprovados; classificação v2, ordenação, busca sem acentos e totais conferidos por execução direta do módulo. Nenhuma nova inferência ou alteração do banco principal nesta rodada.
+
+## Intensidade e ranking viário — 08/11/2026
+
+As vias agora usam escala contínua de laranja a verde, relativa ao maior valor do indicador nos trechos do diagnóstico (a escala não muda quando se aplica busca ou filtro). O indicador padrão é pontos-base por 100 m; o v2 também permite indivíduos por 100 m e cobertura média por trecho. Complementos pendentes não entram nesses indicadores.
+
+O novo painel de ranking fica à esquerda, dentro do espaço viário, com top 5 inicial e expansão da lista ordenada. Ruas são agrupadas por nome OSM e vias sem nome preservam identidade por via. Taxas usam a soma dos pontos dividida pelo comprimento analisado; cobertura usa média dos percentuais por trecho ponderada pelo comprimento, sem alegar área de união da rua. Comprimentos, propostas individuais, grupos e entorno parcial aparecem por item.
+
+Cliques no ranking adicionam/removem ruas à seleção múltipla, destacando todos os seus trechos e pontos associados. O enquadramento inclui as ruas selecionadas e o detalhe mostra o trecho mais recente. Clique no vazio do mapa ou Limpar seleção do ranking remove a seleção. A lista não rola automaticamente para o detalhe ao selecionar pelo ranking.
+
+Em zoom distante, uma base OSM de contexto preenche o fundo; o WMS detalhado entra a partir de zoom 12 e o acervo local a partir de 14. Prévias aéreas são ocultadas abaixo de 12 para evitar uma miniatura isolada. Não há nova fonte de ortofotos.
+
+Verificações: cinco testes de taxas, agregação, cobertura, vias sem nome e paleta; build e lint. No navegador isolado: top 5/expansão para 17 ruas, troca de indicador, seleção simultânea de duas ruas, limpeza por clique no vazio e base de contexto carregada no zoom 8. O banco principal permaneceu inalterado.

@@ -11,7 +11,7 @@ import RequireAuth from '../features/auth/components/RequireAuth'
 
 const StyleLabPage = lazy(() => import('../features/style-lab/pages/StyleLabPage'))
 const AdminMapPage = lazy(() => import('../features/admin/pages/AdminMapPage'))
-const MapPage = lazy(() => import('../features/map/pages/MapPage'))
+const MapPage = lazy(() => import('../features/map/pages/PublishedMapPage'))
 
 export default function AppRoutes() {
 	return (

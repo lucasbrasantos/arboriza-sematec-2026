@@ -1,0 +1,1 @@
+"""Visualização das ortofotos locais."""

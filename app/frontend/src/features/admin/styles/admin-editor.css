@@ -47,19 +47,18 @@
 .editor-inspector-empty { padding: 22px 0; }
 .editor-inspector-empty > svg { color: var(--ar-green); }
 .editor-inspector-empty .ar-button { margin-top: 20px; }
-.editor-floating-toolbar { position: absolute; z-index: 50; bottom: 46px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; max-width: calc(100% - 28px); padding: 7px; overflow-x: auto; }
+.editor-floating-toolbar { position: absolute; z-index: 50; bottom: 6px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; max-width: calc(100% - 28px); padding: 7px; overflow-x: auto; }
+.editor-floating-toolbar[hidden] { display: none; }
 .editor-toolbar-context { padding: 0 10px; color: var(--ar-muted); font-size: .7rem; flex-shrink: 0; }
 .editor-floating-toolbar button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; flex-shrink: 0; min-width: 56px; min-height: 51px; padding: 7px 10px; border: 0; border-radius: 9px; background: none; color: var(--ar-forest); font-size: .65rem; cursor: pointer; }
 .editor-floating-toolbar button[aria-pressed='true'] { background: var(--ar-forest); color: white; }
 .editor-floating-toolbar button:hover:not(:disabled) { background: var(--ar-mint); color: var(--ar-forest); }
 .editor-floating-toolbar button:disabled { opacity: .46; cursor: not-allowed; }
-.editor-statusbar { position: absolute; z-index: 40; bottom: 0; left: 0; right: 0; display: flex; align-items: center; gap: 20px; justify-content: space-between; min-height: 33px; padding: 6px 18px; background: #f7f9f3f5; color: var(--ar-muted); font-size: .65rem; }
-.editor-statusbar strong { color: #6e5317; font-weight: 650; }
 .admin-editor .map-canvas-tools { top: 132px; }
 .admin-editor:has(.editor-inspector:not([hidden])) .map-canvas-tools { right: 310px; }
-.admin-editor .map-base-status { top: 86px; left: 355px; right: auto; max-width: calc(100% - 700px); }
+.admin-editor .map-base-status { top: 86px; left: 50%; transform: translateX(-50%); right: auto; max-width: calc(100% - 700px); }
 .admin-editor .public-leaflet-map .leaflet-control-scale { margin-bottom: 120px; }
-.admin-editor .public-leaflet-map .leaflet-control-attribution { margin-bottom: 34px; }
+.admin-editor .public-leaflet-map .leaflet-control-attribution { margin-bottom: 6px; }
 .analysis-demo-dialog { width: min(530px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; border: 0; border-radius: 16px; padding: 28px; background: #f7f9f3f5; color: #203c2c; box-shadow: 0 24px 70px #05190e55; backdrop-filter: blur(22px); }
 .analysis-demo-dialog[open] { animation: analysis-dialog-in 220ms ease-out; }
 .analysis-demo-dialog::backdrop { background: #071b14a6; backdrop-filter: blur(3px); animation: analysis-backdrop-in 220ms ease-out; }
@@ -95,11 +94,7 @@
   .editor-panel-triggers { left: 10px; right: 10px; }
   .editor-context-panel, .editor-inspector { left: 10px; right: 10px; width: auto; bottom: 124px; }
   .admin-editor .map-canvas-tools, .admin-editor:has(.editor-inspector:not([hidden])) .map-canvas-tools { top: 132px; right: 12px; }
-  .admin-editor .map-base-status { top: auto; bottom: 123px; left: 12px; max-width: calc(100% - 24px); }
-  .editor-statusbar { padding: 6px 12px; gap: 12px; }
-  .editor-statusbar > span:nth-child(2) { display: none; }
-  .editor-statusbar > span:first-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  .editor-statusbar strong { white-space: nowrap; }
+  .admin-editor .map-base-status { top: auto; bottom: 123px; left: 50%; transform: translateX(-50%); max-width: calc(100% - 24px); }
 }
 @media (max-width: 480px) { .editor-title h1 { font-size: .7rem; } .editor-title span { display: none; } .editor-brand img { width: 68px; } .editor-topbar { gap: 8px; } .editor-topbar nav { margin-left: auto; } .editor-topbar nav span { display: none; } .analysis-demo-dialog { padding: 22px; } .analysis-dialog-actions { flex-direction: column; } }
 @media (prefers-reduced-motion: reduce) { .analysis-demo-dialog[open], .analysis-demo-dialog::backdrop, .analysis-dialog-symbol.is-busy svg { animation: none; } }
