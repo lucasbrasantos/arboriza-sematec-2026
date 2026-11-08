@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { paths } from '../config/paths'
 import type { AppPath } from '../config/paths'
-import logo from '../../assets/samples/logo-full.svg'
+import logo from '../../assets/brand/logo-horizontal.svg'
 import './site-header.css'
 
 type NavigationItem = { to: AppPath; label: string }
@@ -31,7 +31,7 @@ export default function SiteHeader() {
           <NavLink
             key={to}
             to={to}
-            end
+            end={to !== paths.admin}
             onClick={() => setOpen(false)}
             className={({ isActive }) => isActive ? 'app-nav-link is-active' : 'app-nav-link'}
           >

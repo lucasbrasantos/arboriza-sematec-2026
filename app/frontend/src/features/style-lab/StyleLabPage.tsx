@@ -16,7 +16,7 @@ import BotanicalGraphic from '../../shared/ui/BotanicalGraphic'
 import { variants, variantOrder } from './variants'
 import GraphicStudy from './GraphicStudy'
 import type { StyleVariant } from './variants'
-import logoImage from '../../assets/samples/logo-full.svg'
+import logoImage from '../../assets/brand/logo-horizontal.svg'
 import '../../shared/styles/theme.css'
 import './style-lab.css'
 

@@ -114,3 +114,8 @@ Os grupos e a paginação preparam a interação para listas maiores, mas não d
 ## Próxima validação
 
 O usuário aprovou o refinamento imersivo em 07/11/2026 e autorizou iniciar a etapa de Administração. API, área piloto real, critérios, setores oficiais, agrupamento e dados revisados continuam pendentes. Proposta da próxima etapa em [Administração](ADMINISTRACAO.md).
+
+
+### Navegação e marca — 08/11/2026
+
+Menu do site explícito na navegação flutuante com Início, Administração e Login. A marca continua como link para o Início. Fecha por Escape com recuperação de foco, clique fora ou navegação. Logos oficiais fornecidas pelo usuário aplicadas ao site e mapa; favicons locais atualizados. Menu conferido no desktop e viewport móvel 375 × 812.

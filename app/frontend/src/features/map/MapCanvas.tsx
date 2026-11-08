@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import { DomEvent, divIcon } from 'leaflet'
 import { ImageOverlay, LayerGroup, MapContainer, Marker, Pane, Polyline, Rectangle, ScaleControl, TileLayer, Tooltip, WMSTileLayer, useMap, useMapEvents } from 'react-leaflet'
 import { Info, LocateFixed, Minus, Plus, RotateCcw } from 'lucide-react'
@@ -12,6 +13,9 @@ import HeatmapOverlay from './HeatmapOverlay'
 import 'leaflet/dist/leaflet.css'
 
 type MapCanvasProps = {
+  children?: ReactNode
+  itemsInteractive?: boolean
+  pointColors?: Readonly<Record<string, string>>
   area: MapArea
   base: BaseMap
   layers: LayerVisibility
@@ -20,6 +24,7 @@ type MapCanvasProps = {
   view: MapView
   heatColors: HeatColors
   leftInset: number
+  rightInset?: number
   onSelect: (item: MapItem) => void
   onClear: () => void
 }
@@ -28,11 +33,11 @@ const leafMarkup = '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentCo
 const pointIcon = divIcon({ className: 'public-tree-marker', html: leafMarkup, iconSize: [34, 34], iconAnchor: [17, 17] })
 const selectedIcon = divIcon({ className: 'public-tree-marker is-selected', html: leafMarkup, iconSize: [40, 40], iconAnchor: [20, 20] })
 
-function MapBehavior({ area, selected, leftInset, onClear }: Pick<MapCanvasProps, 'area' | 'selected' | 'leftInset' | 'onClear'>) {
+function MapBehavior({ area, selected, leftInset, rightInset = 0, onClear }: Pick<MapCanvasProps, 'area' | 'selected' | 'leftInset' | 'rightInset' | 'onClear'>) {
   const reduced = usePrefersReducedMotion()
   const map = useMapEvents({ keydown: (event) => { if (event.originalEvent.key === 'Escape') onClear() } })
-  const inset = useRef(leftInset)
-  useEffect(() => { inset.current = leftInset }, [leftInset])
+  const inset = useRef({ left: leftInset, right: rightInset })
+  useEffect(() => { inset.current = { left: leftInset, right: rightInset } }, [leftInset, rightInset])
 
   useEffect(() => {
     if (reduced) map.stop()
@@ -40,13 +45,16 @@ function MapBehavior({ area, selected, leftInset, onClear }: Pick<MapCanvasProps
 
   useEffect(() => {
     map.getContainer().setAttribute('aria-label', 'Mapa de Araçatuba. Use as setas para navegar e mais ou menos para alterar o zoom.')
-    map.fitBounds(area.bounds, { paddingTopLeft: [inset.current + 30, 100], paddingBottomRight: [40, 150], maxZoom: 18, animate: false })
+    const container = map.getContainer()
+    if (!container.clientWidth || !container.clientHeight) return
+    map.invalidateSize({ pan: false, animate: false })
+    map.fitBounds(area.bounds, { paddingTopLeft: [inset.current.left + 30, 100], paddingBottomRight: [inset.current.right + 40, 150], maxZoom: 18, animate: false })
   }, [area, map])
 
   useEffect(() => {
     if (selected) {
       const center = map.project(itemPosition(selected))
-      center.x -= inset.current / 2
+      center.x -= (inset.current.left - inset.current.right) / 2
       map.panTo(map.unproject(center), { animate: !reduced, duration: .25 })
     }
   }, [selected, reduced, map])
@@ -55,7 +63,11 @@ function MapBehavior({ area, selected, leftInset, onClear }: Pick<MapCanvasProps
     let frame = 0
     const observer = new ResizeObserver(() => {
       cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => map.invalidateSize({ pan: true, animate: false }))
+      frame = requestAnimationFrame(() => {
+        const container = map.getContainer()
+        // Heatmap canvases cannot redraw at a transient zero-size viewport.
+        if (container.isConnected && container.clientWidth > 0 && container.clientHeight > 0) map.invalidateSize({ pan: true, animate: false })
+      })
     })
     observer.observe(map.getContainer())
     return () => { observer.disconnect(); cancelAnimationFrame(frame) }
@@ -64,7 +76,7 @@ function MapBehavior({ area, selected, leftInset, onClear }: Pick<MapCanvasProps
   return null
 }
 
-function MapTools({ area, leftInset }: { area: MapArea; leftInset: number }) {
+function MapTools({ area, leftInset, rightInset }: { area: MapArea; leftInset: number; rightInset: number }) {
   const map = useMap()
   const reduced = usePrefersReducedMotion()
   const [zoom, setZoom] = useState(map.getZoom())
@@ -74,7 +86,7 @@ function MapTools({ area, leftInset }: { area: MapArea; leftInset: number }) {
   return <div ref={tools} className="map-canvas-tools" role="group" aria-label="Navegação do mapa" onPointerDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()}>
     <button type="button" aria-label="Aproximar mapa" title="Aproximar" disabled={zoom >= map.getMaxZoom()} onClick={(event) => { event.stopPropagation(); map.zoomIn(undefined, { animate: !reduced }) }}><Plus size={20} /></button>
     <button type="button" aria-label="Afastar mapa" title="Afastar" disabled={zoom <= map.getMinZoom()} onClick={(event) => { event.stopPropagation(); map.zoomOut(undefined, { animate: !reduced }) }}><Minus size={20} /></button>
-    <button type="button" aria-label="Centralizar no recorte selecionado" title="Ver recorte completo" onClick={(event) => { event.stopPropagation(); map.fitBounds(area.bounds, { paddingTopLeft: [leftInset + 30, 100], paddingBottomRight: [40, 150], maxZoom: 18, animate: !reduced }) }}><LocateFixed size={19} /></button>
+    <button type="button" aria-label="Centralizar no recorte selecionado" title="Ver recorte completo" onClick={(event) => { event.stopPropagation(); map.fitBounds(area.bounds, { paddingTopLeft: [leftInset + 30, 100], paddingBottomRight: [rightInset + 40, 150], maxZoom: 18, animate: !reduced }) }}><LocateFixed size={19} /></button>
   </div>
 }
 
@@ -102,23 +114,29 @@ function BaseLayer({ base }: { base: BaseMap }) {
   </>
 }
 
-export default function MapCanvas({ area, base, layers, items, selected, view, heatColors, leftInset, onSelect, onClear }: MapCanvasProps) {
+export default function MapCanvas({ children, itemsInteractive = true, pointColors, area, base, layers, items, selected, view, heatColors, leftInset, rightInset = 0, onSelect, onClear }: MapCanvasProps) {
   const points = useMemo(() => items.filter((item): item is PointItem => item.kind === 'point'), [items])
+  const coloredIcons = useMemo(() => {
+    const icons = new Map<string, typeof pointIcon>()
+    for (const color of Object.values(pointColors ?? {})) if (/^#[0-9a-f]{6}$/i.test(color) && !icons.has(color)) icons.set(color, divIcon({ className: 'public-tree-marker', html: leafMarkup.replace('<span>', `<span style="color:${color};border-color:${color}">`), iconSize: [34, 34], iconAnchor: [17, 17] }))
+    return icons
+  }, [pointColors])
   return <MapContainer className="public-leaflet-map" bounds={area.bounds} boundsOptions={{ padding: [42, 42], maxZoom: 18 }} minZoom={11} maxZoom={20} zoomControl={false} zoomAnimation={false} fadeAnimation={false} markerZoomAnimation={false} inertia={false} scrollWheelZoom boxZoom={false}>
     <BaseLayer key={base} base={base} />
-    <MapBehavior area={area} selected={selected} leftInset={leftInset} onClear={onClear} />
-    <MapTools area={area} leftInset={leftInset} />
+    <MapBehavior area={area} selected={selected} leftInset={leftInset} rightInset={rightInset} onClear={onClear} />
+    <MapTools area={area} leftInset={leftInset} rightInset={rightInset} />
     {view === 'density' && layers.points && <HeatmapOverlay points={points} colors={heatColors} />}
     <ScaleControl position="bottomleft" imperial={false} />
+    {children}
     {layers.boundary && area.hasExamples && <LayerGroup>
       <Rectangle bounds={area.bounds} pathOptions={{ color: '#ffffff', weight: 5, dashArray: '7 7', fill: false, opacity: .85 }} interactive={false} />
       <Rectangle bounds={area.bounds} pathOptions={{ color: '#38644a', weight: 2, dashArray: '7 7', fillOpacity: .02 }} interactive={false} />
     </LayerGroup>}
-    {items.map((item) => item.kind === 'point' ? layers.points && (view === 'points' || selected?.id === item.id) && <Marker key={item.id} position={item.position} icon={selected?.id === item.id ? selectedIcon : pointIcon} title={`${item.label} — abrir detalhes`} alt={item.label} eventHandlers={{ click: () => onSelect(item) }}>
+    {items.map((item) => item.kind === 'point' ? layers.points && (view === 'points' || selected?.id === item.id) && <Marker key={`${item.id}:${itemsInteractive}`} interactive={itemsInteractive} keyboard={itemsInteractive} position={item.position} icon={selected?.id === item.id ? selectedIcon : coloredIcons.get(pointColors?.[item.id] ?? '') ?? pointIcon} title={`${item.label} — abrir detalhes`} alt={item.label} eventHandlers={{ click: () => { if (itemsInteractive) onSelect(item) } }}>
       <Tooltip direction="top" offset={[0, -18]}>{item.label}</Tooltip>
-    </Marker> : layers.segments && <LayerGroup key={item.id}>
+    </Marker> : layers.segments && <LayerGroup key={`${item.id}:${itemsInteractive}`}>
       <Polyline positions={item.positions} pathOptions={{ color: '#ffffff', weight: selected?.id === item.id ? 13 : 10, opacity: .9, dashArray: item.priority === 'medium' ? '10 7' : undefined }} interactive={false} />
-      <Polyline positions={item.positions} pathOptions={{ color: priorityColors[item.priority], weight: selected?.id === item.id ? 9 : 6, opacity: .95, dashArray: item.priority === 'medium' ? '10 7' : undefined }} eventHandlers={{ click: () => onSelect(item) }}>
+      <Polyline positions={item.positions} interactive={itemsInteractive} pathOptions={{ color: priorityColors[item.priority], weight: selected?.id === item.id ? 9 : 6, opacity: .95, dashArray: item.priority === 'medium' ? '10 7' : undefined }} eventHandlers={{ click: () => { if (itemsInteractive) onSelect(item) } }}>
         <Tooltip sticky>{item.label} · prioridade ilustrativa {priorityLabels[item.priority].toLowerCase()}</Tooltip>
       </Polyline>
     </LayerGroup>)}

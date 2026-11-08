@@ -20,7 +20,7 @@ npm run dev
 
 Abra <http://127.0.0.1:5173/>. O servidor usa uma porta fixa e informa erro se já estiver ocupada. Ctrl+C encerra a execução.
 
-A rota `/` apresenta a área Início validada. `/mapa` contém mapa navegável, painel lateral recolhível e resultados demonstrativos; veja [Mapa público](../docs/MAPA_PUBLICO.md). `/admin` e `/login` ainda apresentam placeholders. `/laboratorio` preserva a comparação visual, documentada no [laboratório visual](../docs/LABORATORIO_VISUAL.md). Não há autenticação nem integração com a API do Arboriza.
+A rota `/` apresenta a área Início validada. `/mapa` contém mapa navegável, painel lateral recolhível e resultados demonstrativos; veja [Mapa público](../docs/MAPA_PUBLICO.md). `/admin` apresenta o portal demonstrativo e `/login` a interface de acesso da equipe, ainda sem autenticação. `/laboratorio` preserva a comparação visual, documentada no [laboratório visual](../docs/LABORATORIO_VISUAL.md). Não há autenticação nem integração com a API do Arboriza.
 
 Para conferir qualidade e gerar o build:
 

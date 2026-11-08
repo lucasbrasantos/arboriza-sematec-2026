@@ -50,7 +50,7 @@ src/
 | `/mapa` | Mapa em toda a tela, painel flutuante e densidade demonstrativa, com refinamento aprovado |
 | `/admin` | Primeira amostra de áreas de trabalho, aguardando validação visual |
 | `/admin?area=centro` | Exemplo de área aberta; suporta acesso direto e recarga |
-| `/login` | Placeholder de Login |
+| `/login` | Interface demonstrativa de acesso da equipe |
 | `/laboratorio` | Redireciona para a combinação visual recomendada |
 | `/laboratorio/natural` | Amostra natural e leve |
 | `/laboratorio/profundo` | Amostra com vidro mais profundo |
@@ -74,7 +74,7 @@ A área Início usa a identidade aprovada, componentes compartilhados, prévia i
 
 A organização administrativa por área de trabalho e a primeira amostra pequena foram aprovadas. `/admin` apresenta três áreas fictícias, busca sem distinção de acentos, filtro por situação e estado vazio. Cada área abre por `?area=`, com resumo, prévia de referência quando disponível e etapas orientativas de obtenção, revisão e preparação da publicação. Identificadores desconhecidos têm estado próprio. No retorno à lista, busca/filtro e foco no item são preservados enquanto a página permanece montada; a recarga não persiste busca/filtro. A área sem resultados indica “Aguardando resultados”.
 
-A amostra reutiliza `GlassPanel`, `Button` e o tema aprovado com Manrope, verdes, vidro e Mel, sem nova identidade ou dependências. Aguarda validação visual e de navegação antes dos formulários; o botão de configuração permanece indisponível com explicação visível. Login continua como placeholder e o acesso a `/admin` não representa uma sessão autenticada. Não há persistência, análise/importação/revisão/exportação/publicação reais ou integração com a API do Arboriza. Contagens fictícias não confirmam árvores nem cobertura de copas. Consulte [Administração](../../docs/ADMINISTRACAO.md).
+A amostra reutiliza `GlassPanel`, `Button` e o tema aprovado com Manrope, verdes, vidro e Mel, sem nova identidade ou dependências. Aguarda validação visual e de navegação antes dos formulários; o botão de configuração permanece indisponível com explicação visível. Login possui formulário demonstrativo e o acesso a `/admin` não representa uma sessão autenticada. Não há persistência, análise/importação/revisão/exportação/publicação reais ou integração com a API do Arboriza. Contagens fictícias não confirmam árvores nem cobertura de copas. Consulte [Administração](../../docs/ADMINISTRACAO.md).
 
 Lint e build com checagem de tipos aprovados para a amostra administrativa. Busca/filtro, vazio, abertura/retorno e foco, identificador desconhecido e recarga foram conferidos no Chromium desktop e em viewport 375 × 812, sem avisos ou erros de console observados. O CSS contempla movimento reduzido. Dispositivos físicos, outros navegadores, desempenho e API real não foram validados.
 
@@ -83,3 +83,30 @@ O mapa e o laboratório são carregados sob demanda. Tokens aprovados e componen
 Para hospedar a SPA, o servidor precisará encaminhar URLs de páginas ao `index.html`, preservando caminhos de arquivos e, quando existir, da API. Vite dev e preview já atendem os acessos diretos usados nesta validação; `preview` não é servidor de produção.
 
 O projeto foi iniciado a partir do template oficial React do [Vite](https://vite.dev/guide/) e usa [React Router](https://reactrouter.com/start/declarative/installation). O conteúdo e os assets de demonstração do template foram removidos.
+
+
+### Portal administrativo
+
+- `/admin`: entrada com os dois acessos.
+- `/admin/mapa`: mapa navegável, contextos à esquerda, propriedades à direita, barra flutuante e análise demonstrativa com bloqueio modal. Sem edição ou análise real.
+- `/admin/acervo`: registros fictícios de análises e importações; detalhes em `?registro=ID`.
+- `/login`: formulário demonstrativo; sem autenticação, cadastro público ou proteção de rotas.
+
+SQLite permanece uma proposta para o backend local futuro, sem alterações de persistência nesta etapa. A regra de publicação por abrangência está documentada em `docs/ADMINISTRACAO.md`; não é executada pelo frontend.
+
+
+### Login da equipe — interface
+
+Campos Usuário e Senha, mostrar/ocultar senha e validação de preenchimento. Envio com dados fictícios informa que não há autenticação e limpa a senha; não cria sessão, transmite credenciais ou persiste os campos. Não há cadastro público. Acesso ao portal demonstrativo é um link independente. Consulte [Login](../../docs/LOGIN.md).
+
+
+### Mapa administrativo — primeira amostra
+
+Rota sob demanda em layout de mapa. Contextos Área/Análise/Revisão/Camadas; seleção e propriedades de exemplos; camadas e densidade. Acompanhamento demonstrativo com confirmação, progresso por etapas, sucesso, erro e interrupção local. Não há IA, persistência, edição de pontos ou publicação conectadas. Organização e verificações em [Mapa administrativo](../../docs/MAPA_ADMINISTRATIVO.md).
+
+
+### Camadas e setores censitários
+
+O mapa administrativo dispõe de gerenciador de resultados demonstrativos, visibilidade simultânea, camada ativa independente, enquadramento e modos Detalhado/Compacto. Propriedades da camada e da seleção ficam no inspetor. O estado permanece apenas na sessão em memória.
+
+A malha real do IBGE é servida por arquivo estático em `public/data`, com metadados preservados e atribuição. Seleção por clique/código, busca paginada, todos/inverter/limpar e área declarada disponíveis. Desenhos, união/interseção, edição e persistência ainda serão implementados. Consulte [Mapa administrativo](../../docs/MAPA_ADMINISTRATIVO.md).

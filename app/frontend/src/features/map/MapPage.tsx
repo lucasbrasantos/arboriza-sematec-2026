@@ -4,11 +4,12 @@ import { Info, PanelLeft } from 'lucide-react'
 import MapCanvas from './MapCanvas'
 import MapSidebar from './MapSidebar'
 import MapDisplayControls from './MapDisplayControls'
+import MapSiteNavigation from './MapSiteNavigation'
 import type { DisplayPanel } from './MapDisplayControls'
 import { areas, demoItems, heatPalettes } from './map-data'
 import type { AreaId, BaseMap, HeatColors, HeatPalette, LayerVisibility, MapItem, MapView } from './map-data'
 import { paths } from '../../shared/config/paths'
-import logo from '../../assets/samples/logo-full.svg'
+import logo from '../../assets/brand/logo-vertical.svg'
 import './map.css'
 
 export default function MapPage() {
@@ -45,6 +46,7 @@ export default function MapPage() {
 
   return <section className="public-map-page" aria-labelledby="public-map-title">
     <header className="map-floating-nav">
+      <MapSiteNavigation onOpen={() => setDisplayPanel(null)} />
       <Link to={paths.home} className="map-home-link" aria-label="Voltar ao site Arboriza" title="Voltar ao site"><img src={logo} alt="" /></Link>
       <div><h1 id="public-map-title">Araçatuba</h1><p>Arboriza · demonstração</p></div>
       <button ref={panelToggle} type="button" className="map-panel-toggle" aria-controls="map-sidebar" aria-expanded={panelOpen} aria-label={panelOpen ? 'Recolher painel' : 'Explorar mapa'} title={panelOpen ? 'Recolher painel' : 'Explorar mapa'} onClick={() => { setDisplayPanel(null); if (panelOpen) closePanel(); else setPanelOpen(true) }}><PanelLeft size={20} /><span>{panelOpen ? 'Recolher' : 'Explorar'}</span></button>

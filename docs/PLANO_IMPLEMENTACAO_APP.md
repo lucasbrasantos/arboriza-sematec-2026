@@ -208,3 +208,47 @@ As opções abaixo registram a pesquisa inicial. Após a avaliação do laborat�
 - Persistência, autenticação, infraestrutura e estratégia de publicação.
 
 Esses pontos serão apresentados no momento adequado para validação; não impedem o planejamento nem autorizam avançar automaticamente entre etapas.
+
+
+### Revisão da entrada administrativa — 07/11/2026
+
+- Fluxo alinhado: portal com dois cards, mapa administrativo de produção e acervo de análises/importações.
+- Acesso futuro só pela equipe; usuários criados internamente, sem cadastro público. SQLite proposto para a versão local, sem backend nesta etapa.
+- Rotas `/admin`, `/admin/mapa` e `/admin/acervo` separadas; registros individuais com prévia, origem e abrangência. Mapa de produção ainda é uma prévia estática identificada.
+- Publicação: exclusividade para a mesma abrangência; conjuntos parcialmente sobrepostos podem coexistir. Regras efetivas e publicação ficam para integração.
+- Validar organização antes das ferramentas operacionais e formulários.
+
+
+### Interface de login — 08/11/2026
+
+Usuário autorizou construir o login mantendo a etapa sem backend. Criado formulário de acesso da equipe com campos obrigatórios, mostrar senha e feedback demonstrativo. Sem cadastro público, sessão simulada, envio ou persistência de credenciais. Tema aprovado e componentes compartilhados reutilizados, sem dependências novas. Lint/build e percursos desktop/móvel conferidos; detalhes e limites em [Login](LOGIN.md). Aguardar avaliação da interface antes da autenticação real.
+
+
+### Planejamento do mapa administrativo e atualização da marca — 08/11/2026
+
+- Usuário aprovou a interface de login e pediu planejar o editor com base nas funcionalidades atuais do protótipo.
+- Levantadas seleção territorial, edição de pontos e histórico, copas vinculadas v2, camadas/GeoJSON e diagnóstico de ruas. Proposta e decisões pendentes em [Mapa administrativo](MAPA_ADMINISTRATIVO.md).
+- Atualizadas logos horizontal/vertical e favicons a partir dos arquivos oficiais em `assets`. SVGs copiados para o frontend sem redesenho.
+- Mapa público recebeu menu recolhível explícito para Início, Administração e Login; Escape e clique fora fecham o menu.
+- Lint/build aprovados. Menu, Escape/foco e retorno ao Início conferidos no Chromium; viewport 375 × 812 sem transbordamento horizontal, marca e menu visíveis. Capturas em `output/site-react-navegacao-marca` na pasta Sematec. Sem aparelho físico ou auditoria completa de acessibilidade.
+- Editor administrativo ainda não implementado; aguardar escolha da composição e do recorte inicial.
+
+
+### Primeira amostra do mapa administrativo — 08/11/2026
+
+- Usuário escolheu composição híbrida: contexto à esquerda, propriedades à direita e barra central inferior flutuante/contextual com vidro. Aprovou acompanhamento central com bloqueio do espaço de trabalho durante análise.
+- Implementada estrutura navegável, seleção de exemplos, inspetor, camadas e demonstração de análise com confirmação, etapas, conclusão, falha e interrupção local.
+- Mapa/carregamento sob demanda, reaproveitamento do componente cartográfico e ajuste de enquadramento para duas laterais. Contextos/toolbar ainda não executam edição ou IA.
+- Verificação e limites em [Mapa administrativo](MAPA_ADMINISTRATIVO.md). Aguardar avaliação da amostra antes de implementar edição local, território/arquivos e integração.
+
+
+### Revisão do levantamento — camadas e setores IBGE — 08/11/2026
+
+- Pedido do usuário: priorizar gerenciador de camadas/resultados e segmentação territorial do Censo 2022; estudar modos Detalhado/Compacto nos mapas.
+- Inspeção estática confirmou coleção/ativa no protótipo, camadas v2 relacionadas, importação/exportação, diagnóstico e malha local de 499 setores urbanos. Nenhuma UI foi alterada nesta rodada.
+- Lista de lacunas, distinções de dados e ordem proposta em [Levantamento de camadas e território](LEVANTAMENTO_CAMADAS_E_TERRITORIO.md). Validar a nova composição antes da implementação.
+
+
+### Gerenciador de camadas e seleção IBGE — 08/11/2026
+
+Usuário autorizou seguir o levantamento. Construídos camadas ativas/visíveis independentes, múltipla exibição, busca/filtros/paginação, enquadramento e propriedades, em uma composição compacta única com painéis flutuantes (o modo detalhado foi removido após avaliação). A malha oficial local de 499 setores urbanos foi incorporada sem alterações; seleção inicial por clique/código, resumo da área declarada e enquadramento disponíveis. Sem backend, persistência ou publicação. Verificações e próximos passos em [Mapa administrativo](MAPA_ADMINISTRATIVO.md).

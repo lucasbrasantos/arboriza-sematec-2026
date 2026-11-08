@@ -1,8 +1,14 @@
-# Administração — primeira amostra para validação
+# Administração — portal, mapa de produção e acervo
 
 ## Situação em 07/11/2026
 
-O usuário aprovou o refinamento do mapa público, escolheu a organização por **área de trabalho, com etapas dentro de cada área**, e autorizou uma primeira amostra pequena: estrutura, lista e abertura da área. A amostra está implementada em `/admin` e aguarda avaliação visual e de navegação antes dos formulários. `/login` continua como placeholder; não há autenticação ou proteção real de rotas.
+A organização foi revisada com o usuário: entrada em `/admin` com dois cards grandes, **Mapa administrativo** (`/admin/mapa`) e **Análises e importações** (`/admin/acervo`). O acervo anterior foi adaptado para registros individuais, com nome, prévia, origem, abrangência e abertura por `?registro=`. O espaço do mapa já apresenta a primeira amostra navegável, contextos, propriedades e acompanhamento demonstrativo; edição, seleção territorial e processamento ainda serão implementados. Consulte [Mapa administrativo](MAPA_ADMINISTRATIVO.md). `/login` possui interface demonstrativa de acesso da equipe; detalhes em [Login](LOGIN.md).
+
+Acesso futuro exclusivo da equipe, com usuários cadastrados internamente, sem cadastro público. Cada análise/importação gera um registro próprio. Duas análises de X não ficam publicadas simultaneamente; X e X + Y podem coexistir como publicações distintas. A verificação de abrangências e os conflitos de publicação serão definidos no backend. Nenhuma publicação real ocorre nesta amostra.
+
+A etapa permanece somente no frontend. SQLite é uma opção proposta para a futura versão local, sem instalação, esquema ou backend criados. Credenciais, sessão, autorização e cadastro interno de usuários dependem da integração posterior.
+
+Os três registros fictícios exemplificam X, outra análise de X e X + Y. A imagem e as contagens da combinação são demonstrativas, sem delimitação territorial calculada. Os detalhes das etapas permanecem orientativos. O registro abaixo descreve a primeira amostra anterior à revisão do portal; esta seção prevalece para rotas e organização atuais.
 
 ## O que já está definido
 
@@ -18,7 +24,7 @@ O usuário aprovou o refinamento do mapa público, escolheu a organização por 
 | Referência | O que oferece hoje | Consequência para esta etapa |
 |---|---|---|
 | `app/frontend/src/features/admin/AdminPage.tsx`, `admin-data.ts` e `admin.css` | Lista de três áreas fictícias, busca/filtro, abertura e resumo, com etapas orientativas. | Primeira amostra disponível; formulários e operações ainda serão construídos após validação. |
-| `app/frontend/src/features/auth/LoginPage.tsx` | Placeholder de Login. | Não há sessão ou proteção real de rotas. |
+| `app/frontend/src/features/auth/LoginPage.tsx` | Formulário demonstrativo de acesso da equipe. | Não há sessão ou proteção real de rotas. |
 | `prototipo-01/frontend/index.html` e módulos em `js/` | Recortes e seleção territorial; perfis/corte de score; acompanhamento de análise; importação/exportação GeoJSON; ferramentas de pontos e camadas com armazenamento no navegador. | Reaproveitar conceitos e estudar o comportamento, preservando o protótipo e sem copiar a manipulação de DOM para React. |
 | `prototipo-01/backend/api.py` | Rotas de recortes, análises assíncronas/status/GeoJSON e operações territoriais. | Contrato é referência para a futura integração; não equivale a um backend administrativo com autenticação, revisão e publicação. |
 
@@ -62,3 +68,8 @@ Não há API, persistência ou sessão nesta amostra. Login e proteção efetiva
 ## Decisões seguintes
 
 Validar a composição concreta, navegação e estados desta amostra. Após essa aprovação, definir por partes os formulários de análise/importação, a interação de revisão no mapa e a conferência de publicação. Formatos aceitos, campos obrigatórios, critérios, persistência e permissões continuam abertos.
+
+
+## Verificação da revisão do portal
+
+Lint e build com TypeScript estrito aprovados. Conferidos no Chromium: dois acessos do portal, busca por abrangência no acervo, abertura/recarregamento do registro e retorno ao portal. Captura desktop em `output/site-react-portal/desktop.png` na pasta Sematec. A leitura de layout móvel foi feita com viewport 375 × 812, mas a captura móvel falhou na ferramenta; a revisão visual móvel desta revisão permanece pendente. Viewport restaurado. Nenhum login real, processamento, persistência ou publicação foram testados.
