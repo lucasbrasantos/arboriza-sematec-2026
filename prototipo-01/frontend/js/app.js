@@ -4,6 +4,7 @@ import { createLayers, confirmAction } from './layers.js';
 import { connectAnalysis } from './analysis.js';
 import { createAnalysisVisual } from './analysis-visual.js';
 import { connectTerritory } from './territory.js';
+import { createCrownOverlay, crownKinds, livingCrowns, pairCrowns } from './crowns.js';
 
 const $ = id => document.getElementById(id);
 const message = (text, error = false) => {
@@ -24,6 +25,7 @@ function start() {
 		$('map').setAttribute('aria-busy', String(loading));
 	}, () => message('Alguns blocos não carregaram. Verifique a conexão ou troque o mapa de fundo.', true));
 	const container = $('map');
+	$('crown-legend').open = container.clientWidth > 640;
 	const circles = new Map();
 	const pointPopup = L.popup({ className: 'point-info', autoPan: false, closeOnClick: false, maxWidth: 280 });
 	const coordinateButton = $('mouse-coordinates');
@@ -38,6 +40,16 @@ function start() {
 		listLimit = 50; render();
 	}, message);
 	const current = store.current;
+	let shownLayer;
+	const crownOverlay = createCrownOverlay(map, (id, additive) => {
+		if (territory?.active) return;
+		const point = current().points.find(p => p.feature.properties.copa_id === id);
+		if (point) {
+			cancelGesture(); tool = 'select'; container.dataset.tool = tool;
+			document.querySelectorAll('button[data-tool]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.tool === tool)));
+			togglePoint(point.key, additive);
+		}
+	});
 	const latLng = point => L.latLng(point.feature.geometry.coordinates[1], point.feature.geometry.coordinates[0]);
 
 	function changed(text) {
@@ -58,15 +70,22 @@ function start() {
 
 	function selection() {
 		const layer = current();
+		const byKey = new Map(layer.points.map(point => [point.key, point]));
 		circles.forEach((circle, key) => circle.setStyle({
 			radius: layer.selected.has(key) ? 7 : 5.5,
-			fillColor: layer.selected.has(key) ? '#1971c2' : '#23734a',
+			fillColor: layer.selected.has(key) ? '#1971c2' : crownKinds[byKey.get(key)?.feature.properties.tipo]?.color || '#23734a',
 			color: '#ffffff', weight: layer.selected.has(key) ? 3 : 2, fillOpacity: 1,
 		}));
 		$('selection-count').textContent = `${layer.selected.size} selecionados`;
 		$('delete-points').disabled = !layer.selected.size;
 		$('undo').disabled = !layer.past.length;
 		$('redo').disabled = !layer.future.length;
+		crownOverlay.select(new Set(layer.points.filter(p => layer.selected.has(p.key)).map(p => p.feature.properties.copa_id).filter(Boolean)));
+		document.querySelectorAll('[data-tool="move"], [data-tool="add"]').forEach(button => {
+			button.disabled = Boolean(layer.linkedCrowns);
+			button.title = layer.linkedCrowns ? 'Modelo v2: ponto e copa têm posição fixa. Você pode excluir o par.'
+				: button.dataset.tool === 'move' ? 'Mover seleção (M)' : 'Adicionar árvore (P)';
+		});
 		$('undo').title = `Desfazer${layer.past.length ? ': ' + layer.past.at(-1).label : ''} (Ctrl+Z)`;
 		$('redo').title = `Refazer${layer.future.length ? ': ' + layer.future.at(-1).label : ''} (Ctrl+Y)`;
 		$('select-all').disabled = !layer.points.length;
@@ -76,7 +95,7 @@ function start() {
 			input.checked = layer.selected.has(input.value);
 			input.closest('li').classList.toggle('selected', input.checked);
 		});
-		if (tool === 'select' && layer.selected.size === 1 && $('show-points').checked) {
+		if (tool === 'select' && layer.selected.size === 1 && ($('show-points').checked || ($('show-crowns').checked && layer.crowns))) {
 			const point = layer.points.find(p => layer.selected.has(p.key));
 			pointPopup.setLatLng(latLng(point)).setContent(pointInfo(point)).openOn(map);
 		} else map.closePopup(pointPopup);
@@ -93,6 +112,8 @@ function start() {
 		if (feature.properties.copa_id) {
 			const kinds = { copa_individual: 'Copa individual candidata', grupo_de_copas: 'Grupo de copas (não equivale a uma árvore)', complemento_pendente: 'Complemento Cambridge pendente' };
 			details.textContent += `\nTipo: ${kinds[feature.properties.tipo] || feature.properties.tipo}\nCopa vinculada: ${feature.properties.copa_id}`;
+			if (Number.isFinite(feature.properties.area_copa_m2)) details.textContent += `\nÁrea da copa: ${feature.properties.area_copa_m2.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} m²`;
+			details.textContent += '\nO ponto representa a copa, não a posição exata do tronco.';
 		}
 		if (Number.isFinite(feature.properties.score)) details.textContent += `\nScore: ${feature.properties.score.toFixed(3)}`;
 		const actions = document.createElement('div'); actions.className = 'row';
@@ -101,6 +122,11 @@ function start() {
 			const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
 			button.onclick = () => copyText(text, label);
 			actions.append(button);
+		}
+		if (feature.properties.copa_id) {
+			const removePair = document.createElement('button'); removePair.type = 'button';
+			removePair.className = 'danger'; removePair.textContent = 'Excluir ponto e copa';
+			removePair.onclick = remove; actions.append(removePair);
 		}
 		box.append(heading, details, actions); return box;
 	}
@@ -154,9 +180,26 @@ function start() {
 
 	function render() {
 		const layer = current();
+		if (shownLayer !== layer.id) {
+			shownLayer = layer.id;
+			$('show-crowns').checked = false;
+			if (layer.linkedCrowns) { tool = 'select'; $('show-points').checked = true; markers.addTo(map); }
+		}
+		void store.loadCrowns(layer);
+		$('crown-controls').hidden = !layer.linkedCrowns;
+		$('point-tools-title').textContent = layer.linkedCrowns ? 'Revisar pontos e copas' : 'Pontos de árvores';
+		$('show-crowns').disabled = !layer.crowns;
+		$('crown-load-status').textContent = layer.crownsLoading ? 'Carregando copas vinculadas…'
+			: layer.crownsError || (layer.crowns ? `${layer.points.length} pares nesta revisão. Excluir remove ponto e copa; Desfazer restaura ambos.` : 'Esta camada não possui copas disponíveis.');
+		$('crown-retry').hidden = !layer.crownsError || Boolean(layer.crowns);
+		$('crown-legend').hidden = !layer.linkedCrowns || Boolean(territory?.active);
+		$('crown-mode-label').textContent = $('show-crowns').checked ? 'Copas e pontos vinculados' : 'Pontos do modelo v2';
+		crownOverlay.render(layer, $('show-crowns').checked && !territory?.active);
+		container.dataset.tool = tool;
+		document.querySelectorAll('button[data-tool]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.tool === tool)));
 		markers.clearLayers(); circles.clear();
 		layer.points.forEach(point => {
-			circles.set(point.key, L.circleMarker(latLng(point), { interactive: false }).addTo(markers));
+			circles.set(point.key, L.circleMarker(latLng(point), { interactive: false, pane: 'crown-points' }).addTo(markers));
 		});
 		updateHeat();
 		const bounds = area.getBounds();
@@ -191,6 +234,9 @@ function start() {
 	}
 
 	function setTool(next) {
+		if (current().linkedCrowns && ['move', 'add'].includes(next)) {
+			message('No modelo v2, ponto e copa têm posição fixa. Selecione para excluir o par ou use uma camada manual.', true); return;
+		}
 		if (territory?.active) territory.exit();
 		cancelGesture(); tool = next; ignoreClickUntil = 0;
 		if (tool !== 'select') map.closePopup(pointPopup);
@@ -199,7 +245,9 @@ function start() {
 			if (button.tagName === 'BUTTON') button.setAttribute('aria-pressed', String(button.dataset.tool === tool));
 		});
 		$('show-points').checked = true; markers.addTo(map);
-		message({ select: 'Clique para selecionar. Ctrl/Shift combina pontos; arraste a seleção para mover.', move: 'Arraste de qualquer lugar do mapa para mover a seleção. V volta a selecionar e navegar.', add: 'Clique dentro da área para adicionar uma árvore. Esc volta à seleção.', box: 'Arraste um retângulo para selecionar. Ctrl/Shift mantém a seleção anterior.' }[tool]);
+		message(current().linkedCrowns && tool === 'select'
+			? 'Selecione um ponto ou copa. Delete exclui o par; Ctrl+Z desfaz. As posições são fixas.'
+			: { select: 'Clique para selecionar. Ctrl/Shift combina pontos; arraste a seleção para mover.', move: 'Arraste de qualquer lugar do mapa para mover a seleção. V volta a selecionar e navegar.', add: 'Clique dentro da área para adicionar uma árvore. Esc volta à seleção.', box: 'Arraste um retângulo para selecionar. Ctrl/Shift mantém a seleção anterior.' }[tool]);
 	}
 
 	function hitPoint(position) {
@@ -224,6 +272,9 @@ function start() {
 		if (event.button !== 0 || !event.isPrimary || event.target.closest('.leaflet-control, .leaflet-popup') || gesture) return;
 		const start = map.mouseEventToContainerPoint(event);
 		const point = hitPoint(start);
+		if (current().linkedCrowns && tool === 'select' && point) {
+			return;
+		}
 		if (tool === 'add' || (tool === 'select' && !point && !event.shiftKey)) return;
 		const additive = event.ctrlKey || event.metaKey || event.shiftKey;
 		if (tool === 'move' && !current().selected.size) {
@@ -282,6 +333,10 @@ function start() {
 	map.on('click', event => {
 		if (territory?.active) return;
 		if (performance.now() < ignoreClickUntil) return;
+		if (current().linkedCrowns && tool === 'select') {
+			const point = hitPoint(map.latLngToContainerPoint(event.latlng));
+			if (point) { togglePoint(point.key, event.originalEvent.ctrlKey || event.originalEvent.metaKey || event.originalEvent.shiftKey); return; }
+		}
 		if (tool === 'add') {
 			if (!area.getBounds().contains(event.latlng)) return message('Adicione dentro da área delimitada ou ajuste a área de estudo.', true);
 			if (current().points.length >= 10000) return message('Esta camada atingiu o limite de 10.000 pontos do protótipo.', true);
@@ -300,7 +355,10 @@ function start() {
 	coordinateButton.onclick = () => copyText(`${$('mouse-lat').textContent}, ${$('mouse-lng').textContent}`, 'Coordenadas do cursor');
 
 	const undo = redo => { cancelGesture(); if (current().history(redo)) changed(redo ? 'Ação refeita.' : 'Ação desfeita.'); };
-	const remove = () => { const count = current().selected.size; if (count) { current().remove(); changed(`${count} pontos apagados. Ctrl+Z restaura a seleção.`); } };
+	const remove = () => { const count = current().selected.size; if (count) {
+		const linked = current().linkedCrowns;
+		current().remove(); changed(`${count} ${linked ? (count === 1 ? 'par de ponto e copa excluído desta revisão' : 'pares de ponto e copa excluídos desta revisão') : 'pontos apagados'}. Ctrl+Z restaura a seleção.`);
+	} };
 	document.querySelectorAll('button[data-tool]').forEach(button => button.onclick = () => setTool(button.dataset.tool));
 	$('delete-points').onclick = remove;
 	$('undo').onclick = () => undo(false); $('redo').onclick = () => undo(true);
@@ -355,8 +413,12 @@ function start() {
 	});
 	$('show-points').onchange = event => {
 		event.target.checked ? markers.addTo(map) : map.removeLayer(markers);
+		if (current().linkedCrowns) $('crown-mode-label').textContent = $('show-crowns').checked
+			? (event.target.checked ? 'Copas e pontos vinculados' : 'Copas do modelo v2') : 'Pontos do modelo v2';
 		selection();
 	};
+	$('show-crowns').onchange = () => { render(); };
+	$('crown-retry').onclick = () => { void store.loadCrowns(current(), true); render(); };
 	$('show-density').disabled = !heat;
 	$('show-density').onchange = event => {
 		if (event.target.checked) { heat.addTo(map); updateHeat(); }
@@ -365,11 +427,13 @@ function start() {
 	$('import').onchange = async event => {
 		for (const file of event.target.files) {
 			try {
-				if (file.size > 5_000_000) throw new Error('Use arquivos de até 5 MB.');
+				if (file.size > 50_000_000) throw new Error('Use arquivos de até 50 MB para camadas com copas.');
 				const data = JSON.parse(await file.text()), features = readPoints(data);
+				if (!data.arboriza?.copas && file.size > 5_000_000) throw new Error('Use arquivos de até 5 MB para camadas somente de pontos.');
+				const crowns = data.arboriza?.copas ? pairCrowns(data.arboriza.copas, features) : undefined;
 				listLimit = 50; setTool('select');
 				const studyArea = readStudyArea(data.arboriza?.area);
-				const saved = store.add(file.name, features, { studyArea });
+				const saved = store.add(file.name, features, { studyArea, crowns, modelVersion: data.arboriza?.versao_modelo });
 				if (saved) message(`${features.length} pontos importados. Alterne a camada para comparar.`);
 			} catch (error) { message(`Não foi possível importar ${file.name}. ${error.message}`, true); }
 		}
@@ -381,7 +445,9 @@ function start() {
 		const now = new Date(), pad = value => String(value).padStart(2, '0');
 		const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 		const time = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
-		const data = { ...current().geojson(), arboriza: { area: context } };
+		if (current().linkedCrowns && !current().crowns) return message('Carregue as copas antes de exportar para preservar os vínculos do modelo v2.', true);
+		const data = { ...current().geojson(), arboriza: { area: context,
+			...(current().crowns ? { versao_modelo: 2, copas: livingCrowns(current()), revisao_local: true } : {}) } };
 		const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/geo+json' }));
 		const link = document.createElement('a'); link.href = url; link.download = `arboriza-pontos_${recorte}_${date}_${time}.geojson`; link.click();
 		setTimeout(() => URL.revokeObjectURL(url), 1000); message('Camada inteira exportada em GeoJSON.');
@@ -428,10 +494,12 @@ function start() {
 			if (map.hasLayer(area)) area.remove();
 			$('point-tools').hidden = true; $('point-tools').disabled = true;
 			$('territory-tools').hidden = false; $('territory-tools').disabled = false;
+			$('crown-legend').hidden = true; crownOverlay.render(current(), false);
 		} else {
 			area.addTo(map); $('point-tools').hidden = false; $('point-tools').disabled = false;
 			$('territory-tools').hidden = true; $('territory-tools').disabled = true;
 			setTool('select');
+			render();
 		}
 		analysis.refresh();
 	} });

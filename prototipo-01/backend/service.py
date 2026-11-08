@@ -26,7 +26,7 @@ PROFILES = [
      "descricao": "Mesmo modelo, janelas e parâmetros de Controle · DataGEO direto, lendo somente o novo acervo urbano de 25 cm, sem rede."},
     {"id": "multiescala", "nome": "Multiescala · experimental",
      "descricao": "Combina janelas de 200 e 100 m. Pode encontrar mais copas e gerar duplicações."},
-    {"id": "fusao", "nome": "Restor + Cambridge · experimental",
+    {"id": "fusao", "nome": "Modelo v2 · Restor + Cambridge · experimental",
      "descricao": "Copas e pontos vinculados; grupos e complementos separados. Restor em 0,50; este corte ajusta Cambridge. Usa somente imagens locais a 25 cm."},
 ]
 
@@ -38,10 +38,21 @@ class AnalysisService:
 
     def run_fusion(self, geometry, score, folder, progress, sectors=None, paths=None):
         from .fusion_engine import FusionModels, LocalImages, run_fusion
+        from .detector import ROOT
+        if paths is None:
+            paths = sorted((ROOT/'data/ortofotos/acervo-urbano-25cm').glob('*.tif'))
+        images = LocalImages(paths)
+        if not images.sources:
+            raise ValueError('O modelo v2 precisa do acervo local a 25 cm. Confira os blocos da captura urbana.')
         if self.fusion is None:
             progress('Conferindo pesos e carregando Restor + Cambridge na GPU')
             self.fusion = FusionModels()
-        return run_fusion(self.fusion, geometry, folder, score, progress, LocalImages(paths), sectors)
+        result = run_fusion(self.fusion, geometry, folder, score, progress, images, sectors)
+        result.update(fonte_imagens='acervo_local', versao_modelo=2,
+                      indexacao_acervo_s=images.index_seconds,
+                      metadados_acervo_atualizados=images.metadata_opens)
+        write_json(folder/'resumo.json', result)
+        return result
 
     def run_fusion_sectors(self, territory, ids, score, folder, progress):
         from shapely import transform, union_all
@@ -111,7 +122,10 @@ class AnalysisService:
             path = RECORTES[recorte]
             selected = recorte_footprint(path)
             geometry = transform(selected, Transformer.from_crs(4326, 31982, always_xy=True).transform, interleaved=False)
-            return self.run_fusion(geometry, score, folder, progress, paths=[path])
+            result = self.run_fusion(geometry, score, folder, progress)
+            result.update(recorte=recorte, tipo_area='recorte')
+            write_json(folder/'resumo.json', result)
+            return result
         loaded_now = self.detector is None
         load_started = perf_counter()
         if loaded_now:

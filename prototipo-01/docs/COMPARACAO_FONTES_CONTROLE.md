@@ -30,7 +30,7 @@ O erro `Acervo local incompleto na janela restor/5814/79734` foi reproduzido com
 
 A solução densifica a borda geográfica antes da reprojeção, em passos de no máximo 0,00001 grau. Isso aproxima a curva projetada com precisão suficiente para a grade de 25 cm. Não foi adotada uma tolerância cega de pixels nem desativada a checagem de validade. Uma falha real na região necessária continua interrompendo a análise.
 
-A fusão do recorte Centro continua usando o raster original desse recorte, agora com o contorno corrigido. A fusão por setores continua consultando o acervo e as demais fontes locais existentes. O novo Controle Local lê explicitamente só o acervo recém-baixado.
+Naquela etapa, a fusão do Centro ainda usava os pixels do raster original. Na etapa atual do modelo v2, recortes e setores usam exclusivamente o acervo urbano, conservando o contorno corrigido. Consulte [REVISAO_COPAS_V2.md](REVISAO_COPAS_V2.md). Os Controles mantêm as fontes descritas nesta comparação.
 
 ## API e implementação
 

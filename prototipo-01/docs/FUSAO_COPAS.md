@@ -1,4 +1,4 @@
-# Perfil experimental Restor + Cambridge
+# Modelo v2 · Restor + Cambridge
 
 ## Decisões aprovadas
 
@@ -11,11 +11,11 @@ O processamento está no laboratório `prototipo-01`, onde já existe a API de a
 
 ## Usar
 
-Reinicie o servidor local de análise se ele já estiver aberto, recarregue a interface do protótipo e escolha **Restor + Cambridge · experimental** em Perfil de análise. Funciona com os recortes locais Centro/Centro-norte e com setores que estejam cobertos pelas imagens locais disponíveis.
+Reinicie o servidor local de análise se ele já estiver aberto, recarregue a interface do protótipo e escolha **Modelo v2 · Restor + Cambridge · experimental** em Perfil de análise. Funciona com os recortes locais Centro/Centro-norte e com setores que estejam cobertos pelas imagens locais disponíveis.
 
 A interface gera camadas separadas de pontos individuais, grupos e complementos pendentes, sem trocar automaticamente a camada ativa pelos grupos/complementos. A identidade de uma camada agora inclui a análise e sua finalidade; várias camadas da mesma análise permanecem distintas após recarregar o navegador. A ficha de cada ponto identifica seu tipo e o ID da copa vinculada.
 
-As máscaras são exportadas e acessíveis pela API; ainda não há uma nova camada visual de polígonos no mapa do protótipo. A revisão conjunta de pontos/polígonos e a integração com o app React são etapas seguintes a validar.
+As máscaras podem ser exibidas no mapa. A revisão permite excluir ponto e copa juntos, com desfazer/refazer, mantendo as posições fixas. O estado inicial mostra apenas pontos. Consulte [REVISAO_COPAS_V2.md](REVISAO_COPAS_V2.md) para persistência, exportação, acervo e testes desta etapa. A integração com o React continua separada.
 
 Comando alternativo, dentro de `prototipo-01`:
 
@@ -45,7 +45,7 @@ Restor usa janelas de 512 px (128 m), interpolação bilinear de entrada de 2,5�
 
 Correção posterior do Centro: o contorno geográfico dos recortes é densificado antes de projetar para UTM. Isso corrige a divergência de 1–2 pixels na borda do raster original sem relaxar a validação. Os três Controles e o teste de fonte local/DataGEO estão descritos em [COMPARACAO_FONTES_CONTROLE.md](COMPARACAO_FONTES_CONTROLE.md).
 
-A fonte local consulta TIFFs finalizados do novo acervo urbano, os recortes locais existentes e o cache WMS já adquirido. Arquivos `.part` da captura em andamento não são usados. Um índice espacial procura fontes que cruzem a janela solicitada. Dados com resolução estimada acima de 27 cm são excluídos desta entrada, evitando usar o JPG de aproximadamente 50 cm como se fosse 25 cm.
+O v2 consulta exclusivamente os TIFFs finalizados do novo acervo urbano, tanto nos setores quanto nos recortes conhecidos. Os limites anteriores dos recortes são preservados; seus pixels antigos e o cache WMS não são usados como fontes no v2. Arquivos `.part` da captura em andamento não são usados. Um índice espacial procura fontes que cruzem a janela solicitada. Dados com resolução estimada acima de 27 cm são excluídos desta entrada, evitando usar o JPG de aproximadamente 50 cm como se fosse 25 cm.
 
 As janelas são lidas/reprojetadas em EPSG:31982 a 0,25 m/pixel. A máscara de validade da origem é preservada, e toda a parte da seleção dentro de cada janela precisa estar coberta. Se faltar imagem, a análise falha com mensagem explícita e preserva resultados anteriores. **Não há download automático no perfil experimental nesta etapa**: aguarde os blocos necessários ou selecione uma área já disponível localmente.
 

@@ -98,7 +98,7 @@ def run_fusion(models, selection, folder, score=.15, progress=print, images=None
             if not required.any():
                 continue
             if (required & ~valid).any():
-                raise ValueError(f'Acervo local incompleto na janela {engine}/{x}/{y}. Aguarde os blocos necessários ou forneça uma imagem local a 25 cm.')
+                raise ValueError(f'Acervo local incompleto na janela {engine}/{x}/{y}. Confira os blocos necessários da captura urbana a 25 cm. O v2 não baixa imagens nem usa o TIFF antigo automaticamente.')
             hasher = hashlib.sha256(rgb.tobytes()+valid.tobytes())
             hasher.update(json.dumps([1, models.identity, engine, bounds], sort_keys=True).encode())
             key = hasher.hexdigest(); cached = cache_root/(key+'.json')
@@ -119,11 +119,13 @@ def run_fusion(models, selection, folder, score=.15, progress=print, images=None
             rows.extend(local)
             timings.append({'motor': engine, 'janela': [x, y], 'cache_inferencia': cache_hit,
                             'deteccoes_brutas': count, 'limite_atingido': cap, 'fontes': sources,
+                            'cache_janela_local': getattr(images, 'last_metadata', {}).get('cache_janela_local', False),
                             'segundos': round(perf_counter()-tick, 3)})
     progress('Cruzando máscaras, recortando setores e vinculando pontos')
     result = fuse(rows, selection, folder.name, score, sectors)
     result['resumo'].update(janelas=len(timings), medicoes_janelas=timings,
                             janelas_cache_inferencia=sum(t['cache_inferencia'] for t in timings),
+                            janelas_cache_acervo=sum(t['cache_janela_local'] for t in timings),
                             janelas_no_limite_deteccoes=sum(t['limite_atingido'] for t in timings),
                             duracao_fusao_s=round(perf_counter()-started, 3), resolucao_solicitada_m=GSD,
                             fonte_imagens='local_sem_download_automatico')

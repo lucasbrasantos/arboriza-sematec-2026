@@ -64,6 +64,12 @@ test('perfil de fusão envia setores e importa indivíduos, grupos e complemento
     if (path.endsWith('/geojson')) return ok(points('individual', 'copa_individual'));
     if (path.endsWith('/pontos-grupos')) return ok(points('grupo', 'grupo_de_copas'));
     if (path.endsWith('/pontos-complementos')) return ok(points('complemento', 'complemento_pendente'));
+    if (path.endsWith('/copas')) return ok({ type: 'FeatureCollection', features:
+      [['individual','copa_individual'],['grupo','grupo_de_copas'],['complemento','complemento_pendente']].map(([id,tipo]) => ({
+        type:'Feature',id,properties:{copa_id:id,tipo},geometry:{type:'Polygon',coordinates:[[
+          [-50.441,-21.211],[-50.439,-21.211],[-50.439,-21.209],[-50.441,-21.211],
+        ]]},
+      })) });
     throw new Error(path);
   };
   el('analysis-profile').value = 'fusao'; el('analysis-profile').selectedOptions = [{ value: 'fusao', textContent: 'Fusão' }];
@@ -76,5 +82,25 @@ test('perfil de fusão envia setores e importa indivíduos, grupos e complemento
   assert.equal(sent.perfil, 'fusao'); assert.equal(layers.length, 3);
   assert.deepEqual(layers.map(l => l[1][0].properties.tipo), ['copa_individual', 'grupo_de_copas', 'complemento_pendente']);
   assert.equal(layers[1][2].analysisId, 'job'); assert.equal(layers[1][2].analysisPart, 'pontos-grupos');
+  assert.equal(layers[0][2].modelVersion, 2);
+  assert.deepEqual(layers.map(l => l[2].crowns.features.map(f => f.id)), [['individual'],['grupo'],['complemento']]);
   assert.equal(layers[1][3], false); assert.match(el('analysis-status').textContent, /1 grupos/);
+});
+
+test('resultado com vínculo de copa ausente não adiciona camadas parciais', async t => {
+  const {el}=environment(t);const layers=[];
+  globalThis.fetch=async path=>({ok:true,json:async()=>{
+    if(path==='/api/recortes')return {recortes:[],perfis:[{id:'fusao',nome:'v2'}]};
+    if(path==='/api/analises/setores')return {analysis_id:'job'};
+    if(path==='/api/analises/job')return {estado:'concluida',duracao_s:1,resumo:{perfil:'fusao'}};
+    if(path.endsWith('/geojson'))return points('sem-mascara','copa_individual');
+    if(path.endsWith('/copas'))return {type:'FeatureCollection',features:[]};
+    throw new Error(path);
+  }});
+  el('analysis-profile').value='fusao';el('analysis-profile').selectedOptions=[{value:'fusao',textContent:'v2'}];
+  el('analysis-score').value='.15';
+  connectAnalysis({revision:0,cleared:0},(...args)=>layers.push(args),()=>true,()=>{},
+    ()=>({ids:['a'],source:'hash',bounds:[[-21.22,-50.45],[-21.20,-50.43]]}));
+  await new Promise(resolve=>setImmediate(resolve));await el('analyze').onclick();
+  assert.equal(layers.length,0);assert.match(el('analysis-status').textContent,/sem copa correspondente/);
 });

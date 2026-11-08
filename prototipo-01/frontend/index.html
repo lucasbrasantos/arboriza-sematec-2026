@@ -167,6 +167,12 @@
 								accept=".geojson,.json,application/geo+json,application/json" multiple></label><button
 							id="export" type="button" disabled>Exportar camada</button></div>
 					<label class="check"><input id="show-points" type="checkbox" checked> Mostrar pontos</label>
+					<div id="crown-controls" hidden>
+						<label class="check"><input id="show-crowns" type="checkbox"> Mostrar copas do modelo v2</label>
+						<p id="crown-load-status" role="status" aria-live="polite"></p>
+						<button id="crown-retry" type="button" hidden>Recarregar copas</button>
+						<p>As posições são fixas. Selecione um ponto ou uma copa para excluir o par. A alteração vale para esta revisão; a análise original é preservada.</p>
+					</div>
 					<label class="check"><input id="show-density" type="checkbox"> Mostrar densidade</label>
 					<p>A densidade mostra concentração de pontos, não porcentagem de cobertura de copas.</p>
 					<p>Camadas salvas neste navegador. Exporte para manter uma cópia dos pontos revisados.</p>
@@ -190,6 +196,16 @@
 				</div>
 				<span id="analysis-map-time">—</span>
 			</div>
+			<details id="crown-legend" class="glass" aria-label="Legenda do modelo v2" open hidden>
+				<summary><strong id="crown-mode-label">Pontos do modelo v2</strong></summary>
+				<ul>
+					<li><span class="crown-swatch crown-individual" aria-hidden="true"></span>Copa individual candidata</li>
+					<li><span class="crown-swatch crown-group" aria-hidden="true"></span>Grupo de copas</li>
+					<li><span class="crown-swatch crown-pending" aria-hidden="true"></span>Complemento pendente</li>
+					<li><span class="crown-swatch crown-selected" aria-hidden="true"></span>Selecionado</li>
+				</ul>
+				<p>Grupos não equivalem a uma árvore. Complementos ficam fora da cobertura até revisão.</p>
+			</details>
 			<fieldset id="map-lists" disabled aria-label="Listas do mapa">
 				<legend class="sr-only">Camadas e pontos</legend>
 				<div class="list-launchers">
@@ -228,7 +244,7 @@
 			</fieldset>
 			<fieldset id="point-tools" class="glass" disabled aria-label="Ferramentas de pontos">
 				<legend class="sr-only">Edição de pontos</legend>
-				<div class="tool-heading"><strong>Pontos de árvores</strong><span id="selection-count">0
+				<div class="tool-heading"><strong id="point-tools-title">Pontos de árvores</strong><span id="selection-count">0
 						selecionados</span>
 					<div class="selection-actions"><button id="select-all" type="button"
 							title="Selecionar todos da camada (Ctrl+A)">Selecionar todos</button><button

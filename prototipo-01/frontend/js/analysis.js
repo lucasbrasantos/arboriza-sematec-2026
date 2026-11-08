@@ -1,4 +1,5 @@
 import { readPoints } from './points.js';
+import { pairCrowns, readCrowns } from './crowns.js';
 
 // Polling sequencial: só agenda a próxima consulta depois de receber a anterior.
 export function connectAnalysis(store, onLayer, isTerritoryActive = () => false, onVisualState = () => {}, getTerritory = () => null) {
@@ -53,11 +54,15 @@ export function connectAnalysis(store, onLayer, isTerritoryActive = () => false,
 					onVisualState({ mode: 'running', stage: `${context.name} · Carregando resultado…`, seconds: context.seconds });
 					const points = readPoints(await request(`/api/analises/${context.id}/geojson`));
 					const extraLayers = [];
+					let crowns;
 					if (job.resumo?.perfil === 'fusao') {
+						crowns = readCrowns(await request(`/api/analises/${context.id}/camadas/copas`));
+						pairCrowns(crowns, points);
 						for (const [part, label, count] of [['pontos-grupos', 'Grupos de copas', job.resumo.grupos_copas],
 							['pontos-complementos', 'Complementos pendentes', job.resumo.complementos_pendentes]]) {
 							if (count) extraLayers.push({ part, label, points: readPoints(await request(`/api/analises/${context.id}/camadas/${part}`)) });
 						}
+						for (const layer of extraLayers) pairCrowns(crowns, layer.points);
 					}
 					let completion;
 					// A limpeza pode acontecer durante o download; conferir antes de adicionar.
@@ -65,17 +70,18 @@ export function connectAnalysis(store, onLayer, isTerritoryActive = () => false,
 						const activate = store.revision === context.revision && $('area').value === context.area && !isTerritoryActive();
 						const name = `${context.name} · ${context.profile} · score ${context.score.toLocaleString('pt-BR')} · ${new Date(job.criada_em).toLocaleString('pt-BR')}`;
 						const metadata = { analysisId: context.id, recorte: job.recorte };
+						if (crowns) Object.assign(metadata, { modelVersion: 2, crowns: pairCrowns(crowns, points) });
 						if (context.territory) metadata.studyArea = { recorte: 'custom', bounds: context.territory.bounds };
 						onLayer(name, points, metadata, activate);
 						for (const layer of extraLayers) onLayer(`${name} · ${layer.label}`, layer.points,
-							{ ...metadata, analysisPart: layer.part }, false);
+							{ ...metadata, analysisPart: layer.part, crowns: pairCrowns(crowns, layer.points) }, false);
 						const warning = job.resumo?.janelas_no_limite_deteccoes ? ' Algumas janelas atingiram o limite de detecções; revise o resultado.' : '';
 						const cache = Number.isInteger(job.resumo?.janelas_cache)
 							? (job.resumo.fonte_imagens === 'acervo_local'
 								? ` Imagens: ${job.resumo.janelas_locais} janelas do acervo local, sem download; ${job.resumo.janelas_cache_acervo ?? 0} recortes prontos reutilizados. Inferência executada nesta análise.`
 								: ` Imagens: ${job.resumo.janelas_cache} do cache e ${job.resumo.janelas_download} baixadas${job.resumo.fonte_imagens === 'datageo_direto_sem_cache' ? ', sem usar cache' : ''}.`) : '';
 						completion = `${points.length} possíveis árvores · ${seconds} s. ${activate ? 'Camada pronta para revisão.' : 'Camada adicionada; sua edição atual foi preservada.'}${cache}${warning}`;
-						if (job.resumo?.perfil === 'fusao') completion = `${points.length} copas individuais · ${job.resumo.grupos_copas} grupos · ${job.resumo.complementos_pendentes} complementos pendentes · ${seconds} s. Pontos separados em Camadas; polígonos salvos na análise.${warning}`;
+						if (job.resumo?.perfil === 'fusao') completion = `${points.length} copas individuais · ${job.resumo.grupos_copas} grupos · ${job.resumo.complementos_pendentes} complementos pendentes · ${seconds} s. Modelo v2: pontos e copas vinculados; ative Mostrar copas para visualizar.${warning}`;
 					} else completion = `Análise concluída em ${seconds} s. O mapa foi limpo; o resultado ficou salvo no disco.`;
 					running = null; onVisualState({ mode: 'idle' }); refresh(); status(completion); return;
 				}
