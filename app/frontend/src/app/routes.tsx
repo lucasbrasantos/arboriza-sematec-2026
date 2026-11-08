@@ -1,16 +1,17 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
-import HomePage from '../features/home/HomePage'
-import AdminPage from '../features/admin/AdminPage'
-import ArchivePage from '../features/admin/ArchivePage'
-import LoginPage from '../features/auth/LoginPage'
-import AppLayout from '../shared/components/AppLayout'
+import HomePage from '../features/home/pages/HomePage'
+import AdminPage from '../features/admin/pages/AdminPage'
+import ArchivePage from '../features/admin/pages/ArchivePage'
+import LoginPage from '../features/auth/pages/LoginPage'
+import AppLayout from '../shared/components/layout/AppLayout'
 import { paths } from '../shared/config/paths'
 import NotFoundPage from './NotFoundPage'
+import RequireAuth from '../features/auth/components/RequireAuth'
 
-const StyleLabPage = lazy(() => import('../features/style-lab/StyleLabPage'))
-const AdminMapPage = lazy(() => import('../features/admin/AdminMapPage'))
-const MapPage = lazy(() => import('../features/map/MapPage'))
+const StyleLabPage = lazy(() => import('../features/style-lab/pages/StyleLabPage'))
+const AdminMapPage = lazy(() => import('../features/admin/pages/AdminMapPage'))
+const MapPage = lazy(() => import('../features/map/pages/MapPage'))
 
 export default function AppRoutes() {
 	return (
@@ -24,13 +25,12 @@ export default function AppRoutes() {
 				} />
 			))}
 			<Route element={<AppLayout mode="map" />}>
-				<Route path={paths.adminMap} element={<Suspense fallback={<p className="map-route-loading" role="status">Abrindo o mapa administrativo…</p>}><AdminMapPage /></Suspense>} />
+				<Route element={<RequireAuth />}><Route path={paths.adminMap} element={<Suspense fallback={<p className="map-route-loading" role="status">Abrindo o mapa administrativo…</p>}><AdminMapPage /></Suspense>} /></Route>
 				<Route path={paths.map} element={<Suspense fallback={<p className="map-route-loading" role="status">Preparando o mapa de Araçatuba…</p>}><MapPage /></Suspense>} />
 			</Route>
 			<Route element={<AppLayout />}>
 				<Route index element={<HomePage />} />
-				<Route path={paths.admin} element={<AdminPage />} />
-				<Route path={paths.adminArchive} element={<ArchivePage />} />
+				<Route element={<RequireAuth />}><Route path={paths.admin} element={<AdminPage />} /><Route path={paths.adminArchive} element={<ArchivePage />} /></Route>
 				<Route path={paths.login} element={<LoginPage />} />
 				<Route path="*" element={<NotFoundPage />} />
 			</Route>

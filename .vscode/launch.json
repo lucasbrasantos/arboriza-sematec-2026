@@ -10,6 +10,29 @@
       "cwd": "${workspaceFolder}/prototipo-01",
       "console": "integratedTerminal",
       "justMyCode": true
+    },
+    {
+      "name": "Arboriza: frontend",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/app/frontend/node_modules/vite/bin/vite.js",
+      "cwd": "${workspaceFolder}/app/frontend",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Arboriza: backend",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${workspaceFolder}/app/backend/.venv/Scripts/python.exe",
+      "module": "uvicorn",
+      "args": ["arboriza_api.main:app", "--host", "127.0.0.1", "--port", "8000", "--workers", "1"],
+      "cwd": "${workspaceFolder}/app/backend",
+      "console": "integratedTerminal",
+      "justMyCode": true
     }
+  ],
+  "compounds": [
+    { "name": "Arboriza: frontend + backend", "configurations": ["Arboriza: frontend", "Arboriza: backend"], "stopAll": true }
   ]
 }

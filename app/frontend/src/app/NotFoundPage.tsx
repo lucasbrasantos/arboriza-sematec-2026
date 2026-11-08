@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import PlaceholderPage from '../shared/components/PlaceholderPage'
+import PlaceholderPage from '../shared/components/feedback/PlaceholderPage'
 import { paths } from '../shared/config/paths'
 
 export default function NotFoundPage() {

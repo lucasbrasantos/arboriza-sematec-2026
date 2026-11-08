@@ -2,6 +2,12 @@
 
 Aplicação React com TypeScript estrito, Vite e React Router em modo declarativo.
 
+## Estado atual — acesso da equipe
+
+O login, a sessão e o logout usam a API real. As rotas `/admin`, `/admin/mapa` e `/admin/acervo` exigem sessão; administradores podem gerenciar usuários no portal. O token fica na sessão da aba e é validado pela API após recarregar. O servidor Vite encaminha `/api` para `127.0.0.1:8000`; o backend precisa estar em execução. `npm run preview` não configura esse proxy. O mapa administrativo e o acervo ainda usam dados demonstrativos; a integração deles será feita nas próximas etapas. As notas mais antigas abaixo descrevem a evolução da interface, não o estado atual do login.
+
+No VS Code, use **Arboriza: frontend + backend** em Executar e Depurar para iniciar os dois processos. Há também configurações individuais e a opção anterior do protótipo.
+
 ## Começar
 
 Requer Node.js 22.22 ou superior e npm. A partir desta pasta:
@@ -30,15 +36,16 @@ src/
   main.tsx
   app/                 # Composição, rotas e página não encontrada
   features/
-    home/              # Início
-    map/               # Mapa público
-    admin/             # Administração
-    auth/              # Login
+    home/              # Início: páginas e estilos
+    map/               # Mapa público: páginas, componentes, dados e estilos
+    admin/             # Administração: páginas, componentes, dados e estilos
+    auth/              # Acesso: páginas, componentes, contexto, serviços e estilos
+    style-lab/         # Laboratório visual
   shared/
-    components/        # Layout, cabeçalho e placeholder
+    components/        # Layout, mapas ilustrativos, seções e feedback
     config/            # Caminhos tipados, usados nas rotas e nos links
     styles/            # Base e tema aprovados
-    ui/                # Primitivas visuais compartilhadas
+    ui/                # Controles, superfícies, grafismos, movimento e estilos
     hooks/             # Preferência de movimento reduzido
 ```
 

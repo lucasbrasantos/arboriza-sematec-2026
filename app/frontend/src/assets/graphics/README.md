@@ -2,7 +2,7 @@
 
 `botanical-branch.png` é um recorte botânico sintético criado com a ferramenta integrada de geração de imagem em 06/11/2026 para a comparação no laboratório visual. Não é fotografia documental, espécie identificada ou árvore de Araçatuba. Arquivo RGBA, 1536 × 1024, com fundo transparente. O usuário aprovou sua combinação com vetores e a escala dos grafismos para aplicação na área Início. A imagem é utilizada pelo laboratório e pelo componente compartilhado `BotanicalCutout`, com créditos no rodapé da página.
 
-Os grafismos geométricos são SVG próprios em `shared/ui/LivingGraphic.tsx`, independentes da imagem. A preferência por movimento reduzido preserva sua composição estática.
+Os grafismos geométricos são SVG próprios em `shared/ui/graphics/LivingGraphic.tsx`, independentes da imagem. A preferência por movimento reduzido preserva sua composição estática.
 
 Mel `#E9B949` é o destaque predominante aprovado; Coral `#EE9C82` e Azul-céu `#91BFE0` são complementos pontuais. Esses tokens decorativos não substituem as cores de ações, estados ou diagnóstico do mapa.
 

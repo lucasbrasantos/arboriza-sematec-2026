@@ -16,6 +16,7 @@ users_router = APIRouter(prefix='/api/users', tags=['Usuários'])
 bearer = HTTPBearer(auto_error=False)
 ITERATIONS = 600_000
 SESSION_SECONDS = 8 * 60 * 60
+LOGIN_FAILURE_WINDOW_SECONDS = 5
 
 
 def hash_password(password: str) -> str:
@@ -73,12 +74,12 @@ def login(body: Credentials):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         attempt = db.execute('SELECT failures, last_failure FROM login_attempts WHERE identity=?', (identity,)).fetchone()
-        if attempt and attempt['failures'] >= 5 and timestamp - attempt['last_failure'] < 300:
-            raise HTTPException(429, 'Muitas tentativas. Aguarde cinco minutos.')
+        if attempt and attempt['failures'] >= 5 and timestamp - attempt['last_failure'] < LOGIN_FAILURE_WINDOW_SECONDS:
+            raise HTTPException(429, f'Muitas tentativas. Aguarde {LOGIN_FAILURE_WINDOW_SECONDS} segundos.')
         user = db.execute('SELECT * FROM users WHERE username=?', (body.username.strip(),)).fetchone()
         valid = bool(user and user['active'] and verify_password(body.password, user['password_hash']))
         if not valid:
-            failures = (attempt['failures'] if attempt and timestamp - attempt['last_failure'] < 300 else 0) + 1
+            failures = (attempt['failures'] if attempt and timestamp - attempt['last_failure'] < LOGIN_FAILURE_WINDOW_SECONDS else 0) + 1
             db.execute('INSERT OR REPLACE INTO login_attempts VALUES(?,?,?)', (identity, failures, timestamp))
         else:
             db.execute('DELETE FROM login_attempts WHERE identity=?', (identity,))

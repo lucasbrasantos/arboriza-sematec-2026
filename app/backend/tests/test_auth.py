@@ -85,9 +85,15 @@ class AuthTest(unittest.TestCase):
                                           json={'active': False}).status_code, 409)
 
     def test_login_limits_repeated_failures(self):
-        for _ in range(5):
-            self.assertEqual(self.login('principal', 'errada').status_code, 401)
-        self.assertEqual(self.login('principal', 'senha-segura-123').status_code, 429)
+        with patch('arboriza_api.access.auth.time.time', return_value=1000):
+            for _ in range(5):
+                self.assertEqual(self.login('principal', 'errada').status_code, 401)
+        with patch('arboriza_api.access.auth.time.time', return_value=1004):
+            blocked = self.login('principal', 'senha-segura-123')
+            self.assertEqual(blocked.status_code, 429)
+            self.assertIn('5 segundos', blocked.json()['detail'])
+        with patch('arboriza_api.access.auth.time.time', return_value=1005):
+            self.assertEqual(self.login('principal', 'senha-segura-123').status_code, 200)
 
     def test_another_instance_cannot_start_on_same_database(self):
         with TestClient(create_app()):
