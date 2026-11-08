@@ -38,9 +38,9 @@ class AnalysisService:
 
     def run_fusion(self, geometry, score, folder, progress, sectors=None, paths=None):
         from .fusion_engine import FusionModels, LocalImages, run_fusion
-        from .detector import ROOT
+        from .detector import DATA_ROOT
         if paths is None:
-            paths = sorted((ROOT/'data/ortofotos/acervo-urbano-25cm').glob('*.tif'))
+            paths = sorted((DATA_ROOT/'ortofotos/acervo-urbano-25cm').glob('*.tif'))
         images = LocalImages(paths)
         if not images.sources:
             raise ValueError('O modelo v2 precisa do acervo local a 25 cm. Confira os blocos da captura urbana.')

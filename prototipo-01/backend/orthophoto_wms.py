@@ -13,11 +13,11 @@ import rasterio
 from PIL import Image, UnidentifiedImageError
 from rasterio.transform import from_bounds
 
-from .detector import ROOT
+from .detector import DATA_ROOT
 
 WMS_URL = 'https://datageo.ambiente.sp.gov.br/geoimage/datageoimg/ows'
 LAYER = 'ORTOFOTOS_SP_2023_2024'
-TEMP_ROOT = ROOT / 'data' / 'ortofotos' / 'temporario'
+TEMP_ROOT = DATA_ROOT / 'ortofotos' / 'temporario'
 MAX_IMAGE_BYTES = 20 * 1024 * 1024
 MAX_DIMENSION = 2048
 

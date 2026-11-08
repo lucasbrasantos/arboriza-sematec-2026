@@ -78,3 +78,12 @@ node --test tests/test-points.mjs tests/test-areas.mjs tests/test-territory-anal
 .\.envs\detectree2\Scripts\python.exe -m unittest tests.test_analysis tests.test_cambridge tests.test_multiscale tests.test_api
 .\.envs\detectree2\Scripts\python.exe -m unittest tests.test_territory
 ```
+# Localização compartilhada dos dados
+
+Desde a migração para o backend do produto, o caminho padrão de ortofotos, malha,
+ruas e caches WMS é `../app/backend/data`. O protótipo e a API usam essa mesma
+localização. As cópias anteriores em `prototipo-01/data` ainda estão preservadas
+para conferência; referências a elas na documentação histórica descrevem o local
+antigo. `ARBORIZA_DATA_DIR` permite escolher outro diretório de dados antes da
+inicialização. O protótipo mantém seus próprios modelos e ambiente Python; o
+backend principal possui cópias independentes.

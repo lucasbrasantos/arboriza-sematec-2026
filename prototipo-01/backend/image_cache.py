@@ -9,9 +9,9 @@ from uuid import uuid4
 
 import rasterio
 
-from .detector import ROOT
+from .detector import DATA_ROOT
 
-CACHE_DIR = ROOT / 'data' / 'ortofotos' / 'cache-blocos'
+CACHE_DIR = DATA_ROOT / 'ortofotos' / 'cache-blocos'
 DEFAULT_LIMIT = 10 * 1024**3
 RESERVE = 1024**3
 

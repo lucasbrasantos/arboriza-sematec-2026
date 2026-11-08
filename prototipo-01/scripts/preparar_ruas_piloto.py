@@ -12,12 +12,12 @@ from pyproj import Transformer
 from shapely import transform
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from backend.detector import ROOT
+from backend.detector import DATA_ROOT
 from backend.territory import Territory
 
 ROAD_TYPES = {'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential',
               'living_street', 'service', 'primary_link', 'secondary_link', 'tertiary_link', 'trunk_link'}
-DESTINATION = ROOT / 'data' / 'ruas' / 'piloto-osm'
+DESTINATION = DATA_ROOT / 'ruas' / 'piloto-osm'
 
 
 def prepare(sector_id, destination=DESTINATION):

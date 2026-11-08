@@ -28,3 +28,10 @@ prototipo-01/debug/
 
 arboriza_fusao/
 arboriza_fusao.7z
+
+# Dados locais e estado operacional do backend do produto
+app/backend/data/
+app/backend/banco/
+app/backend/cache/
+app/backend/modelos/
+app/backend/resultados/

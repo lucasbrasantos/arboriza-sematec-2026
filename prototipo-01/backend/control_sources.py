@@ -3,7 +3,7 @@ from pathlib import Path
 from time import perf_counter
 
 
-from .detector import ROOT
+from .detector import DATA_ROOT
 from .orthophoto_wms import fetch_orthophoto
 
 
@@ -16,7 +16,7 @@ class LocalControlSource:
     def __init__(self, paths=None, **options):
         from .local_imagery import LocalImages
         if paths is None:
-            paths = sorted((ROOT/'data/ortofotos/acervo-urbano-25cm').glob('*.tif'))
+            paths = sorted((DATA_ROOT/'ortofotos/acervo-urbano-25cm').glob('*.tif'))
         self.images = LocalImages(paths, **options)
         if not self.images.sources:
             raise ValueError('Acervo urbano local ausente: conclua a captura de ortofotos a 25 cm.')

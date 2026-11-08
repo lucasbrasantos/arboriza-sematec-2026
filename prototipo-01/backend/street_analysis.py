@@ -10,10 +10,10 @@ from shapely import STRtree, transform, union_all
 from shapely.geometry import LineString, Point, mapping, shape
 from shapely.ops import substring
 
-from .detector import ROOT
+from .detector import DATA_ROOT
 from .street_catalog import DATABASE, load_roads
 
-ROAD_DIR = ROOT / 'data' / 'ruas' / 'piloto-osm'
+ROAD_DIR = DATA_ROOT / 'ruas' / 'piloto-osm'
 ANALYSIS_ID = re.compile(r'^\d{8}T\d{6}Z-[0-9a-f]{8}$')
 STRETCH_M = 100
 VISUAL_MARGIN_M = 20

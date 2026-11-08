@@ -6,6 +6,8 @@ from pathlib import Path
 from time import perf_counter
 
 ROOT = Path(__file__).resolve().parents[1]
+# Protótipo e API usam a mesma fonte de dados; modelos e ambientes continuam locais ao protótipo.
+DATA_ROOT = Path(os.environ.get("ARBORIZA_DATA_DIR", ROOT.parent / "app" / "backend" / "data")).resolve()
 MODEL_DIR = ROOT / ".models" / "deepforest-tree"
 MANIFEST = Path(__file__).with_name("model.json")
 MODEL_ID = "weecology/deepforest-tree"

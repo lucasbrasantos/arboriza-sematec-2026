@@ -25,9 +25,10 @@ from rasterio.transform import from_origin
 from shapely import prepare, transform, union_all
 from shapely.geometry import box, mapping, shape
 
-ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / 'data/territorial/setores-urbanos-aracatuba-ibge-2022.geojson'
-DESTINATION = ROOT / 'data/ortofotos/acervo-urbano-25cm'
+from .detector import DATA_ROOT
+
+SOURCE = DATA_ROOT / 'territorial/setores-urbanos-aracatuba-ibge-2022.geojson'
+DESTINATION = DATA_ROOT / 'ortofotos/acervo-urbano-25cm'
 WMS = 'https://datageo.ambiente.sp.gov.br/geoimage/datageoimg/ows'
 LAYER = 'ORTOFOTOS_SP_2023_2024'
 CRS = 'EPSG:31982'

@@ -67,3 +67,23 @@ A ordem pode ser ajustada após validação. Cada etapa combina frontend e backe
 ## Critérios mínimos de verificação
 
 Validar contratos e erros, acesso não autorizado, persistência após reinício, falha de processamento e leitura de resultados, importação inválida, conflito de publicação e acesso público apenas a registros publicados. Testar um fluxo completo com dados e modelo reais quando disponíveis, distinguindo funcionamento técnico de precisão do modelo. Verificar responsividade, acessibilidade e desempenho com volume representativo antes de afirmar que a solução está pronta para uso amplo.
+
+## Decisões de implementação — 08/11/2026
+
+- A primeira apresentação executará o backend, processamento e armazenamento na máquina do Lucas. O acesso externo ao frontend será feito por túnel; o desenho da integração deve disponibilizar também a API pelo mesmo endereço público, sem depender do `localhost` do visitante. A implantação comercial é uma etapa futura.
+- Haverá perfis distintos: somente administradores gerenciam usuários. Não haverá cadastro público. Um administrador geral inicial será criado para o primeiro acesso; a equipe poderá criar os demais usuários. A recuperação inicial será conduzida por um administrador.
+- Uma análise concluída permanece inicialmente na área administrativa e não entra automaticamente no acervo nem na publicação.
+- Uma pessoa autorizada envia explicitamente o resultado ao acervo. Ele entra como **não revisado**; após revisão e aprovação, é publicado e passa a estar disponível no mapa público. A revisão e a publicação devem manter a versão aprovada identificável.
+- Ao publicar o pacote B para a mesma área do pacote A, a publicação de A é desativada e B assume seu lugar. A permanece no acervo. A substituição deve ocorrer de forma atômica, e a regra precisa identificar a área pela malha e pelo conjunto normalizado de setores. A regra para áreas sem setores ainda está pendente.
+- A primeira entrega de implementação abrange as etapas 1 a 4 deste documento: base, autenticação, território e processamento real com acompanhamento e recuperação. Revisão, acervo e publicação serão entregas posteriores; sua ausência não deve ser disfarçada por dados demonstrativos apresentados como reais.
+- O diagnóstico de ruas deve ser considerado na migração dos serviços de backend, mas sua interface e o botão no site ficam para uma etapa posterior.
+- Importação externa sem área ou setores: pode ser guardada no acervo, porém não publicada até ter a abrangência informada e validada. A declaração da área, por si só, não comprova a origem ou a cobertura real dos dados. Esse fluxo exige desenho e validação próprios antes de sua implementação.
+
+### Validação futura de abrangência em importações
+
+- Preservar o arquivo original, sua procedência e os metadados disponíveis; distinguir informação contida no arquivo daquela declarada pela equipe.
+- Validar geometria, sistema de referência, coordenadas, integridade dos pontos e malha utilizada. Apresentar prévia para conferência humana da área e dos dados.
+- Cruzar espacialmente pontos e abrangência proposta, exibindo pontos fora da área e inconsistências, sem corrigir silenciosamente. Definir uma regra explícita para pontos na borda e discrepâncias toleráveis antes de implementar.
+- Confirmar setores e versão da malha quando forem usados. Uma seleção de setores não demonstra que a área inteira foi analisada nem que os pontos pertencem à mesma execução.
+- Registrar quem informou e validou a abrangência, quando e com quais evidências. Se a origem ou a área analisada não puder ser comprovada, manter essa limitação explícita e impedir publicação até que o critério de aprovação seja definido e atendido.
+- Não deduzir área efetivamente analisada pelo envelope dos pontos ou pela ausência de pontos. Casos de dados vazios, copas que cruzam limites, múltiplas áreas e resultados sobrepostos precisam de regras específicas.

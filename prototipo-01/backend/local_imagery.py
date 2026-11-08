@@ -18,7 +18,7 @@ from rasterio.windows import Window
 from shapely.geometry import box
 
 from .analysis import RECORTES
-from .detector import ROOT
+from .detector import DATA_ROOT, ROOT
 
 CRS = 'EPSG:31982'
 CACHE = ROOT / '.cache/acervo-local-v1'
@@ -34,9 +34,9 @@ class LocalImages:
     def __init__(self, paths=None, cache_root=CACHE, limit_bytes=LIMIT_BYTES):
         started = time.perf_counter()
         if paths is None:
-            paths = list((ROOT/'data/ortofotos/acervo-urbano-25cm').glob('*.tif'))
+            paths = list((DATA_ROOT/'ortofotos/acervo-urbano-25cm').glob('*.tif'))
             paths += [p for p in RECORTES.values() if p.is_file()]
-            paths += list((ROOT/'data/ortofotos/cache-wms').glob('*.tif'))
+            paths += list((DATA_ROOT/'ortofotos/cache-wms').glob('*.tif'))
         self.paths = list(dict.fromkeys(Path(p).resolve() for p in paths))
         self.cache_root = Path(cache_root)
         self.cache_root.mkdir(parents=True, exist_ok=True)

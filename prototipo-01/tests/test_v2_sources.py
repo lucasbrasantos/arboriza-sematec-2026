@@ -20,7 +20,7 @@ class V2SourcesTests(unittest.TestCase):
             output.mkdir()
             service = AnalysisService()
             service.fusion = object()
-            with patch('backend.detector.ROOT', root), patch('backend.fusion_engine.LocalImages') as reader, \
+            with patch('backend.detector.DATA_ROOT', root/'data'), patch('backend.fusion_engine.LocalImages') as reader, \
                  patch('backend.fusion_engine.run_fusion', return_value={}) as run:
                 reader.return_value.sources = [tile]
                 reader.return_value.index_seconds = .01
@@ -33,7 +33,7 @@ class V2SourcesTests(unittest.TestCase):
 
     def test_missing_archive_fails_before_loading_gpu_models(self):
         with tempfile.TemporaryDirectory() as temp:
-            with patch('backend.detector.ROOT', Path(temp)), \
+            with patch('backend.detector.DATA_ROOT', Path(temp)/'data'), \
                  patch('backend.fusion_engine.LocalImages') as reader, \
                  patch('backend.fusion_engine.FusionModels') as models:
                 reader.return_value.sources = []

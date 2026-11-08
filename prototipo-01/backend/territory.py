@@ -8,10 +8,10 @@ from shapely import STRtree, transform, union_all
 from shapely.errors import GEOSException
 from shapely.geometry import mapping, shape
 
-from .detector import ROOT
+from .detector import DATA_ROOT
 
 
-DATA = ROOT / "data" / "territorial" / "setores-urbanos-aracatuba-ibge-2022.geojson"
+DATA = DATA_ROOT / "territorial" / "setores-urbanos-aracatuba-ibge-2022.geojson"
 
 
 class Territory:

@@ -14,9 +14,9 @@ from pyproj import Transformer
 from shapely import STRtree, from_wkb, transform, union_all
 from shapely.geometry import LineString
 
-from .detector import ROOT
+from .detector import DATA_ROOT
 
-DIRECTORY = ROOT/'data/ruas/acervo-urbano-osm'
+DIRECTORY = DATA_ROOT/'ruas/acervo-urbano-osm'
 DATABASE = DIRECTORY/'ruas.sqlite3'
 ENDPOINT = 'https://overpass-api.de/api/interpreter'
 ROAD_TYPES = {'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified',
