@@ -1,0 +1,52 @@
+.sector-comparison { position: relative; height: calc(100dvh - 0px); overflow: hidden; background: #edf1e5; color: var(--ar-forest); }
+.sector-map { position:absolute; inset:0; z-index:0; }
+.sector-header { position:absolute; top:16px; left:16px; z-index:700; display:flex; align-items:center; gap:15px; padding:10px 13px; border-radius:14px; background:#fffff8; box-shadow:0 4px 24px #193e261a; }
+.sector-header img { width:100px; height:35px; object-fit:contain; }
+.sector-header > span { font-size:.8rem; border-left:1px solid #d6e0d1; padding-left:14px; }
+.sector-header button { display:flex; align-items:center; gap:7px; border:0; background:transparent; color:inherit; padding:7px; cursor:pointer; }
+.sector-panel { position:absolute; top:92px; left:16px; bottom:48px; width:292px; z-index:650; padding:21px; border-radius:16px; background:#fffff8; box-shadow:0 4px 24px #193e261a; display:flex; flex-direction:column; gap:13px; }
+.sector-panel[hidden] { display:none; }
+.sector-panel-title { display:flex; justify-content:space-between; align-items:center; }
+.sector-panel-title h2 { font-size:1.3rem; }
+.sector-panel-title button,.sector-legend-heading button { border:0; color:inherit; background:transparent; cursor:pointer; padding:5px; }
+.sector-panel p { font-size:.77rem; color:#536957; line-height:1.5; }
+.sector-selection-count { display:flex; align-items:center; gap:12px; padding:12px 0; }
+.sector-selection-count strong { font-size:2.5rem; line-height:1; letter-spacing:-.04em; }
+.sector-selection-count span { max-width:135px; font-size:.75rem; line-height:1.5; color:#536957; }
+.sector-selection-actions { display:flex; gap:8px; }
+.sector-selection-actions button { flex:1; border:1px solid #c8d8bc; background:#f1f6e9; border-radius:7px; padding:8px 5px; font:inherit; font-size:.7rem; color:inherit; cursor:pointer; }
+.sector-panel label { font-size:.74rem; font-weight:600; }
+.sector-panel input { width:100%; padding:9px 11px; border:1px solid #c8d8bc; border-radius:8px; background:white; font:inherit; font-size:.8rem; color:inherit; }
+.sector-list { overflow:auto; flex:1; min-height:60px; }
+.sector-list button { display:flex; align-items:center; gap:9px; width:100%; border:0; border-bottom:1px solid #edf1e6; background:transparent; padding:10px 3px; color:inherit; font:inherit; font-size:.7rem; cursor:pointer; text-align:left; }
+.sector-list button[aria-pressed=true] .sector-check { background:#29734c; border-color:#29734c; color:white; }
+.sector-check { display:flex; width:17px; height:17px; border:1px solid #b6c7aa; border-radius:4px; flex-shrink:0; }
+.sector-list small { margin-left:auto; color:#536957; }
+.sector-panel > a { display:flex; gap:8px; align-items:center; color:inherit; font-size:.74rem; padding-top:6px; }
+.sector-legend { position:absolute; top:16px; left:50%; transform:translateX(-50%); width:min(480px,calc(100% - 36px)); z-index:660; background:#fffff8; border-radius:16px; box-shadow:0 4px 24px #193e261a; padding:17px 22px 14px; }
+.sector-legend.has-panel { left:calc(50% + 150px); }
+.sector-legend-heading { display:flex; align-items:center; justify-content:space-between; font-size:.7rem; color:#536957; }
+.sector-legend-heading > span { display:flex; align-items:center; gap:6px; }
+.sector-metric { display:flex; align-items:center; position:relative; margin-top:3px; }
+.sector-metric select { appearance:none; width:100%; border:0; background:transparent; color:#143f2b; font:inherit; font-size:1.25rem; font-weight:650; padding:6px 25px 10px 0; cursor:pointer; }
+.sector-metric svg { position:absolute; right:0; pointer-events:none; }
+.sector-color-scale { display:flex; gap:3px; }
+.sector-color-scale > div { flex:1; min-width:0; }
+.sector-color-scale i { display:block; height:9px; }
+.sector-color-scale > div:first-child i { border-radius:4px 0 0 4px; }
+.sector-color-scale > div:last-child i { border-radius:0 4px 4px 0; }
+.sector-color-scale span { display:block; margin-top:6px; font-size:.58rem; white-space:nowrap; text-align:center; color:#435a44; }
+.sector-scale-unit { font-size:.6rem; color:#65765c; text-align:center; margin-top:4px; }
+.sector-statistics { display:grid; grid-template-columns:1.2fr 1fr 1fr; padding:15px 0 12px; gap:14px; }
+.sector-statistics > div { display:flex; flex-direction:column; gap:2px; }
+.sector-statistics strong { font-size:1.3rem; font-weight:650; line-height:1.2; }
+.sector-statistics span { font-size:.61rem; color:#536957; }
+.sector-label-controls { border-top:1px solid #e1e8d9; padding-top:11px; display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:.7rem; }
+.sector-label-controls select { padding:5px 8px; border:1px solid #cbd9bf; border-radius:7px; background:white; color:inherit; font:inherit; }
+.sector-empty,.sector-hint { font-size:.75rem; line-height:1.5; color:#536957; margin:9px 0!important; }
+.sector-source { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); z-index:650; padding:8px 13px; border-radius:9px; background:#fffff5ed; color:#436047; font-size:.62rem; text-align:center; max-width:calc(100% - 140px); }
+.sector-source span { display:block; font-size:.56rem; margin-top:1px; }
+.sector-number { background:transparent; border:0; color:#143f2b; font:600 12px 'Manrope Variable',sans-serif; text-align:center; line-height:26px; }
+.sector-number span { background:#fffff6ef; padding:3px 7px; border-radius:5px; box-shadow:0 1px 5px #173d2926; }
+@media(min-width:900px) and (max-width:1250px) { .sector-header > span {display:none;} .sector-legend {top:82px;} }
+@media(max-width:899px) { .sector-header {top:10px;left:10px;right:10px;justify-content:space-between;padding:7px 8px;gap:6px;} .sector-header > span {font-size:.7rem;} .sector-header img {width:80px;} .sector-header button span {display:none;} .sector-legend,.sector-legend.has-panel {left:50%;top:82px;width:calc(100% - 90px);padding:12px 14px;} .sector-metric select {font-size:1.05rem;} .sector-panel {top:78px;bottom:60px;left:10px;width:min(310px,calc(100% - 70px));z-index:750;} .sector-source {bottom:27px;width:calc(100% - 110px);font-size:.58rem;} .sector-statistics {gap:7px;padding:10px 0;} .sector-statistics strong {font-size:1.1rem;} .sector-statistics span {font-size:.55rem;} .sector-color-scale span {font-size:.48rem;} }

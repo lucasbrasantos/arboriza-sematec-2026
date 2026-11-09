@@ -17,6 +17,7 @@ from ..core.database import connect
 from ..engine.inference import service as engine
 from ..engine.inference.analysis import RECORTES
 from ..territory.router import get_territory
+from ..core.processing import gpu_lock
 
 router = APIRouter(prefix='/api/analises', tags=['Análises'])
 lock = Lock()
@@ -64,6 +65,11 @@ def update(ident, state, step, summary=None, error=None):
 
 
 def work(ident, request):
+    with gpu_lock():
+        _work(ident, request)
+
+
+def _work(ident, request):
     global service
     try:
         if service is None:
@@ -124,6 +130,9 @@ def start_crop(body: CropRequest, user=Depends(current_user)):
 
 def enqueue(body, user):
     with lock:
+        from ..urban_base.jobs import active
+        if active():
+            raise HTTPException(409, 'A base urbana está em processamento. Pause-a antes de iniciar outra análise.')
         if pool is None:
             raise HTTPException(503, 'Executor indisponível.')
         with connect() as db:

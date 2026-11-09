@@ -21,6 +21,8 @@ class AuthTest(unittest.TestCase):
             ('arboriza_api.core.database.DATABASE', test_dir / 'test.sqlite'),
             ('arboriza_api.main.DATABASE', test_dir / 'test.sqlite'),
             ('arboriza_api.analyses.router.RESULTS', test_dir / 'results'),
+            ('arboriza_api.core.processing.CACHE_DIR', test_dir / 'cache'),
+            ('arboriza_api.urban_base.jobs.ROOT', test_dir / 'base-urbana'),
         ):
             fixture = patch(target, value)
             fixture.start()

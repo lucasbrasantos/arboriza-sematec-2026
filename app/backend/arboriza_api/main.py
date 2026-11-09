@@ -8,6 +8,7 @@ from .access import auth
 from .streets import router as streets
 from .territory import router as territory
 from .imagery import router as imagery
+from .urban_base.router import router as urban_base
 from .core.config import DATABASE, DATA_DIR, MODELS_DIR
 from .core.database import initialize
 
@@ -39,6 +40,7 @@ def create_app() -> FastAPI:
     app.include_router(workspace.router)
     app.include_router(streets.router)
     app.include_router(imagery.router)
+    app.include_router(urban_base)
 
     @app.get("/api/health")
     def health():

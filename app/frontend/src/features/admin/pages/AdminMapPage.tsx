@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { ArrowLeft, ChevronRight, ClipboardCheck, FolderOpen, Layers, MapPin, MousePointer2, PanelLeft, PanelRight, ScanLine, X } from 'lucide-react'
 import MapCanvas from '../../map/components/MapCanvas'
+import SectorComparison from '../../map/pages/SectorComparison'
 import MapDisplayControls from '../../map/components/WorkspaceDisplayControls'
 import { areas, heatPalettes, itemPosition } from '../../map/data/map-data'
 import type { MapArea, BaseMap, Coordinate, LayerVisibility, MapItem, MapView } from '../../map/data/map-data'
@@ -50,6 +51,7 @@ const contextLabels: Record<Context, string> = { area: 'Definir território', an
 const initialGroups: Record<ResultKind, ResultGroupView> = { point: { scope: '', open: true, page: 1 }, segment: { scope: '', open: false, page: 1 } }
 
 export default function AdminMapPage() {
+  const [comparisonOpen,setComparisonOpen] = useState(false)
   const skipSessionRestore = useRef(false)
   const [workspaceReady, setWorkspaceReady] = useState(false)
   const [workspaceIssue, setWorkspaceIssue] = useState('')
@@ -277,7 +279,7 @@ export default function AdminMapPage() {
   }, [sidebarVersion, selectingSectors])
   const pointKeyHandler = useRef<(event: KeyboardEvent) => void>(() => {})
   useEffect(() => { pointKeyHandler.current = (event) => {
-    if (streetMode || sidebarVersion !== 'v2' || selectingSectors || editingBusy || !editable || !visibleIds.has(activeLayer.id) || document.querySelector('dialog[open]') || (event.target as HTMLElement | null)?.closest('input, textarea, select, [contenteditable="true"]')) return
+    if (comparisonOpen || streetMode || sidebarVersion !== 'v2' || selectingSectors || editingBusy || !editable || !visibleIds.has(activeLayer.id) || document.querySelector('dialog[open]') || (event.target as HTMLElement | null)?.closest('input, textarea, select, [contenteditable="true"]')) return
     const command = event.ctrlKey || event.metaKey
     const key = event.key.toLowerCase()
     if (command && key === 'a') { event.preventDefault(); editor.selectAll(activeLayer); return }
@@ -306,6 +308,7 @@ export default function AdminMapPage() {
     return () => { window.removeEventListener('beforeunload', warn); document.removeEventListener('click', confirmNavigation, true) }
   }, [hasEdits])
 
+  if(comparisonOpen) return <SectorComparison initialIds={[...selectedSectors]} onClose={()=>setComparisonOpen(false)} />
   return <section className="admin-editor public-map-page" data-layout-mode="compact" data-context={context} data-street-mode={streetMode} data-street-background={streetView.background} aria-labelledby="editor-title">
     <div className="editor-map" style={docked ? { left: leftOpen ? 378 : 0, right: inspectorOpen ? 310 : 0 } : undefined} role="region" aria-label="Mapa de trabalho" inert={panelsCoverMap}>
       <MapCanvas densityItems={densityItems} prototypeDensity={sidebarVersion === 'v2'} pointColors={pointColors} itemsInteractive={!selectingSectors && (sidebarVersion === 'v1' || pointTool === 'select') && !editingBusy} area={area} base={base} layers={layers} items={streetMode ? [] : items} selected={selected} selectedIds={sidebarVersion === 'v2' ? editor.selectedIds : new Set()} panToSelected={sidebarVersion === 'v1'} view={streetMode ? 'points' : view} heatColors={heatPalettes.forest.colors} leftInset={leftOpen && !compact && !docked ? sidebarVersion === 'v2' ? 370 : 342 : 0} rightInset={inspectorOpen && !compact && !docked ? sidebarVersion === 'v2' ? 330 : 300 : 0} onSelect={select} onClear={() => { if (streetMode) { setStreetSelected(null); setStreetView((current) => ({ ...current, rankedKeys: [] })); return } if (sidebarVersion === 'v2' && !selectingSectors) clearPoints(); else setSelected(null) }}>
@@ -321,6 +324,7 @@ export default function AdminMapPage() {
       <div className="editor-title"><h1 id="editor-title">Mapa administrativo</h1><span>Processamento real · dados de exemplo identificados</span></div>
       <div className="editor-version-switch" role="group" aria-label="Versão das ferramentas"><button type="button" aria-pressed={sidebarVersion === 'v1'} onClick={() => setSidebarVersion('v1')}>Atual</button><button type="button" aria-pressed={sidebarVersion === 'v2'} onClick={() => setSidebarVersion('v2')}>V2</button></div>
       {sidebarVersion === 'v2' && <button type="button" className="editor-territory-trigger" aria-pressed={selectingSectors} disabled={territoryBusy} onClick={toggleTerritoryMode}><MapPin size={16} /><span>Selecionar setores</span></button>}
+      <button type="button" className="editor-territory-trigger" disabled={selectedSectors.size<2} title="Selecione pelo menos dois setores" onClick={()=>setComparisonOpen(true)}><Layers size={16}/><span>Comparar setores</span></button>
       <nav aria-label="Navegação administrativa"><Link to={paths.admin} aria-label="Portal administrativo" title="Portal administrativo"><ArrowLeft size={16} /><span>Portal</span></Link><Link to={paths.adminArchive} aria-label="Acervo de análises" title="Acervo de análises"><FolderOpen size={16} /><span>Acervo</span></Link><Link to={paths.home}>Início</Link></nav>
     </header>
     <div className="editor-panel-triggers"><button ref={leftToggle} type="button" aria-expanded={leftOpen} aria-controls={sidebarVersion === 'v2' ? 'editor-context-panel-v2' : 'editor-context-panel'} onClick={() => { if (leftOpen) closeLeft(); else { setLeftOpen(true); if (compact) setInspectorOpen(false) } }}><PanelLeft size={18} /> Ferramentas</button><button ref={rightToggle} type="button" aria-expanded={inspectorOpen} aria-controls={sidebarVersion === 'v2' ? 'editor-results-panel-v2' : 'editor-inspector'} onClick={() => { if (inspectorOpen) closeInspector(); else { setInspectorOpen(true); if (compact) setLeftOpen(false) } }}><PanelRight size={18} /> {sidebarVersion === 'v2' ? 'Camadas e pontos' : 'Propriedades'}</button></div>

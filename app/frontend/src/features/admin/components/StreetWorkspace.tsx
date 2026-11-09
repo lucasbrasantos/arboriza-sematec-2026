@@ -28,13 +28,18 @@ export default function StreetWorkspace(props: Props) {
     if (!props.data) return
     const entries = streetEntries(props.data)
     const visible = visibleStreets(entries, props.view.category, props.view.search)
-    api.ready(props.data, streetTotals(entries)); api.background(props.view.background); api.visibility(props.view)
+    api.ready(props.data, streetTotals(entries)); api.background(props.view.background)
     const explanation = document.getElementById('street-v2-explanation')
     if (explanation) explanation.textContent = `As cores comparam ${intensityMetrics[props.view.metric].label.toLocaleLowerCase('pt-BR')}. Complementos pendentes não entram no indicador. A cobertura das máscaras é uma medida estimada separada, disponível no detalhe de cada trecho.`
     api.list(visible, props.view.category, entries.length)
     api.detail(visible.find((entry) => String(entry.feature.id) === props.selected) ?? null, Number(props.data.arboriza.distancia_m), !(props.view.rankedKeys?.length))
     if (props.selected && !visible.some((entry) => String(entry.feature.id) === props.selected)) props.onSelect(null)
   }, [props])
+  // Unrelated renders can occur between a native checkbox's click and change.
+  // Only synchronize checked state when its actual source changes.
+  useEffect(() => {
+    panel.current?.visibility({ boundary: props.view.boundary, points: props.view.points })
+  }, [props.name, props.data, props.busy, props.error, props.view.boundary, props.view.points])
   const target = document.getElementById('street-workspace-slot')
   return target ? createPortal(<><div dangerouslySetInnerHTML={{ __html: streetTemplate }} />{props.data && !props.busy && !props.error && <StreetRanking data={props.data} view={props.view} onView={props.onView} onSelect={props.onSelect} />}</>, target) : null
 }
