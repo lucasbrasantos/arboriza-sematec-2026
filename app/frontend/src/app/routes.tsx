@@ -4,6 +4,7 @@ import HomePage from '../features/home/pages/HomePage'
 import AdminPage from '../features/admin/pages/AdminPage'
 import ArchivePage from '../features/admin/pages/ArchivePage'
 import LoginPage from '../features/auth/pages/LoginPage'
+import AboutPage from '../features/about/pages/AboutPage'
 import AppLayout from '../shared/components/layout/AppLayout'
 import { paths } from '../shared/config/paths'
 import NotFoundPage from './NotFoundPage'
@@ -34,6 +35,7 @@ export default function AppRoutes() {
 				<Route index element={<HomePage />} />
 				<Route element={<RequireAuth />}><Route path={paths.admin} element={<AdminPage />} /><Route path={paths.adminArchive} element={<ArchivePage />} /></Route>
 				<Route path={paths.login} element={<LoginPage />} />
+				<Route path={paths.about} element={<AboutPage />} />
 				<Route path="*" element={<NotFoundPage />} />
 			</Route>
 		</Routes>

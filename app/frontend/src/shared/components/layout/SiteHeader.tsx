@@ -11,6 +11,7 @@ type NavigationItem = { to: AppPath; label: string }
 const links = [
 	{ to: paths.home, label: 'Início' },
 	{ to: paths.map, label: 'Mapa público' },
+	{ to: paths.about, label: 'Sobre o projeto' },
 	{ to: paths.admin, label: 'Administração' },
 	{ to: paths.login, label: 'Login' },
 	//   { to: paths.lab, label: 'Laboratório visual' },

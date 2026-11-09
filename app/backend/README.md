@@ -2,6 +2,12 @@
 
 API e motor de processamento do Arboriza, conectados ao portal administrativo local.
 
+> A pasta `.venv` não é incluída no Git. O comando abaixo funciona no ambiente preparado desta máquina; em outro computador, será necessário criar um ambiente Python 3.12 e instalar dependências compatíveis. Detectron2/Detectree2 têm componentes compilados para CUDA e não possuem uma instalação genérica garantida no Windows. Dados, imagens e pesos também precisam ser obtidos/preparados à parte.
+
+### Hardware usado nas análises
+
+Os pilotos foram executados em Windows 10 Pro com AMD Ryzen 5 5600G (6 núcleos / 12 threads), 64 GB de RAM e NVIDIA GeForce RTX 5070 (12 GB de VRAM). A pilha Cambridge/Restor foi validada com Python 3.12.10, PyTorch 2.7.1+cu128, torchvision 0.22.1+cu128, CUDA Toolkit 12.8.61 e Detectron2 compilado para `sm_120`. Esses dados descrevem a máquina testada; não estabelecem mínimos de hardware. Para preparar os modelos numa instalação nova, siga o [guia de instalação de modelos](INSTALACAO_MODELOS_IA.md).
+
 ## Execução local
 
 No PowerShell, em `app/backend`:
@@ -10,7 +16,7 @@ No PowerShell, em `app/backend`:
 .\.venv\Scripts\python.exe -m uvicorn arboriza_api.main:app --host 127.0.0.1 --port 8000 --workers 1
 ```
 
-A documentação fica em `http://127.0.0.1:8000/docs`. Use um processo/worker; uma trava impede duas instâncias com o mesmo banco. Esta versão ainda não foi preparada para exposição na internet.
+A documentação fica em `http://127.0.0.1:8000/docs`. Use um processo/worker; uma trava impede duas instâncias com o mesmo banco. Esta versão ainda não foi preparada para exposição na internet. Consulte `requirements/requirements-api.txt` e `requirements/requirements-detectree2-lock.txt` como registros de versões, não como garantia de instalação automática em qualquer máquina; Detectron2 e Detectree2 são preparados separadamente.
 
 A API fornece duas famílias de modelos: Controle (Cambridge) e Modelo v2 (Restor + Cambridge). `GET /api/analises/perfis` retorna `modelos` com as duas famílias e `perfis` com as variações técnicas disponíveis, incluindo fontes diferentes do Controle e o perfil multiescala experimental histórico. O modelo v2 usa somente o acervo local; grupos e complementos são distintos de indivíduos.
 
@@ -32,6 +38,16 @@ A API fornece duas famílias de modelos: Controle (Cambridge) e Modelo v2 (Resto
 O ambiente `.venv` foi criado nesta máquina com Python 3.12 e os pacotes do ambiente validado do protótipo foram copiados para ele. O executável, as bibliotecas e a extensão CUDA estão no backend, mas a venv depende da instalação base do Python e não deve ser considerada portátil para outro computador. As listas de versões estão em `requirements/`. Detectron2/Detectree2 incluem componentes nativos compilados para esta combinação Windows/CUDA; reconstruir um ambiente em outra máquina exige instalação/compilação compatível e validação própria.
 
 `python -m arboriza_api.access.bootstrap` cria interativamente o primeiro administrador somente se não houver usuários. A autenticação retorna bearer token com expiração; apenas administradores gerenciam usuários.
+
+### Conta local para demonstração
+
+Para reproduzir o acesso administrativo no clone local, com o backend parado ou em execução, use um banco ainda sem usuários:
+
+```powershell
+.\.venv\Scripts\python.exe -m arboriza_api.access.demo_admin
+```
+
+O comando cria `demo` / `ArborizaDemo2026!` somente quando a tabela de usuários está vazia. Se já houver alguém cadastrado, encerra sem alterar nada. Essa credencial é pública e serve apenas para desenvolvimento local em `127.0.0.1`; não a use em uma instalação acessível pela internet. Para outro ambiente, crie uma senha própria com `python -m arboriza_api.access.bootstrap`.
 
 ## Limites
 

@@ -82,6 +82,7 @@ export default function HomePage() {
 			</div>
 			<nav aria-label="Referências e informações">
 				<a href="https://www.aracatuba.sp.gov.br/arborizacao">Arborização de Araçatuba</a>
+				<Link to={paths.about}>Sobre o projeto</Link>
 				{/* <Link to={paths.lab}>Laboratório visual</Link> */}
 				<a href="#conteudo">Voltar ao topo</a></nav>
 			<details>

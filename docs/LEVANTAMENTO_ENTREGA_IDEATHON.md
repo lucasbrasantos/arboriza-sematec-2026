@@ -2,11 +2,11 @@
 
 **Data:** 08/11/2026.  
 **Fonte:** [Ideathon — Fatec 2026](doc-apoio/Ideathon%20-%20Fatec%202026.pdf), páginas 10–12; cronograma na página 4.  
-**Escopo desta rodada:** diagnóstico e plano de documentação. Não certifica conformidade final, não cria conta de demonstração e não publica o site. Vídeo e produção do pitch ficam a cargo da equipe, fora desta rodada.
+**Escopo desta rodada:** documentação de entrada, conta local de demonstração e página pública de transparência. Isso não certifica conformidade final nem publica o site. Vídeo e pitch ficam a cargo da equipe, fora desta rodada.
 
 ## 1. Resultado do levantamento
 
-A implementação tem vários elementos necessários, mas a documentação principal ainda não reúne todos os itens exigidos. Há instruções de execução e fontes distribuídas em READMEs e relatórios, enquanto o README da raiz cobre apenas problema, solução e links de desenvolvimento. O README de `app/` ainda descreve uma versão anterior sem backend, em desacordo com o código e com o README atual do frontend.
+A documentação principal agora reúne instruções para iniciar o frontend, conta administrativa de demonstração local, limites de execução, fontes, declaração resumida de IA e bibliotecas. A página `/sobre` organiza a transparência no próprio site. Ainda faltam validar a instalação completa em outro computador, confirmar a declaração de originalidade com todos os integrantes e preparar um ambiente acessível à banca.
 
 As maiores pendências não são apenas textuais: confirmar um endereço acessível à banca, disponibilizar acesso demonstrativo às funções protegidas e conferir o percurso de uso sem instalações ou chaves particulares do avaliador. A existência do código não prova que esse percurso já esteja disponível.
 
@@ -15,19 +15,19 @@ As maiores pendências não são apenas textuais: confirmar um endereço acessí
 | Exigência | Evidência encontrada | Situação e ação necessária |
 | --- | --- | --- |
 | Link acessível do protótipo | READMEs indicam endereços `127.0.0.1`; API documentada como local, sem preparação para exposição na internet. | **Pendente de definição.** Registrar URL de entrega e validar acesso por outro dispositivo. Endereço local não é um link acessível remotamente à banca. |
-| README: problema e solução | Presentes no README principal. | **Parcialmente coberto.** Atualizar solução para o escopo atual: análise, revisão, acervo e publicação. Propostas automáticas de plantio não devem aparecer como capacidade já validada. |
-| README: como rodar | Comandos separados nos READMEs de frontend, backend e protótipo. | **Parcialmente coberto.** Criar percurso principal na raiz com links de detalhe; esclarecer preparação dos dados/modelos e a diferença entre uso da demonstração e instalação para desenvolvimento. |
-| README: limitações e próximos passos | Informações em documentos de escopo e relatórios técnicos. | **Pendente na raiz.** Resumir qualidade não validada globalmente, abrangência real, dados de exemplo, dependências e roadmap. |
-| Declaração de originalidade | Não foi localizada declaração consolidada. | **Pendente.** A equipe precisa confirmar autoria e desenvolvimento durante o evento, reconhecendo explicitamente bibliotecas, pesos pré-treinados e recursos de terceiros. |
-| Declaração de IA: ferramentas, finalidade e conteúdo gerado | Há registro de um grafismo botânico sintético e seu prompt; a conversa registra assistência de IA em planejamento, código e documentação. | **Parcialmente coberto.** Consolidar declaração curta, com uma tabela das ferramentas e contribuições efetivamente usadas. Confirmar histórico adicional com os integrantes. |
-| Fontes de dados e simulações | IGC/DataGEO, IBGE e OSM documentados em relatórios; assets têm notas próprias; exemplos identificados em várias telas. | **Parcialmente coberto.** Reunir índice de fontes e manter a indicação de simulação junto aos exemplos. Rever telas novas antes da entrega. |
+| README: problema e solução | Explicação do projeto, fluxo de análise/revisão e limites de interpretação no README principal. | **Resumido.** Conferir a descrição contra os recursos efetivamente publicados na versão entregue. Não apresentar propostas automáticas de plantio como capacidade validada. |
+| README: como rodar | README principal e guias de app/frontend/backend com comandos locais e limitações do ambiente. | **Documentado para desenvolvimento local.** O frontend roda de um clone limpo; inferência e API completa dependem de dependências nativas/CUDA, pesos e dados externos ao Git. Validar uma instalação reproduzível em outra máquina. |
+| README: limitações e próximos passos | Qualidade, cobertura, dependências, revisão humana, roadmap e máquina usada nos pilotos resumidos na raiz. Guia backend detalha instalação de modelos e hardware. | **Documentado em síntese.** Rever após concluir acervo/publicação e substituir próximos passos por estado real da entrega. |
+| Declaração de originalidade | Declaração de desenvolvimento pela equipe no README e página Sobre; identificados uso de pesos/bibliotecas de terceiros. | **A validar pela equipe.** Todos os integrantes devem confirmar que a declaração corresponde à autoria e à procedência do trabalho. |
+| Declaração de IA: ferramentas, finalidade e conteúdo gerado | README e `/sobre` declaram ChatGPT/Codex, OpenAI ImageGen e modelos pré-treinados Cambridge/Restor com suas funções. | **Resumido.** Confirmar com os integrantes se todas as ferramentas e materiais estão contemplados antes da entrega. |
+| Fontes de dados e simulações | README e `/sobre` listam IGC/DataGEO, IBGE, OSM e separam as demonstrações fictícias de resultados. | **Documentado em síntese.** Rever rótulos locais no produto e conferir as fontes/datas utilizadas na versão publicada. |
 | Uso em navegador/celular sem instalação | Frontend web em React; inferência executada no servidor. | **Arquitetura compatível, entrega não comprovada.** O visitante não deve instalar Node, Python, CUDA ou pesos; o ambiente da equipe pode precisar desses componentes. Validar a versão entregue em outro dispositivo. |
 | Sem dependência de serviço pago/chave privada | Fluxo central utiliza modelos locais e fontes cartográficas; proposta futura de edição de fotos dependeria de API externa. | **Conferir na entrega.** O caminho obrigatório da demonstração precisa funcionar sem a banca fornecer chave ou contratar serviço. A simulação generativa futura não pode ser requisito desse caminho; se oferecida, precisa ter alternativa gratuita sem chave exigida do avaliador. |
-| Sem login obrigatório, ou conta demonstrativa funcional | Início e `/mapa` são públicos no roteamento. Administração exige sessão real; usuários são criados internamente. | **Consulta pública prevista; acesso administrativo demonstrativo pendente de confirmação.** Definir conta própria para demonstração, instruções e permissões. Não remover a proteção da administração apenas para atender ao evento. |
+| Sem login obrigatório, ou conta demonstrativa funcional | Início e `/mapa` são públicos. Existe comando local que cria credencial de demonstração apenas em banco vazio; administração exige sessão real. | **Parcial.** Consulta pública não pede login e a conta local está documentada. Para a banca ainda é preciso disponibilizar uma instância hospedada e validar o acesso administrativo seguro; não remover a proteção da administração. |
 | Dados reais ou explicitamente simulados | Fontes oficiais e pilotos reais coexistem com exemplos de interface. | **Parcialmente coberto.** Auditar legendas e metadados da versão final. Proposta de copa não é árvore confirmada; ausência de resultado não significa zero árvores. |
 | Git com commits de pelo menos 3 integrantes | `git shortlog -s HEAD` mostra seis grafias/identidades de autor; há nomes e aliases diferentes. | **Evidência favorável.** Confirmar a correspondência de pelo menos três identidades com integrantes reais. Não confundir aliases com pessoas distintas nem fabricar histórico. |
 | Contraste, texto redimensionável e informação além da cor | Há foco visível, rótulos, preferência de movimento reduzido e estilos responsivos. | **Implementação parcial; verificação final necessária.** Conferir zoom de texto, teclado e legendas nos fluxos públicos e administrativos; não declarar auditoria completa sem executá-la. |
-| Bibliotecas e templates declarados | `package.json`, requisitos Python e nota sobre template oficial React/Vite no README do frontend. | **Parcialmente coberto.** Criar resumo legível das principais dependências, template e licenças/atribuições relevantes. Arquivo de dependências sozinho não explica o uso à banca. |
+| Bibliotecas e templates declarados | README e `/sobre` resumem as bibliotecas principais e declaram o template oficial React/Vite. | **Documentado em síntese.** Conferir licenças e créditos exigidos pelas dependências e pesos efetivamente usados. |
 | Presença mínima nos checkpoints | Não comprovável pelo código consultado. | **Confirmação da equipe.** Reunir evidências disponíveis com integrantes/organização. |
 | Repositório criado no evento; projeto não pré-existente | Primeiro commit local alcançável: `bdc5fe7`, em 04/11/2026; PDF informa atividades em 03–06/11 e apresentação em 09/11. | **Datas compatíveis, prova incompleta.** Conferir criação do repositório na plataforma e procedência do material. Data do primeiro commit não comprova sozinha criação do repositório nem originalidade integral. |
 
@@ -35,7 +35,7 @@ Pitch de no máximo seis slides e vídeo de backup de 1–2 minutos continuam ob
 
 ## 3. Organização proposta para a documentação
 
-### README principal
+### README principal — concluído nesta rodada
 
 Deve funcionar como porta de entrada da entrega, nesta ordem:
 
@@ -51,7 +51,7 @@ Deve funcionar como porta de entrada da entrega, nesta ordem:
 
 O README deve explicar o que a banca encontrará no link publicado. Não tratar `npm run dev`, uma venv ou o endereço `localhost` como instrução de acesso de um visitante remoto.
 
-### Documentos de apoio sugeridos
+### Possíveis documentos de apoio adicionais
 
 | Documento proposto | Conteúdo |
 | --- | --- |
@@ -59,7 +59,7 @@ O README deve explicar o que a banca encontrará no link publicado. Não tratar 
 | `docs/FONTES_E_CREDITOS.md` | Bases geográficas, imagens, modelos pré-treinados, licenças, assets decorativos, bibliotecas e template. |
 | READMEs de `app/`, frontend e backend | Percurso coerente com a versão final; separar estado atual de notas históricas. |
 
-Estes nomes são uma proposta. Não é necessário criar dezenas de arquivos: a declaração curta pode ficar no README, com os detalhes em um ou dois documentos de apoio.
+O README e a página Sobre já contêm a declaração curta e o resumo das fontes. Criar os documentos adicionais só se a equipe precisar de um inventário de licenças ou declaração assinada mais detalhada; não é necessário duplicar o conteúdo.
 
 ## 4. Declaração de IA: nível de detalhe suficiente
 
@@ -106,9 +106,9 @@ Consolidar, com links e função no sistema:
 
 Manter atribuição cartográfica no próprio mapa, não somente no README. Uma declaração geral de dados simulados não substitui rótulos locais quando há dados reais e fictícios na mesma aplicação.
 
-## 7. Proposta para uma página do site
+## 7. Página pública de transparência
 
-Criar uma página pública **“Sobre o projeto e transparência”**, acessível pelo rodapé, com rota sugerida `/sobre`:
+Foi criada a página pública **“Sobre o Arboriza”**, acessível pelo menu e rodapé em `/sobre`, com:
 
 - Proposta do Arboriza e contexto acadêmico.
 - Equipe e responsabilidades, depois de confirmadas.
@@ -118,7 +118,7 @@ Criar uma página pública **“Sobre o projeto e transparência”**, acessíve
 - Limitações e próximos passos.
 - Link do repositório e da documentação.
 
-Essa página é uma sugestão de comunicação, não uma exigência explícita de página adicional no regulamento. O README continua sendo obrigatório. A página não deve publicar senhas de contas internas nem chaves de API; o acesso demonstrativo precisa ser próprio para avaliação.
+Essa página complementa o README, que continua sendo obrigatório. A senha de demonstração local está somente na documentação de desenvolvimento; a página pública não publica credenciais nem chaves de API.
 
 ## 8. Decisões e informações que faltam
 

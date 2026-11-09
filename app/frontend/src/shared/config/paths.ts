@@ -5,6 +5,7 @@ export const paths = {
   adminMap: '/admin/mapa',
   adminArchive: '/admin/acervo',
   login: '/login',
+  about: '/sobre',
   lab: '/laboratorio',
 } as const
 
