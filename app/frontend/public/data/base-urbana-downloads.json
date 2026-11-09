@@ -1,0 +1,5 @@
+{
+  "pontos": "https://github.com/lucasbrasantos/arboriza-sematec-2026/releases/download/base-urbana-20261109T031948-ca7410d3/pontos.geojson.gz",
+  "copas": "https://github.com/lucasbrasantos/arboriza-sematec-2026/releases/download/base-urbana-20261109T031948-ca7410d3/copas.geojson.gz",
+  "geopackage": "https://github.com/lucasbrasantos/arboriza-sematec-2026/releases/download/base-urbana-20261109T031948-ca7410d3/aracatuba.gpkg"
+}

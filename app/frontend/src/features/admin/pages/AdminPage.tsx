@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useAuth } from '../../auth/context/AuthContext'
 import UserManagement from '../components/UserManagement'
+import UrbanBasePanel from '../components/UrbanBasePanel'
 
 export default function AdminPage() {
   const { user, logout } = useAuth()
@@ -29,7 +30,7 @@ export default function AdminPage() {
       <Link className="admin-entry admin-entry--map" to={paths.adminMap}><img src={aerial} alt="" /><div className="admin-entry-content"><Map size={30} /><h2>Mapa administrativo</h2><p>Área de trabalho para delimitar, analisar imagens e revisar as marcações.</p><span>Abrir espaço do mapa <ArrowUpRight size={20} /></span></div></Link>
       <Link className="admin-entry admin-entry--archive" to={paths.adminArchive}><div className="admin-entry-content"><FolderOpen size={30} /><h2>Análises e importações</h2><p>Consulte os resultados por registro, sua abrangência e as informações para publicação.</p><span>Abrir acervo <ArrowUpRight size={20} /></span></div></Link>
     </div>
-    {user?.role === 'admin' && <UserManagement currentUser={user} />}
+    {user?.role === 'admin' && <><UrbanBasePanel /><UserManagement currentUser={user} /></>}
     <p className="admin-hub-note">O mapa público apresenta o material publicado pela equipe. As ferramentas de processamento ficam neste espaço administrativo.</p>
   </section>
 }

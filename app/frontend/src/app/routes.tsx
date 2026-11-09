@@ -14,6 +14,7 @@ const StyleLabPage = lazy(() => import('../features/style-lab/pages/StyleLabPage
 const AdminMapPage = lazy(() => import('../features/admin/pages/AdminMapPage'))
 const ArchiveReviewPage = lazy(() => import('../features/admin/pages/ArchiveReviewPage'))
 const MapPage = lazy(() => import('../features/map/pages/PublishedMapPage'))
+const SectorComparison = lazy(() => import('../features/map/pages/SectorComparison'))
 
 export default function AppRoutes() {
 	return (
@@ -27,6 +28,7 @@ export default function AppRoutes() {
 				} />
 			))}
 			<Route element={<AppLayout mode="map" />}>
+				<Route path="/mapa/comparar" element={<Suspense fallback={<p className="map-route-loading" role="status">Preparando comparação…</p>}><SectorComparison /></Suspense>} />
 				<Route element={<RequireAuth />}><Route path="/admin/acervo/:id/revisar" element={<Suspense fallback={<p className="map-route-loading" role="status">Abrindo revisão…</p>}><ArchiveReviewPage /></Suspense>} /></Route>
 				<Route element={<RequireAuth />}><Route path={paths.adminMap} element={<Suspense fallback={<p className="map-route-loading" role="status">Abrindo o mapa administrativo…</p>}><AdminMapPage /></Suspense>} /></Route>
 				<Route path={paths.map} element={<Suspense fallback={<p className="map-route-loading" role="status">Preparando o mapa de Araçatuba…</p>}><MapPage /></Suspense>} />

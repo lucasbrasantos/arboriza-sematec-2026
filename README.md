@@ -1,5 +1,9 @@
 # Arboriza
 
+<p align="center">
+  <img src="docs/assets/arboriza-logo-readme.svg" alt="Logo Arboriza" width="340" />
+</p>
+
 **Arboriza é um projeto acadêmico da SEMATEC / Ideathon FATEC 2026**, no tema Mobilidade Urbana e Sustentabilidade. O site organiza imagens aéreas e dados geográficos para mapear possíveis copas de árvores em Araçatuba/SP. A equipe revisa as propostas antes de disponibilizá-las para consulta.
 
 > Protótipo em desenvolvimento. As análises são estimativas, não um inventário confirmado de árvores. A qualidade geral e a cobertura de toda a cidade ainda não foram validadas.

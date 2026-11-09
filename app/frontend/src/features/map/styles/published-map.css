@@ -21,5 +21,6 @@
 .public-view-toolbar { position: absolute; z-index: 50; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; padding: 6px; max-width: calc(100% - 28px); border: 1px solid #ccdfc5; border-radius: 10px; background: #f7fbf3f5; box-shadow: 0 6px 20px #123c2826; }
 .public-view-toolbar button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 66px; min-height: 47px; padding: 5px; border: 0; border-radius: 7px; background: transparent; color: #214e33; font-size: .65rem; cursor: pointer; }
 .public-view-toolbar button[aria-pressed='true'] { background: #245a3d; color: #fff; }
+.public-compare-link { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-width:82px; padding:5px; color:#214e33; font-size:.65rem; text-decoration:none; border-right:1px solid #d6e0d1; }
 .published-map[data-street-mode='true'] .map-panel-toggle { display: none; }
 @media (max-width: 899px) { .public-tools-sidebar { left: 10px; right: 10px; width: auto; } .public-view-toolbar { flex-wrap: wrap; justify-content: center; } }
