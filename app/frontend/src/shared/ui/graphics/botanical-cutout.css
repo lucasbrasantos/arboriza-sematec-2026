@@ -1,0 +1,3 @@
+.ar-botanical-cutout { transform-origin: 15% 90%; }
+.ar-botanical-cutout img { display: block; width: 100%; height: auto; transform-origin: 15% 90%; }
+@media(prefers-reduced-motion:reduce) { .ar-botanical-cutout, .ar-botanical-cutout img { transform: none !important; } }

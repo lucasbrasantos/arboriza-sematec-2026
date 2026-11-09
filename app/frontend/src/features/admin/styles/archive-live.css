@@ -1,0 +1,10 @@
+.archive-live { max-width: 1280px; margin: 0 auto; padding: 35px 24px; color: #214e33; }
+.archive-live-layout { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(280px, 1.5fr); gap: 24px; margin-top: 24px; }
+.archive-live-layout > section { display: grid; align-content: start; gap: 8px; }
+.archive-live-layout > section > button { display: grid; gap: 6px; padding: 16px; border: 1px solid #bdd0b7; border-radius: 8px; text-align: left; background: #f7fbf3; color: inherit; cursor: pointer; }
+.archive-live-layout > aside { padding: 20px; border: 1px solid #bdd0b7; border-radius: 10px; background: #f7fbf3; }
+.archive-live-actions { display: grid; gap: 12px; margin-top: 20px; }
+.archive-live button { padding: 9px 12px; color: inherit; cursor: pointer; }
+.archive-live button:disabled { opacity: .5; cursor: default; }
+.archive-live input:not([type='checkbox']) { display: block; width: 100%; max-width: 420px; padding: 10px; margin-top: 6px; }
+@media (max-width: 700px) { .archive-live-layout { grid-template-columns: 1fr; } }

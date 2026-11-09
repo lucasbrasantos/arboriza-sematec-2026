@@ -1,0 +1,109 @@
+/* Reset, acessibilidade e placeholders. O tema aprovado fica em theme.css. */
+:root {
+	color-scheme: light;
+	font-family: system-ui, sans-serif;
+	color: #25382d;
+	background: #f7faf7;
+	line-height: 1.5;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	min-width: 320px;
+}
+
+a {
+	color: #215c40;
+	text-underline-offset: 0.2em;
+}
+
+:focus-visible {
+	outline: 3px solid #215c40;
+	outline-offset: 4px;
+}
+
+.skip-link {
+	position: absolute;
+	top: 0;
+	left: 1rem;
+	z-index: 1;
+	padding: 0.75rem 1rem;
+	background: white;
+	transform: translateY(-150%);
+}
+
+.skip-link:focus {
+	transform: translateY(0);
+}
+
+.site-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 1rem;
+	padding: 1.25rem clamp(1rem, 4vw, 3rem);
+	border-bottom: 1px solid #dce6de;
+	background: white;
+}
+
+.brand {
+	font-size: 1.25rem;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.site-header nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.nav-link {
+	padding: 0.625rem 0.875rem;
+	border-radius: 0.375rem;
+	text-decoration: none;
+}
+
+.nav-link:hover {
+	text-decoration: underline;
+}
+
+.nav-link.is-active {
+	background: #e1eee4;
+	text-decoration: underline;
+	font-weight: 600;
+}
+
+.placeholder-page {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	min-height: 65vh;
+	padding: 3rem 1rem;
+	text-align: center;
+}
+
+.placeholder-page h1 {
+	margin: 0;
+	font-size: clamp(1.75rem, 5vw, 2.5rem);
+	line-height: 1.2;
+}
+
+@media (max-width: 540px) {
+	.site-header {
+		align-items: flex-start;
+	}
+
+	.site-header nav {
+		width: 100%;
+	}
+}

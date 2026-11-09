@@ -1,5 +1,6 @@
 import { PointLayer, readPoints } from './points.js';
 import { studyAreaFor } from './map.js';
+import { crownStorage, pairCrowns } from './crowns.js';
 
 // Camadas e persistência do navegador. Os arquivos do experimento permanecem no disco.
 export function createLayers(beforeChange, onChange, message) {
@@ -9,13 +10,18 @@ export function createLayers(beforeChange, onChange, message) {
 	let layers = [], active = 0, revision = 0, cleared = 0;
 	const make = (name, features = [], metadata = {}) => {
 		const layer = Object.assign(new PointLayer(name, features), { id: crypto.randomUUID(), ...metadata });
+		if (layer.crowns) {
+			layer.crowns = pairCrowns(layer.crowns, features);
+			layer.modelVersion = 2;
+			layer.crownKey ||= crypto.randomUUID();
+		}
 		layer.studyArea = studyAreaFor(layer);
 		return layer;
 	};
 	try {
 		const saved = JSON.parse(localStorage.getItem(key) || 'null');
 		if (saved) {
-			layers = saved.layers.map(item => make(item.name, readPoints(item.geojson), { id: item.id, recorte: item.recorte, analysisId: item.analysisId, studyArea: item.studyArea }));
+			layers = saved.layers.map(item => make(item.name, readPoints(item.geojson), { id: item.id, recorte: item.recorte, analysisId: item.analysisId, analysisPart: item.analysisPart, studyArea: item.studyArea, modelVersion: item.modelVersion, crownKey: item.crownKey }));
 			active = Math.max(0, layers.findIndex(layer => layer.id === saved.active));
 		} else {
 			const old = JSON.parse(localStorage.getItem(legacy) || 'null');
@@ -29,7 +35,7 @@ export function createLayers(beforeChange, onChange, message) {
 		revision++;
 		try {
 			localStorage.setItem(key, JSON.stringify({ active: current().id, layers: layers.map(layer => ({
-				id: layer.id, name: layer.name, recorte: layer.recorte, analysisId: layer.analysisId, studyArea: layer.studyArea, geojson: layer.geojson(),
+				id: layer.id, name: layer.name, recorte: layer.recorte, analysisId: layer.analysisId, analysisPart: layer.analysisPart, studyArea: layer.studyArea, modelVersion: layer.modelVersion, crownKey: layer.crownKey, geojson: layer.geojson(),
 			})) }));
 			localStorage.removeItem(legacy);
 			return true;
@@ -58,6 +64,7 @@ export function createLayers(beforeChange, onChange, message) {
 				beforeChange();
 				const selectedId = current().id;
 				layers.splice(layers.indexOf(layer), 1);
+				if (layer.crownKey) crownStorage(layer.crownKey, null).catch(() => {});
 				if (!layers.length) layers.push(make('Marcação manual'));
 				active = Math.max(0, layers.findIndex(item => item.id === selectedId));
 				onChange(current().id !== selectedId); const saved = save();
@@ -68,16 +75,47 @@ export function createLayers(beforeChange, onChange, message) {
 	}
 	document.getElementById('clear-map').onclick = async () => {
 		if (!await confirmAction('Limpar todo o mapa?', 'Todas as camadas e marcações serão removidas deste navegador. Exporte o que quiser guardar. Uma análise em andamento não será adicionada após a limpeza.', 'Limpar mapa')) return;
-		beforeChange(); layers = [make('Marcação manual')]; active = 0; cleared++;
+		beforeChange();
+		layers.forEach(layer => { if (layer.crownKey) crownStorage(layer.crownKey, null).catch(() => {}); });
+		layers = [make('Marcação manual')]; active = 0; cleared++;
 		const saved = save(); onChange();
 		if (saved) message('Mapa limpo. Os arquivos de resultados no disco foram preservados.');
 	};
-	return { current, render, save,
+	return { current, render, save, all: () => [...layers],
+		async loadCrowns(layer = current(), retry = false) {
+			if (!layer.linkedCrowns || layer.crowns || layer.crownsLoading || (layer.crownsError && !retry)) return;
+			layer.crownsLoading = true; layer.crownsError = null;
+			try {
+				let data;
+				if (layer.crownKey) {
+					try { data = await crownStorage(layer.crownKey); }
+					catch { /* Tentar recuperar o resultado original da API quando disponível. */ }
+				}
+				if (!data && layer.analysisId) {
+					const response = await fetch(`/api/analises/${encodeURIComponent(layer.analysisId)}/camadas/copas`, { signal: AbortSignal.timeout(20000) });
+					if (response.ok) data = await response.json();
+				}
+				if (!data) throw new Error('Copas não encontradas. Importe uma exportação com copas ou refaça a análise v2.');
+				// Guardar todas as máscaras disponíveis permite desfazer exclusões nesta sessão.
+				pairCrowns(data, layer.points.map(p => p.feature));
+				layer.crowns = data; layer.modelVersion = 2; layer.crownKey ||= crypto.randomUUID();
+				try { await crownStorage(layer.crownKey, data); }
+				catch { layer.crownsError = 'As copas estão disponíveis nesta sessão. Exporte a camada: o navegador não conseguiu guardá-las.'; }
+				save();
+			} catch (error) { layer.crownsError = error.message; }
+			finally { layer.crownsLoading = false; if (current() === layer) onChange(false); }
+		},
 		get revision() { return revision; }, get cleared() { return cleared; },
 		add(name, features, metadata = {}, activate = true) {
-			if (metadata.analysisId && layers.some(layer => layer.analysisId === metadata.analysisId)) return;
+			if (metadata.analysisId && layers.some(layer => layer.analysisId === metadata.analysisId
+				&& (layer.analysisPart || '') === (metadata.analysisPart || ''))) return;
 			if (activate) beforeChange();
-			layers.push(make(name, features, metadata));
+			const layer = make(name, features, metadata);
+			layers.push(layer);
+			if (layer.crowns) crownStorage(layer.crownKey, layer.crowns).catch(() => {
+				layer.crownsError = 'As copas estão disponíveis nesta sessão, mas não foram salvas no navegador. Exporte a camada para guardá-las.';
+				message(layer.crownsError, true);
+			});
 			if (activate) active = layers.length - 1;
 			const saved = save();
 			if (activate) onChange(true); else render();

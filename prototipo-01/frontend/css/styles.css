@@ -1209,3 +1209,34 @@ dd {
 		scroll-behavior: auto !important;
 	}
 }
+
+/* Modelo v2: mesma linguagem do laboratório, com legenda recolhível no mapa. */
+#crown-controls {
+  margin-block: 1rem;
+  padding-block: .75rem;
+  border-block: 1px solid var(--border);
+}
+#crown-controls p { font-size: .82rem; line-height: 1.5; }
+#crown-legend {
+  position: absolute;
+  z-index: 750;
+  right: 1rem;
+  bottom: calc(var(--tools-height, 130px) + 1.5rem);
+  width: min(250px, calc(100% - 2rem));
+  padding: .85rem 1rem;
+  color: var(--text);
+  font-size: .8rem;
+}
+#crown-legend summary { cursor: pointer; min-height: 24px; }
+#crown-legend summary:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+#crown-legend ul { list-style: none; padding: 0; margin: .85rem 0; display: grid; gap: .6rem; }
+#crown-legend li { display: flex; align-items: center; gap: .6rem; }
+#crown-legend p { margin: 0; color: var(--muted); font-size: .75rem; line-height: 1.5; }
+.crown-swatch { display: inline-block; width: 22px; height: 13px; flex: 0 0 22px; border: 2px solid; border-radius: 3px; }
+.crown-individual { border-color: #137c66; background: rgb(19 124 102 / 17%); }
+.crown-group { border-color: #7954b5; border-style: dashed; background: rgb(121 84 181 / 17%); }
+.crown-pending { border-color: #b66a08; border-style: dotted; background: rgb(182 106 8 / 17%); }
+.crown-selected { border-color: #1683e0; background: rgb(22 131 224 / 28%); }
+@media (max-width: 640px) {
+  #crown-legend { right: .65rem; bottom: calc(var(--tools-height, 130px) + 1rem); padding: .65rem .8rem; }
+}

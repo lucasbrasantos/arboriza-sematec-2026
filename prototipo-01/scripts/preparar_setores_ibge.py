@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -14,7 +15,9 @@ from shapely.geometry import mapping, shape
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / "data" / "territorial" / "setores-urbanos-aracatuba-ibge-2022.geojson"
+sys.path.insert(0, str(ROOT))
+from backend.detector import DATA_ROOT
+OUTPUT = DATA_ROOT / "territorial" / "setores-urbanos-aracatuba-ibge-2022.geojson"
 SOURCE = ("https://geoftp.ibge.gov.br/organizacao_do_territorio/malhas_territoriais/"
           "malhas_de_setores_censitarios__divisoes_intramunicipais/censo_2022/"
           "setores/shp/UF/SP_setores_CD2022.zip")

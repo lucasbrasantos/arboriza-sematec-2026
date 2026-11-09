@@ -1,6 +1,6 @@
 # Arboriza — plano de implementação do app
 
-**Situação:** planejamento para validação; desenvolvimento ainda não autorizado nesta etapa.  
+**Situação:** etapas 1, 2, área Início e refinamento imersivo do mapa público validados. Usuário escolheu Administração por área de trabalho com etapas internas e autorizou uma primeira amostra de estrutura, lista e abertura de área. Amostra implementada; avaliação visual pendente antes dos formulários.
 **Contexto:** complementa o [escopo funcional](ESCOPO_WEBSITE_PRIMEIRA_ENTREGA.md). O prazo anteriormente informado para a primeira entrega foi 09/11/2026; este plano não garante viabilidade nesse prazo.
 
 ## Acordo de trabalho e validação
@@ -10,6 +10,7 @@
 - Correções solicitadas durante a validação pertencem à etapa atual. Decisões pendentes e mudanças de direção devem ser anotadas com o usuário, sem presumir aprovação por silêncio.
 - O usuário poderá criar as pastas ou iniciar o projeto por conta própria. Quando avisar, examinar o estado real, ler os arquivos e regras locais, preservar alterações existentes e alinhar a continuação com ele; não recriar nem sobrescrever sua estrutura automaticamente.
 - Manter arquitetura simples e organizada; aplicar os princípios de separação de responsabilidades conforme a necessidade, evitando camadas e dependências sem uso concreto.
+- Decisão atualizada pelo usuário em 06/11/2026: frontend em **TypeScript com tipagem estrita**, substituindo o JavaScript da proposta inicial. Componentes e contratos devem ser tipados; verificações de tipos fazem parte do build.
 
 ## Direção acordada
 
@@ -18,7 +19,7 @@
 - Página inicial expressiva, com interações de mouse e animações a discutir; mapa e administração claros e confortáveis para operar.
 - Glassmorphism nos componentes principais e cartões, com identidade própria do Arboriza: transparência, cor e desfoque equilibrados com a temática de natureza e cidade. Não reproduzir integralmente o estilo visual da Apple.
 - Área piloto de Araçatuba para a primeira entrega e visão de expansão para a cidade toda; regra 3-30-300 como conteúdo educativo. Dados e diagnósticos demonstrativos devem ser identificados como tais.
-- Estrutura proposta: `app/frontend` em React, `app/backend` para a API Python/FastAPI e, se necessário, `app/scripts` e README. `prototipo-01` segue como referência e laboratório existente.
+- Estrutura proposta: `app/frontend` em React + TypeScript, `app/backend` para a API Python/FastAPI e, se necessário, `app/scripts` e README. `prototipo-01` segue como referência e laboratório existente.
 
 ## Etapa 0 — Preparação conjunta
 
@@ -32,7 +33,7 @@
 
 **Objetivo:** entregar uma aplicação limpa e navegável, ainda sem design final.
 
-- Criar ou aproveitar `app/frontend`, com React + Vite e JavaScript, conforme a proposta anterior, verificando antes o que o usuário já fez.
+- Criar ou aproveitar `app/frontend`, com React + Vite e TypeScript estrito, conforme a decisão atualizada do usuário, verificando antes o que ele já fez.
 - Remover conteúdo de demonstração gerado pelo template e organizar uma estrutura inicial pequena por área e código compartilhado, sem criar componentes complexos antecipadamente.
 - Configurar navegação e rotas: `/` (Início), `/mapa` (Mapa público), `/admin` (Administração) e `/login` (Login), além de tratamento simples para rota inexistente.
 - Criar links funcionais entre áreas e placeholders simples com o nome da página. Os placeholders não representam autenticação, mapa, análise ou publicação funcionando.
@@ -40,6 +41,16 @@
 - Verificar inicialização, navegação pelos links e URLs diretas, retorno do navegador, rota inexistente e build; observar comportamento básico em desktop e viewport móvel. Registrar limites se o ambiente impedir alguma verificação.
 
 **Validação:** demonstrar a aplicação navegável, estrutura, arquivos alterados e verificações. Aguardar o usuário aprovar antes de iniciar identidade visual.
+
+### Registro da entrega técnica — 06/11/2026
+
+- Criado `app/frontend` com React + Vite, React Router declarativo e TypeScript estrito. A tipagem foi uma escolha explícita do usuário durante a implementação, substituindo JavaScript.
+- Organizados `src/app`, `src/features` por área e `src/shared`, com caminhos tipados centralizados. Removidos o conteúdo e os assets de demonstração do template.
+- Rotas `/`, `/mapa`, `/admin` e `/login` com placeholders identificados pelo nome, cabeçalho compartilhado, indicação de rota ativa e títulos no navegador. Caminhos desconhecidos oferecem retorno ao início.
+- Criados README de execução e organização em `app/` e `app/frontend/`, e README de reserva em `app/backend/`. O backend não foi implementado.
+- Verificados: `npm run lint`, build com `tsc -b`, links, histórico Voltar, acesso direto às quatro rotas no preview do build, recarga de `/mapa`, rota inexistente, foco por teclado e link para pular ao conteúdo.
+- Layout conferido no navegador em desktop e viewport 375 × 812, sem transbordamento horizontal. Não houve teste em dispositivo físico. O console não apresentou erros nas interações verificadas.
+- Servidor de desenvolvimento local configurado em `http://127.0.0.1:5173/`. Estilo básico provisório, sem autenticação, dados, mapa ou integração de API. A etapa 2 segue aguardando validação.
 
 ## Etapa 2 — Identidade visual e componentes compartilhados
 
@@ -54,6 +65,14 @@
 
 **Validação:** mostrar amostras concretas da identidade, dos componentes, do vidro e dos movimentos propostos. Aguardar escolhas e aprovação antes de construir a área Início.
 
+### Registro das amostras — 06/11/2026
+
+- O usuário autorizou uma rota separada, a comparação de três direções e a exploração de vidro com profundidade, com preferência inicial pela combinação entre natural e profundo.
+- Criado o laboratório em `/laboratorio` com variantes Natural, Profundidade e Equilíbrio; tema restrito ao experimento e componentes compartilhados tipados.
+- Adicionados Motion, Radix Slider/Switch, Lucide e Manrope local para os usos concretos das amostras. O vidro é construído em CSS, sem refração física.
+- Controles ajustam material e movimento; mapa, busca e botão de teste são identificados como demonstração.
+- Referências, assets, escolhas e próximos pontos de avaliação estão em [Laboratório visual](LABORATORIO_VISUAL.md).
+
 ## Etapa 3 — Área Início
 
 **Objetivo:** construir uma apresentação responsiva e interativa do Arboriza.
@@ -66,7 +85,44 @@
 
 **Validação:** demonstrar desktop e celular, animações e interações; ajustar conforme feedback e aguardar aprovação para avançar.
 
+### Implementação da área Início — 06/11/2026
+
+- O usuário aprovou a direção Equilíbrio, a paleta, os componentes, a interação com o vidro, os pontos e os estados de botões. Pediu mistura com a fotografia e a profundidade da outra amostra.
+- Corrigido o foco duplicado da busca no laboratório: o contêiner mantém o destaque e o campo interno não cria outro outline.
+- Construída a página `/` com tema compartilhado aprovado, floresta de referência, vidro claro e profundo, grafismos vetoriais de apoio, conteúdo do projeto, processo de detecção, prévia ilustrativa do mapa, regra 3-30-300 e fontes.
+- Componentes `RuleSection` e `IllustrativeMap` são compartilhados com o laboratório. `AnimatedNumber`, `Reveal` e `BotanicalGraphic` organizam a contagem por entrada na tela, movimentos moderados e elementos gráficos. A preferência por movimento reduzido é respeitada.
+- Cabeçalho compartilhado adaptado ao tema, com menu móvel e fechamento por Escape. Mudanças de área retornam ao início da página; comparações entre amostras mantêm a posição de rolagem.
+- Imagens e pontos são explicitamente identificados como referência ou demonstração. Não houve integração com a API ou implementação das ferramentas da área Mapa.
+- Lint, build com checagem de tipos e `git diff --check` aprovados. Busca com foco externo único, contagem por rolagem, menu móvel, seleção dos pontos e movimento reduzido conferidos no Chromium. Os limites da verificação estão registrados no [laboratório visual](LABORATORIO_VISUAL.md).
+
+### Refinamento de grafismos e destaque — 06/11/2026
+
+- Mistura visual, intensidade das animações e ajustes gerais aprovados. Usuário pediu aumentar muito a presença e interação dos elementos de apoio e adicionar uma cor de destaque.
+- Confirmada mistura de vetores com recortes botânicos. Criada comparação no laboratório, com Mel, Coral e Azul-céu, três composições, entrada por rolagem, resposta ao ponteiro e repetição por botão acessível por teclado/toque. Sem dependências adicionais.
+- O ramo transparente é gerado com IA e identificado como tal; não constitui foto local, espécie identificada ou dado ambiental.
+- Validar a escolha concreta antes de aplicá-la à área Início e aos futuros estados de apoio do Mapa e Administração. As ferramentas de mapa não recebem grafismos decorativos sobre a área de dados.
+
+### Aplicação da escolha aprovada — 06/11/2026
+
+- Usuário aprovou a presença dos grafismos para aplicar à área Início e escolheu Mel como destaque principal; autorizou Coral e Azul-céu em detalhes pontuais.
+- Tokens de destaque adicionados ao tema compartilhado. Ações, foco, estados e pontos ilustrativos do mapa mantêm seus próprios papéis de cor.
+- Ramos com textura fotográfica, copas e folhas vetoriais distribuídos pela abertura, apresentação, processo, seção fotográfica, chamada da prévia, regra educativa e encerramento. Não há elementos decorativos sobre a área de dados da prévia do mapa.
+- Componente compartilhado `BotanicalCutout` reutiliza o asset aprovado, responde ao ponteiro e à rolagem e respeita movimento reduzido. Botão “Animar folhas” repete a composição da abertura por teclado, toque ou clique. Sem dependências novas.
+- Avaliar o resultado integrado da área Início antes de iniciar a área Mapa.
+- Verificação no Chromium: desktop, viewport 375 × 812, teclado, imagens e movimento reduzido conferidos. Sem transbordamento horizontal ou erros no console nos percursos examinados. Aparelhos físicos, outros navegadores e desempenho em rede móvel não foram medidos.
+
 ## Etapa 4 — Área Mapa público
+
+### Registro da implementação — 07/11/2026
+
+- Usuário aprovou Leaflet + React Leaflet, painel lateral recolhível e detalhes na própria lateral com “Voltar à exploração”; pediu uma organização mais compreensível que a do protótipo.
+- Reaproveitadas bases, prévias cartográficas e limites de recortes do protótipo, sem alterar o HTML/Python existente ou integrar a API do Arboriza.
+- Criados Explorar/Camadas, busca local, seleção de área e itens, detalhes explicativos, legenda, fontes, navegação, estados sem resultados/camadas e falha de rede com nova tentativa.
+- Pontos, traçados e prioridades são fictícios e identificados. Não há métricas de cobertura de copas ou cálculo da regra 3-30-300.
+- Interface e geometria em componentes tipados, rota sob demanda e reaproveitamento do tema e componentes compartilhados.
+- Decisões, verificação e limites em [Mapa público](MAPA_PUBLICO.md). A avaliação do usuário precede Administração e integração.
+
+### Escopo da etapa
 
 - Estudar o aproveitamento do `prototipo-01` com o usuário antes de escolher como integrá-lo ao React.
 - Construir estrutura do mapa, busca/seleção da área, camadas, legenda e painel de diagnóstico, usando os padrões compartilhados aprovados.
@@ -75,7 +131,34 @@
 
 **Validação:** revisar aparência, navegação, painéis, responsividade, transparência dos dados e ferramentas; aguardar aprovação.
 
+### Refinamento aprovado para experimentar — 07/11/2026
+
+- Usuário escolheu mapa em toda a tela, navegação compacta e lateral flutuante recolhível, preservando o cabeçalho da área Início.
+- Implementados seletor de mapa base por miniatura e botão Visualização separado, junto a “Entenda o mapa”. Camadas controla os conjuntos sobrepostos.
+- Pontos e trechos organizados em grupos recolhíveis com contagem, busca e paginação de cinco itens. Retorno dos detalhes preserva grupo/página e recupera foco no item.
+- Usuário aprovou incluir densidade fictícia agora: Leaflet.heat 0.2.0 com tipos compatíveis, três paletas e opção personalizada. Concentração relativa não representa cobertura de copas ou temperatura.
+- Agrupamento dinâmico por zoom e visualização por setores oficiais do Censo 2022 permanecem propostas para validar com dados reais. Não foram criados setores ou estimativas fictícios para a cidade inteira.
+- Lint, build e percursos no Chromium desktop/celular conferidos. Organização, evidências e limites em [Mapa público](MAPA_PUBLICO.md).
+- Refinamento aprovado pelo usuário; a etapa seguinte de Administração foi autorizada. A integração continua pendente.
+
 ## Etapa 5 — Área Administração
+
+### Abertura da etapa — 07/11/2026
+
+- Usuário aprovou o refinamento imersivo do mapa público e autorizou prosseguir para a próxima etapa.
+- Conferidos os placeholders de Administração/Login e as ferramentas/rotas do protótipo.
+- Usuário escolheu organização por área de trabalho, com etapas internas, e a primeira amostra pequena de estrutura, lista e abertura da área. A validação da amostra precede os formulários.
+- Levantamento, decisões e limites em [Administração](ADMINISTRACAO.md).
+
+### Primeira amostra implementada — 07/11/2026
+
+- `/admin` apresenta três áreas fictícias, busca normalizada sem distinção de acentos, filtro por situação e estado sem resultados com limpeza de busca/filtro.
+- Abertura por `?area=` com recarga/acesso direto, estado para identificador desconhecido e retorno à lista. Busca/filtro e foco no item são preservados no retorno enquanto a página permanece montada; não há persistência após recarga.
+- Área aberta contém resumo, prévia de referência quando disponível e etapas orientativas de obtenção, revisão e preparação da publicação. Formulários ainda indisponíveis com explicação visível; área sem resultados mostra “Aguardando resultados”.
+- Reutilizados `GlassPanel`, `Button` e tema compartilhado aprovado: Manrope, verdes, vidro e Mel. Extensão da identidade existente, sem novas dependências; layout móvel e movimento reduzido contemplados no CSS.
+- Lint e build com checagem de tipos aprovados. Chromium desktop e viewport 375 × 812 conferidos nos percursos de busca/filtro, vazio, abertura/retorno/foco, identificador desconhecido e recarga, sem avisos ou erros de console observados.
+- Sem API, autenticação, persistência ou operações reais de análise/importação/revisão/publicação. As contagens são fictícias e não comprovam árvores ou cobertura de copas. Dispositivos físicos, outros navegadores, desempenho e API real não foram validados.
+- **Pendente:** avaliação visual e de navegação pelo usuário antes de definir e construir os formulários. Evidências e limites em [Administração](ADMINISTRACAO.md).
 
 - Projetar e construir a interface de acesso e administração, com seleção de área, análise, importação, revisão de pontos e prioridades, salvamento, exportação e publicação, conforme forem aprovados.
 - Sem API, representar ações e estados como demonstração e não como operações efetivamente concluídas; não tratar a tela de login como segurança real.
@@ -102,7 +185,7 @@
 
 ## Opções para pesquisar e validar juntos
 
-As opções abaixo são referências iniciais, não dependências aprovadas nem resultados de testes neste projeto.
+As opções abaixo registram a pesquisa inicial. Após a avaliação do laboratório, Motion, Radix Slider/Switch, Lucide e Manrope passaram a integrar a base aprovada. As alternativas de refração e GSAP continuam como opções não adotadas.
 
 | Necessidade | Opção | Possível uso e ponto de atenção |
 |---|---|---|
@@ -114,14 +197,58 @@ As opções abaixo são referências iniciais, não dependências aprovadas nem 
 | Vidro com refração alternativo | [simple-liquid-glass](https://github.com/lucaperullo/simple-liquid-glass) | Abordagens com SVG/WebGL e fallback; verificar exigências, diferenças entre navegadores e custo de manutenção. |
 | Movimento reduzido | [`prefers-reduced-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion) | Respeitar a preferência do usuário e manter acesso ao conteúdo com movimentos reduzidos. |
 
-**Ponto de partida a avaliar:** testar vidro fosco com CSS e interações simples; comparar Motion se as animações desejadas justificarem uma biblioteca. Refração forte e GSAP podem ser avaliados em exemplos isolados, mediante interesse do usuário. Nenhuma opção foi instalada ou aprovada.
+**Base aprovada no laboratório:** vidro fosco com CSS e movimentos moderados com Motion. Refração forte e GSAP podem ser avaliados em exemplos isolados, mediante interesse do usuário.
 
 ## Decisões abertas
 
-- Quais efeitos, bibliotecas, fontes, ícones e imagens serão efetivamente adotados.
-- Intensidade e locais de aplicação do vidro; comportamento sobre vídeo e mapa.
+- Ajustes finais de composição, imagens e intensidade dos movimentos na área Início.
+- Intensidade e locais de aplicação do vidro nas próximas áreas; comportamento sobre o mapa.
 - Detalhes finais da estrutura criada pelo usuário, estratégia de execução e distribuição da equipe.
 - Área piloto exata, qualidade do detector, associação a trechos, critérios de prioridade e formato final dos dados.
 - Persistência, autenticação, infraestrutura e estratégia de publicação.
 
 Esses pontos serão apresentados no momento adequado para validação; não impedem o planejamento nem autorizam avançar automaticamente entre etapas.
+
+
+### Revisão da entrada administrativa — 07/11/2026
+
+- Fluxo alinhado: portal com dois cards, mapa administrativo de produção e acervo de análises/importações.
+- Acesso futuro só pela equipe; usuários criados internamente, sem cadastro público. SQLite proposto para a versão local, sem backend nesta etapa.
+- Rotas `/admin`, `/admin/mapa` e `/admin/acervo` separadas; registros individuais com prévia, origem e abrangência. Mapa de produção ainda é uma prévia estática identificada.
+- Publicação: exclusividade para a mesma abrangência; conjuntos parcialmente sobrepostos podem coexistir. Regras efetivas e publicação ficam para integração.
+- Validar organização antes das ferramentas operacionais e formulários.
+
+
+### Interface de login — 08/11/2026
+
+Usuário autorizou construir o login mantendo a etapa sem backend. Criado formulário de acesso da equipe com campos obrigatórios, mostrar senha e feedback demonstrativo. Sem cadastro público, sessão simulada, envio ou persistência de credenciais. Tema aprovado e componentes compartilhados reutilizados, sem dependências novas. Lint/build e percursos desktop/móvel conferidos; detalhes e limites em [Login](LOGIN.md). Aguardar avaliação da interface antes da autenticação real.
+
+
+### Planejamento do mapa administrativo e atualização da marca — 08/11/2026
+
+- Usuário aprovou a interface de login e pediu planejar o editor com base nas funcionalidades atuais do protótipo.
+- Levantadas seleção territorial, edição de pontos e histórico, copas vinculadas v2, camadas/GeoJSON e diagnóstico de ruas. Proposta e decisões pendentes em [Mapa administrativo](MAPA_ADMINISTRATIVO.md).
+- Atualizadas logos horizontal/vertical e favicons a partir dos arquivos oficiais em `assets`. SVGs copiados para o frontend sem redesenho.
+- Mapa público recebeu menu recolhível explícito para Início, Administração e Login; Escape e clique fora fecham o menu.
+- Lint/build aprovados. Menu, Escape/foco e retorno ao Início conferidos no Chromium; viewport 375 × 812 sem transbordamento horizontal, marca e menu visíveis. Capturas em `output/site-react-navegacao-marca` na pasta Sematec. Sem aparelho físico ou auditoria completa de acessibilidade.
+- Editor administrativo ainda não implementado; aguardar escolha da composição e do recorte inicial.
+
+
+### Primeira amostra do mapa administrativo — 08/11/2026
+
+- Usuário escolheu composição híbrida: contexto à esquerda, propriedades à direita e barra central inferior flutuante/contextual com vidro. Aprovou acompanhamento central com bloqueio do espaço de trabalho durante análise.
+- Implementada estrutura navegável, seleção de exemplos, inspetor, camadas e demonstração de análise com confirmação, etapas, conclusão, falha e interrupção local.
+- Mapa/carregamento sob demanda, reaproveitamento do componente cartográfico e ajuste de enquadramento para duas laterais. Contextos/toolbar ainda não executam edição ou IA.
+- Verificação e limites em [Mapa administrativo](MAPA_ADMINISTRATIVO.md). Aguardar avaliação da amostra antes de implementar edição local, território/arquivos e integração.
+
+
+### Revisão do levantamento — camadas e setores IBGE — 08/11/2026
+
+- Pedido do usuário: priorizar gerenciador de camadas/resultados e segmentação territorial do Censo 2022; estudar modos Detalhado/Compacto nos mapas.
+- Inspeção estática confirmou coleção/ativa no protótipo, camadas v2 relacionadas, importação/exportação, diagnóstico e malha local de 499 setores urbanos. Nenhuma UI foi alterada nesta rodada.
+- Lista de lacunas, distinções de dados e ordem proposta em [Levantamento de camadas e território](LEVANTAMENTO_CAMADAS_E_TERRITORIO.md). Validar a nova composição antes da implementação.
+
+
+### Gerenciador de camadas e seleção IBGE — 08/11/2026
+
+Usuário autorizou seguir o levantamento. Construídos camadas ativas/visíveis independentes, múltipla exibição, busca/filtros/paginação, enquadramento e propriedades, em uma composição compacta única com painéis flutuantes (o modo detalhado foi removido após avaliação). A malha oficial local de 499 setores urbanos foi incorporada sem alterações; seleção inicial por clique/código, resumo da área declarada e enquadramento disponíveis. Sem backend, persistência ou publicação. Verificações e próximos passos em [Mapa administrativo](MAPA_ADMINISTRATIVO.md).

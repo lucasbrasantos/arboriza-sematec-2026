@@ -1,0 +1,18 @@
+.map-result-group { border-bottom: 1px solid var(--ar-line); }
+.map-result-group h2 { font-size: .9rem; letter-spacing: -.015em; }
+.map-group-toggle { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 2px; border: 0; background: transparent; color: var(--ar-forest); text-align: left; cursor: pointer; }
+.map-group-toggle > span:not(.map-group-count) { flex: 1; min-width: 0; }
+.map-group-toggle strong { display: block; font-size: .85rem; font-weight: 650; }
+.map-group-toggle small { display: block; margin-top: 3px; font-size: .66rem; font-weight: 400; color: var(--ar-muted); }
+.map-group-toggle > svg { flex-shrink: 0; }
+.map-group-toggle > svg:last-child { transition: rotate .15s; }
+.map-group-toggle > svg.is-open { rotate: 180deg; }
+.map-group-count { display: grid; place-items: center; padding: 4px 8px; border-radius: 7px; background: var(--ar-mint); font-size: .72rem; font-weight: 650; }
+.map-group-items { padding-left: 8px; }
+.map-group-items .map-result { padding-block: 13px; }
+.map-group-items .map-result:last-child { border-bottom: 0; }
+.map-group-pagination { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-block: 12px 16px; color: var(--ar-muted); font-size: .66rem; }
+.map-group-pagination > div { display: flex; gap: 9px; align-items: center; }
+.map-group-pagination button { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 7px; background: var(--ar-mint); color: var(--ar-forest); cursor: pointer; }
+.map-group-pagination button:disabled { background: transparent; color: #a2b19c; cursor: default; }
+@media(prefers-reduced-motion:reduce) { .map-group-toggle > svg:last-child { transition: none; } }

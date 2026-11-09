@@ -6,11 +6,11 @@ from contextlib import closing
 from pathlib import Path
 from time import perf_counter
 
-from .detector import ROOT
+from .detector import DATA_ROOT
 from .image_cache import DEFAULT_LIMIT, RESERVE, connect, digest, import_image
 from .orthophoto_wms import LAYER, WMS_URL, fetch_orthophoto
 
-CACHE_DIR = ROOT / 'data' / 'ortofotos' / 'cache-wms'
+CACHE_DIR = DATA_ROOT / 'ortofotos' / 'cache-wms'
 
 
 def request_identity(bounds, width, height):

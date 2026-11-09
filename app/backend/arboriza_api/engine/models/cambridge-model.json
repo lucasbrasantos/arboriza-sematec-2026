@@ -1,0 +1,15 @@
+{
+  "model_id": "detectree2-cambridge",
+  "file": "urban_trees_Cambridge_20230630.pth",
+  "bytes": 503062799,
+  "md5": "871debbbe5a52d8858439c1991c50e51",
+  "sha256": "3bcfc86ee2daff04cb894d2d9bf5d5bf95a74f6fe1df776353ce0d538b5d0075",
+  "source": "https://zenodo.org/records/15863800",
+  "download": "https://zenodo.org/records/15863800/files/urban_trees_Cambridge_20230630.pth?download=1",
+  "license": "CC-BY-4.0",
+  "attribution": "Ball, James; Kotthoff, Christopher. detectree2 trained models. Zenodo. doi:10.5281/zenodo.15863800",
+  "detectree2_commit": "39da1ba52e9392e54c2b29deef711f1b676bf86b",
+  "detectron2_commit": "247691a1c292654867deb35cabb27f18d75a1363",
+  "base_config": "COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml",
+  "recommended_tile_m": 200
+}

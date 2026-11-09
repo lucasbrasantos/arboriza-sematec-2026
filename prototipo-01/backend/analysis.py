@@ -14,9 +14,9 @@ import rasterio
 from PIL import Image, ImageDraw
 from rasterio.warp import transform as project
 
-from .detector import ROOT, MODEL_ID, Detector, sha256
+from .detector import DATA_ROOT, ROOT, MODEL_ID, Detector, sha256
 
-RECORTES = {name: ROOT / "data" / "ortofotos" / f"aracatuba-{name}_rgb8.tif"
+RECORTES = {name: DATA_ROOT / "ortofotos" / f"aracatuba-{name}_rgb8.tif"
             for name in ("centro", "centro-norte")}
 
 

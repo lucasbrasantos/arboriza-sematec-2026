@@ -101,6 +101,26 @@ O servidor usa um processo e uma instância do modelo, carregada na primeira an�
 
 Estados: `pendente`, `processando`, `concluida`, `erro`.
 
+## Diagnóstico exploratório de ruas
+
+Selecione em **Camadas** uma camada de pontos criada por uma análise territorial concluída neste computador. A seleção restaura os IDs de setores da análise; **Enquadrar ao selecionar camada** permite desativar o ajuste automático. Em **Diagnóstico de ruas**, escolha a distância e clique em **Analisar ruas próximas**. O botão fica desativado quando não há pontos. A seleção territorial, se estiver aberta, é fechada preservando o rascunho.
+
+O diagnóstico substitui a edição por um painel lateral com busca, filtros e detalhes ligados ao mapa. O retângulo sai de cena: o contorno real dos setores permanece acima das vias, e uma máscara escurece apenas o exterior da seleção. A imagem aérea inicia suavizada e pode voltar ao original sem nova consulta. Laranja significa **sem pontos associados**, verde azulado significa **com pontos** e azul significa **selecionado**. Essas categorias são descritivas; não há limiares de prioridade. O entorno parcial é informado separadamente, com a porcentagem geométrica da faixa de comparação dentro dos setores. Os pontos disponíveis continuam contados.
+
+A seleção pela lista respeita a preferência de enquadramento; **Enquadrar trecho** funciona manualmente. Os detalhes mostram comprimento, contagem, taxa por 100 m e um desenho da projeção dos pontos ao longo do eixo. **Voltar à edição de pontos** restaura os controles, a base e as preferências de visualização. O diagnóstico não altera os pontos; uma mudança na camada ou nos pontos invalida o resultado, e respostas tardias são ignoradas. Consulte [DIAGNOSTICO_RUAS.md](DIAGNOSTICO_RUAS.md) para a lógica completa, fórmulas e validações.
+
+A API lê os IDs dos setores e o hash da malha do resumo da análise original no disco, mas usa os pontos atuais da camada ativa, inclusive edições. Camadas manuais/importadas que não mantenham uma análise territorial vinculada não podem ser usadas neste piloto; recarregue ou gere uma camada de análise de setores. Os trechos não são persistidos e podem ser calculados novamente. O diagnóstico usa somente os pontos da camada e não observa áreas ainda não analisadas.
+
+O piloto cruza amostras locais em `data/ruas/piloto-osm/`, de © OpenStreetMap contributors, ODbL. Foram preparadas amostras para os setores `350280405000005`, `350280405000340` e `350280405000505`. Outras seleções só funcionarão após preparar os dados necessários. O script abaixo solicita uma caixa pequena para cada setor e não sobrescreve arquivos; a API principal OSM é usada apenas nesta coleta piloto limitada. Para ampliação da cidade, selecionar uma fonte de extratos adequada em vez de fazer consultas em massa à API de edição.
+
+```powershell
+.\.envs\detectree2\Scripts\python.exe .\scripts\preparar_ruas_piloto.py 350280405000340
+```
+
+Os eixos são recortados pelos setores e divididos em até 100 m, valor provisório para comparação. Cada ponto do setor é atribuído apenas ao trecho mais próximo até a distância indicada (padrão 25 m, ajustável de 5 a 100 m); pontos sem via próxima ou fora dos setores são contados à parte. A vizinhança marcada como parcial ultrapassa a área analisada e sua contagem pode estar incompleta. Trechos muito curtos podem gerar taxas por 100 m pouco representativas. Uma via representada em faixas separadas pode aparecer mais de uma vez.
+
+As amostras OSM são incompletas, podem omitir vias que não tenham nós na caixa da consulta e não confirmam calçadas, limite de propriedade ou locais disponíveis para plantar. Na amostra consultada não foram encontradas calçadas explicitamente identificadas. Este resultado não mede a regra 3-30-300 nem detecta locais de plantio; as cores descrevem apenas presença ou ausência de pontos associados, sem medir déficit.
+
 ## Ambiente e reprodução
 
 Use Python 3.12 e o ambiente Windows/CUDA de [DETECTRON2_WINDOWS.md](DETECTRON2_WINDOWS.md). Os pesos Cambridge e os dois GeoTIFFs locais são os mesmos do piloto. As dependências adicionais já foram instaladas nesta máquina; para reinstalá-las no ambiente existente:

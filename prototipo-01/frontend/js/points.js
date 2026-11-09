@@ -27,6 +27,7 @@ export class PointLayer {
   }
 
   add(coordinates) {
+    if (this.linkedCrowns) return false;
     const point = this.wrap({ type: 'Feature', geometry: { type: 'Point', coordinates }, properties: { origem: 'manual', revisado: false } });
     this.commit([...this.points, point], new Set([point.key]), 'Adicionar ponto');
   }
@@ -37,6 +38,7 @@ export class PointLayer {
   }
 
   move(coordinates) {
+    if (this.linkedCrowns) return false;
     if (!coordinates.size) return;
     const changed = this.points.map(point => coordinates.has(point.key) ? {
       ...point, feature: { ...point.feature, geometry: {
@@ -58,6 +60,8 @@ export class PointLayer {
   }
 
   geojson() { return { type: 'FeatureCollection', features: this.points.map(p => p.feature) }; }
+
+  get linkedCrowns() { return this.modelVersion === 2 || this.points.some(p => p.feature.properties?.copa_id); }
 }
 
 export function readPoints(data) {

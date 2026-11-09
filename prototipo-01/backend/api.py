@@ -8,13 +8,13 @@ from functools import lru_cache
 from pathlib import Path
 from threading import Lock
 from time import perf_counter
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .analysis import RECORTES, write_json
 from .detector import ROOT
@@ -25,7 +25,7 @@ from .territory import DATA as TERRITORY_DATA, Territory
 class Request(BaseModel):
     model_config = ConfigDict(extra="forbid")
     recorte: Literal["centro", "centro-norte"]
-    perfil: Literal["controle", "multiescala"] = "controle"
+    perfil: Literal["controle", "controle-datageo", "controle-local", "multiescala", "fusao"] = "controle"
     score: float = Field(default=.15, ge=.05, le=1, allow_inf_nan=False)
 
 
@@ -45,7 +45,30 @@ class TerritoryBlockPlan(TerritorySelection):
 
 class SectorAnalysisRequest(TerritorySelection):
     fonte_malha: str = Field(min_length=1, max_length=128)
+    perfil: Literal['controle', 'controle-datageo', 'controle-local', 'fusao'] = 'controle'
     score: float = Field(default=.15, ge=.05, le=1, allow_inf_nan=False)
+
+
+class StreetLayerSelection(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    id_camada: str = Field(min_length=1, max_length=128)
+    ids_copas: list[Annotated[str, Field(min_length=1, max_length=200)]] = Field(max_length=10000)
+
+
+class StreetAnalysisRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    analysis_id: str = Field(min_length=1, max_length=32)
+    pontos: list[list[float]] | None = Field(default=None, min_length=1, max_length=50000)
+    camadas: list[StreetLayerSelection] | None = Field(default=None, min_length=1, max_length=12)
+    distancia_m: float = Field(default=25, ge=5, le=100, allow_inf_nan=False)
+
+    @model_validator(mode='after')
+    def one_source(self):
+        if (self.pontos is None) == (self.camadas is None):
+            raise ValueError('Informe pontos ou camadas do v2, exclusivamente.')
+        if self.camadas and sum(len(layer.ids_copas) for layer in self.camadas) > 50000:
+            raise ValueError('Selecione até 50.000 registros no diagnóstico.')
+        return self
 
 
 def create_app(service=None, output=ROOT / "resultados" / "interface", territory_path=TERRITORY_DATA):
@@ -123,6 +146,35 @@ def create_app(service=None, output=ROOT / "resultados" / "interface", territory
         except ValueError as error:
             raise HTTPException(422, str(error)) from error
 
+    @app.post("/api/ruas/diagnostico")
+    def street_diagnostic(request: StreetAnalysisRequest):
+        from .street_analysis import analyze_streets, read_sector_analysis
+        try:
+            current = territory()
+            ids = read_sector_analysis(request.analysis_id, output, current)
+            if request.camadas is not None:
+                from .street_canopies import select_canopies
+                records, metadata = select_canopies(request.analysis_id, output, [layer.model_dump() for layer in request.camadas])
+                result = analyze_streets(current, ids, [r['coordinates'] for r in records], request.distancia_m, canopies=records)
+                result['arboriza'].update(metadata)
+                return result
+            return analyze_streets(current, ids, request.pontos, request.distancia_m)
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+        except (OSError, KeyError, TypeError) as error:
+            logging.warning('Amostra de ruas indisponível: %s', error)
+            raise HTTPException(503, 'Não foi possível ler a amostra local de ruas.') from error
+
+    @app.get("/api/analises/{ident}/territorio")
+    def analysis_territory(ident: str):
+        from .street_analysis import read_sector_analysis
+        try:
+            current = territory()
+            ids = read_sector_analysis(ident, output, current)
+            return {"ids": ids, "fonte_malha": current.metadata['sha256_fonte']}
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+
     def snapshot(ident):
         with lock:
             if ident not in tasks:
@@ -140,7 +192,11 @@ def create_app(service=None, output=ROOT / "resultados" / "interface", territory
         try:
             progress("Preparando análise")
             if isinstance(request, SectorAnalysisRequest):
-                summary = service.run_sectors(territory(), request.ids, request.score, job["folder"], progress)
+                if request.perfil in ('controle-local', 'controle-datageo'):
+                    summary = service.run_control_source(territory(), request.ids, request.score, job['folder'], progress, request.perfil)
+                else:
+                    runner = service.run_fusion_sectors if request.perfil == 'fusao' else service.run_sectors
+                    summary = runner(territory(), request.ids, request.score, job["folder"], progress)
             else:
                 summary = service.run(request.recorte, request.perfil, request.score, job["folder"], progress)
             with lock:
@@ -219,6 +275,15 @@ def create_app(service=None, output=ROOT / "resultados" / "interface", territory
         if snapshot(ident)["estado"] != "concluida":
             raise HTTPException(409, "O resultado ainda não está disponível.")
         return FileResponse(tasks[ident]["folder"] / "pontos.geojson", media_type="application/geo+json")
+
+    @app.get('/api/analises/{ident}/camadas/{camada}')
+    def fusion_layer(ident: str, camada: Literal['copas', 'pontos-todos', 'pontos-grupos', 'pontos-complementos']):
+        if snapshot(ident)['estado'] != 'concluida':
+            raise HTTPException(409, 'O resultado ainda não está disponível.')
+        path = tasks[ident]['folder'] / (camada + '.geojson')
+        if not path.is_file():
+            raise HTTPException(404, 'Esta análise não produziu essa camada.')
+        return FileResponse(path, media_type='application/geo+json')
 
     @app.get("/", include_in_schema=False)
     def welcome():

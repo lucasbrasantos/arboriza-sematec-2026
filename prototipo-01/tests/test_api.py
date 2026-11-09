@@ -29,8 +29,56 @@ class FakeService:
     def run_sectors(self, territory, ids, score, folder, progress):
         return self.run('setores', 'controle', score, folder, progress)
 
+    def run_control_source(self, territory, ids, score, folder, progress, perfil):
+        self.control_source = (list(ids), perfil)
+        return self.run('setores', perfil, score, folder, progress)
+
 
 class ApiTests(unittest.TestCase):
+    def test_local_control_is_available_for_sector_requests(self):
+        service = FakeService(); service.release.set()
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); path=root/'territorio.json'
+            path.write_text(json.dumps(sample()),encoding='utf-8')
+            with TestClient(create_app(service,root/'resultados',path)) as client:
+                names=[p['id'] for p in client.get('/api/recortes').json()['perfis']]
+                self.assertTrue({'controle','controle-local','controle-datageo'}.issubset(names))
+                response=client.post('/api/analises/setores',json={'ids':['a'],'fonte_malha':'teste','perfil':'controle-local'})
+                self.assertEqual(response.status_code,202);ident=response.json()['analysis_id']
+                for _ in range(200):
+                    job=client.get(f'/api/analises/{ident}').json()
+                    if job['estado'] in ('concluida','erro'):break
+                    time.sleep(.01)
+                self.assertEqual(job['estado'],'concluida');self.assertEqual(service.control_source,(['a'],'controle-local'))
+
+    def test_experimental_profile_routes_and_exports_separate_collections(self):
+        class FusionService(FakeService):
+            def run_fusion_sectors(self, territory, ids, score, folder, progress):
+                self.called = (ids, score)
+                self.release.set()
+                self.run('setores', 'fusao', score, folder, progress)
+                for name in ('copas', 'pontos-todos', 'pontos-grupos', 'pontos-complementos'):
+                    (folder/(name+'.geojson')).write_text(json.dumps({'type': 'FeatureCollection', 'features': []}))
+                return {'perfil': 'fusao', 'candidatos': 0, 'grupos_copas': 0, 'complementos_pendentes': 0}
+        service = FusionService()
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); path = root/'territorio.json'
+            path.write_text(json.dumps(sample()), encoding='utf-8')
+            with TestClient(create_app(service, root/'resultados', path)) as client:
+                profiles = client.get('/api/recortes').json()['perfis']
+                self.assertIn('fusao', [p['id'] for p in profiles])
+                self.assertIn('controle', [p['id'] for p in profiles])
+                response = client.post('/api/analises/setores', json={'ids':['a'], 'fonte_malha':'teste', 'perfil':'fusao', 'score':.12})
+                self.assertEqual(response.status_code, 202); ident=response.json()['analysis_id']
+                for _ in range(200):
+                    state=client.get(f'/api/analises/{ident}').json()
+                    if state['estado'] in ('concluida','erro'):break
+                    time.sleep(.01)
+                self.assertEqual(state['estado'], 'concluida'); self.assertEqual(service.called, (['a'], .12))
+                for layer in ('copas','pontos-todos','pontos-grupos','pontos-complementos'):
+                    self.assertEqual(client.get(f'/api/analises/{ident}/camadas/{layer}').json()['features'], [])
+                self.assertEqual(client.get(f'/api/analises/{ident}/camadas/modelos').status_code, 422)
+
     def test_busy_empty_error_and_previous_result(self):
         service = FakeService()
         with tempfile.TemporaryDirectory() as temp, TestClient(create_app(service, Path(temp))) as client:
