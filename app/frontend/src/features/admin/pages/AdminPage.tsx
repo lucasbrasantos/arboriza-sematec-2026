@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router'
-import { ArrowUpRight, FolderOpen, Info, LogOut, Map } from 'lucide-react'
+import { ArrowUpRight, FolderOpen, LogOut, Map } from 'lucide-react'
 import { paths } from '../../../shared/config/paths'
 import aerial from '../../../assets/samples/centro.jpg'
 import '../styles/admin.css'
@@ -24,7 +24,6 @@ export default function AdminPage() {
   return <section className="admin-page" aria-labelledby="admin-title">
     <div className="admin-session"><span>Conectado como <strong>{user?.username}</strong> · {user?.role === 'admin' ? 'Administrador' : 'Operador'}</span><button type="button" onClick={() => void exit()} disabled={loggingOut}><LogOut size={17} />{loggingOut ? 'Saindo…' : 'Sair'}</button></div>
     {logoutError && <p role="alert" className="admin-session-error">{logoutError}</p>}
-    <div className="admin-demo-notice"><Info size={17} /><p><strong>Mapa e acervo em demonstração.</strong> Os resultados ainda são exemplos e não são salvos.</p></div>
     <header className="admin-page-heading"><div><h1 id="admin-title">Seu espaço de trabalho</h1><p>Produza os resultados no mapa. Organize e prepare a publicação pelo acervo.</p></div></header>
     <div className="admin-entry-grid">
       <Link className="admin-entry admin-entry--map" to={paths.adminMap}><img src={aerial} alt="" /><div className="admin-entry-content"><Map size={30} /><h2>Mapa administrativo</h2><p>Área de trabalho para delimitar, analisar imagens e revisar as marcações.</p><span>Abrir espaço do mapa <ArrowUpRight size={20} /></span></div></Link>

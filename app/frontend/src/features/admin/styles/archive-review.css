@@ -1,0 +1,26 @@
+.archive-review { position: relative; height: 100dvh; min-height: 480px; overflow: hidden; background: #e4eddf; color: #183c29; }
+.archive-review-map { position: absolute; inset: 0 0 0 412px; }
+.archive-review-map .map-canvas { height: 100%; }
+.archive-review-panel { position: absolute; z-index: 500; top: 16px; bottom: 16px; left: 16px; width: min(380px, calc(100% - 32px)); display: flex; flex-direction: column; padding: 20px; border: 1px solid #d1e2cc; border-radius: 16px; background: #f8fbf5f7; box-shadow: 0 8px 28px #183c2929; }
+.archive-review-back { display: inline-flex; align-items: center; gap: 7px; color: #365b42; font-size: .8rem; text-decoration: none; }
+.archive-review-panel header { margin: 22px 0 12px; }
+.archive-review-panel header p { margin: 0 0 5px; font-size: .76rem; color: #52705a; }
+.archive-review-panel h1 { margin: 0 0 7px; font-size: 1.35rem; line-height: 1.2; }
+.archive-review-panel header span { color: #836519; font-size: .75rem; font-weight: 700; }
+.archive-review-content { overflow-y: auto; flex: 1; padding-right: 4px; }
+.archive-review-content h2 { font-size: .95rem; margin: 12px 0 7px; }
+.archive-review-content p, .archive-review-panel footer p { font-size: .78rem; line-height: 1.55; }
+.archive-review-layers { display: grid; margin: 16px 0; border-top: 1px solid #dce8d8; }
+.archive-review-layers label { display: flex; align-items: flex-start; gap: 8px; padding: 11px 2px; border-bottom: 1px solid #dce8d8; font-size: .75rem; cursor: pointer; }
+.archive-review-layers label > span:last-child { display: grid; gap: 4px; }
+.archive-review-layers small { color: #557160; line-height: 1.4; }
+.archive-review-color { flex: none; width: 9px; height: 9px; margin-top: 5px; border-radius: 50%; }
+.archive-review-base { border: 1px solid #b9cfb5; border-radius: 8px; padding: 9px 12px; background: white; color: #24563b; cursor: pointer; }
+.archive-review-panel footer { display: grid; gap: 9px; padding-top: 14px; border-top: 1px solid #dce8d8; font-size: .78rem; }
+.archive-review-panel footer label { display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
+.archive-review-panel footer button { padding: 12px; border: 0; border-radius: 8px; color: white; background: #235c3e; font-weight: 700; cursor: pointer; }
+.archive-review-panel footer button:disabled { opacity: .48; cursor: not-allowed; }
+.archive-review-panel footer small { color: #526e5a; }
+.archive-review-success { display: flex; gap: 8px; align-items: center; color: #176443; font-weight: 700; }
+.archive-review-error { color: #a32f28; }
+@media (max-width: 700px) { .archive-review-map { left: 0; } .archive-review-panel { top: auto; right: 10px; bottom: 10px; left: 10px; width: auto; max-height: 55dvh; padding: 14px; } .archive-review-panel header { margin: 12px 0 4px; } .archive-review-panel h1 { font-size: 1.1rem; } }

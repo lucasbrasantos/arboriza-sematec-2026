@@ -10,13 +10,13 @@ export function createStreetMap(map, onSelect, metric = 'base-rate') {
 		if (name !== 'streetRoads') map.getPane(name).style.pointerEvents = 'none';
 	}
 	let maximum = 0;
-	let layers = [], lines = new Map(), casings = new Map(), points = [], selected = null, contours = [], features;
+	let layers = [], lines = new Map(), casings = new Map(), points = [], pointGroup = null, selected = null, contours = [], features;
 	const keep = layer => { layers.push(layer); layer.addTo(map); return layer; };
 	const baseStyle = feature => ({ pane: 'streetRoads', color: intensityColor(segmentIntensity(feature, metric), maximum),
 		weight: 7, opacity: .82, lineCap: 'round', lineJoin: 'round', bubblingMouseEvents: false });
 	function clear() {
 		layers.forEach(layer => map.removeLayer(layer));
-		layers = []; lines.clear(); casings.clear(); points = []; selected = null; contours = [];
+		layers = []; lines.clear(); casings.clear(); points = []; pointGroup = null; selected = null; contours = [];
 	}
 	function draw(data, layerPoints) {
 		clear(); features = data; maximum = data.features.reduce((max, feature) => Math.max(max, segmentIntensity(feature, metric)), 0);
@@ -35,7 +35,7 @@ export function createStreetMap(map, onSelect, metric = 'base-rate') {
 			pane: 'streetRoads', style: baseStyle, onEachFeature(feature, path) {
 				lines.set(String(feature.id), path); path.on('click', () => onSelect(String(feature.id)));
 			} }));
-		const group = keep(L.layerGroup());
+		const group = pointGroup = keep(L.layerGroup());
 		points = layerPoints.map((point, index) => L.circleMarker([point[1], point[0]], { pane: 'streetPoints', radius: 3.5,
 			color: '#ffffff', weight: 1.2, fillColor: pointColor(data.arboriza.tipos_pontos?.[index]), fillOpacity: .95, interactive: false }).addTo(group));
 	}
@@ -62,6 +62,7 @@ export function createStreetMap(map, onSelect, metric = 'base-rate') {
 				casings.get(id)?.setStyle({ opacity: visible ? .38 : .03, weight: visible ? 12 : 5 });
 			}
 		},
-		showBoundary(show) { for (const line of contours) { if (show) line.addTo(map); else map.removeLayer(line); } }
+		showBoundary(show) { for (const line of contours) { if (show) line.addTo(map); else map.removeLayer(line); } },
+		showPoints(show) { if (pointGroup) { if (show) pointGroup.addTo(map); else map.removeLayer(pointGroup); } }
 	};
 }

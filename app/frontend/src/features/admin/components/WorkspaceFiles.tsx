@@ -17,7 +17,6 @@ export default function WorkspaceFiles({ active, snapshot, revision, ready, issu
     const file = event.target.files?.[0]; event.target.value = ''
     if (!file) return
     await run(async () => {
-      if (file.size > 30_000_000) throw new Error('Use arquivos de até 30 MB.')
       const data = JSON.parse(await file.text())
       let imported: ResultLayer[]
       if (data.type !== 'FeatureCollection' || !Array.isArray(data.features)) throw new Error('Use um GeoJSON FeatureCollection WGS84.')

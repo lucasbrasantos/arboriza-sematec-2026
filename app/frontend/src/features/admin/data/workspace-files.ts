@@ -9,5 +9,9 @@ export function workspaceGeoJSON(snapshot: WorkspaceSnapshot) {
 }
 export function downloadJson(value: unknown, name: string) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], { type: 'application/geo+json' }))
-  const anchor = document.createElement('a'); anchor.href = url; anchor.download = name; anchor.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+  const date = new Date()
+  const two = (value: number) => String(value).padStart(2, '0')
+  const stamp = `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}_${two(date.getHours())}-${two(date.getMinutes())}-${two(date.getSeconds())}`
+  const filename = name.replace(/(\.[^.]+)$/, `_${stamp}$1`)
+  const anchor = document.createElement('a'); anchor.href = url; anchor.download = filename === name ? `${name}_${stamp}` : filename; anchor.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000)
 }

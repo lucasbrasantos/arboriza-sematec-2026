@@ -4,13 +4,14 @@ const number = (value, digits = 1) => value.toLocaleString('pt-BR', { maximumFra
 const count = (n, singular, plural) => `${n} ${n === 1 ? singular : plural}`;
 const $ = id => document.getElementById(id);
 
-export function createStreetPanel({ select, focus, back, filter, presentation, boundary, retry }) {
+export function createStreetPanel({ select, focus, back, filter, presentation, boundary, points, retry }) {
 	$('street-back').onclick = back;
 	$('street-retry').onclick = retry;
 	$('street-search').oninput = () => filter(null, $('street-search').value);
 	for (const button of document.querySelectorAll('[data-street-filter]')) button.onclick = () => filter(button.dataset.streetFilter, null);
 	for (const button of document.querySelectorAll('[data-street-background]')) button.onclick = () => presentation(button.dataset.streetBackground);
 	$('street-boundary').onchange = () => boundary($('street-boundary').checked);
+	$('street-points').onchange = () => points($('street-points').checked);
 	let rows = new Map(), selectedId = null;
 	function showDetail(entry, distance, autoScroll = true) {
 		const empty = $('street-detail-empty'), panel = $('street-detail');
@@ -98,6 +99,7 @@ export function createStreetPanel({ select, focus, back, filter, presentation, b
 			}
 		},
 		detail: showDetail,
-		background(mode) { for (const button of document.querySelectorAll('[data-street-background]')) button.setAttribute('aria-pressed', String(button.dataset.streetBackground === mode)); }
+		background(mode) { for (const button of document.querySelectorAll('[data-street-background]')) button.setAttribute('aria-pressed', String(button.dataset.streetBackground === mode)); },
+		visibility(view) { $('street-boundary').checked = view.boundary; $('street-points').checked = view.points; }
 	};
 }

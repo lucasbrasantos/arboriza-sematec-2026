@@ -16,7 +16,7 @@ export default function StreetWorkspace(props: Props) {
   useEffect(() => { current.current = props })
   useEffect(() => {
     const focus = (id: string) => current.current.onView({ focus: { id, revision: performance.now() } })
-    panel.current = createStreetPanel({ select: (id) => { current.current.onSelect(id); if (current.current.autoFit) focus(id) }, focus, back: () => current.current.onBack(), retry: () => current.current.onRetry(), filter: (category, search) => current.current.onView({ ...(category === null ? {} : { category }), ...(search === null ? {} : { search }) }), presentation: (mode) => current.current.onView({ background: mode === 'normal' ? 'normal' : 'soft' }), boundary: (show) => current.current.onView({ boundary: show }) })
+    panel.current = createStreetPanel({ select: (id) => { current.current.onSelect(id); if (current.current.autoFit) focus(id) }, focus, back: () => current.current.onBack(), retry: () => current.current.onRetry(), filter: (category, search) => current.current.onView({ ...(category === null ? {} : { category }), ...(search === null ? {} : { search }) }), presentation: (mode) => current.current.onView({ background: mode === 'normal' ? 'normal' : 'soft' }), boundary: (show) => current.current.onView({ boundary: show }), points: (show) => current.current.onView({ points: show }) })
     panel.current.open({ name: props.name })
     return () => { panel.current = null }
   }, [props.name])
@@ -28,7 +28,7 @@ export default function StreetWorkspace(props: Props) {
     if (!props.data) return
     const entries = streetEntries(props.data)
     const visible = visibleStreets(entries, props.view.category, props.view.search)
-    api.ready(props.data, streetTotals(entries)); api.background(props.view.background)
+    api.ready(props.data, streetTotals(entries)); api.background(props.view.background); api.visibility(props.view)
     const explanation = document.getElementById('street-v2-explanation')
     if (explanation) explanation.textContent = `As cores comparam ${intensityMetrics[props.view.metric].label.toLocaleLowerCase('pt-BR')}. Complementos pendentes não entram no indicador. A cobertura das máscaras é uma medida estimada separada, disponível no detalhe de cada trecho.`
     api.list(visible, props.view.category, entries.length)

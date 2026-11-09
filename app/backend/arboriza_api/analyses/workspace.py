@@ -5,6 +5,7 @@ import math
 import re
 from datetime import datetime, timezone
 from uuid import uuid4
+from threading import BoundedSemaphore
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
@@ -17,8 +18,10 @@ from ..core.config import RESULTS
 from ..territory.router import get_territory
 from ..engine.geography.street_canopies import select_canopies
 from .router import read
+from ..engine.geography.street_analysis import analyze_streets, read_sector_analysis
 
 router = APIRouter(prefix='/api', tags=['Revisão e acervo'])
+public_street_limit = BoundedSemaphore(2)
 
 
 def now():
@@ -42,10 +45,21 @@ class ArchiveRequest(BaseModel):
     snapshot: Snapshot
 
 
+def territory_key(scopes):
+    if not scopes or any(scope is None for scope in scopes):
+        return None
+    sources = {scope[0] for scope in scopes}
+    if len(sources) != 1:
+        return None
+    sectors = sorted({ident for _, ids in scopes for ident in ids})
+    if not sectors:
+        return None
+    return hashlib.sha256(json.dumps((scopes[0][0], sectors), sort_keys=True).encode()).hexdigest()
+
+
 def validate_snapshot(snapshot):
     payload = snapshot.model_dump(include={'layers', 'visible_ids', 'active_id'})
-    if len(json.dumps(payload, allow_nan=False).encode()) > 30_000_000:
-        raise ValueError('O conjunto excede o limite de 30 MB.')
+    json.dumps(payload, allow_nan=False)
     ids, total, scopes, global_points = set(), 0, [], set()
     for layer in payload['layers']:
         ident = layer.get('id')
@@ -128,9 +142,7 @@ def validate_snapshot(snapshot):
         raise ValueError('Há camadas visíveis que não pertencem ao conjunto.')
     if payload['layers'] and payload['active_id'] not in ids:
         raise ValueError('A camada ativa não pertence ao conjunto.')
-    scope = scopes[0] if scopes and scopes[0] is not None and all(s == scopes[0] for s in scopes) else None
-    key = hashlib.sha256(json.dumps(scope, sort_keys=True).encode()).hexdigest() if scope else None
-    return payload, key
+    return payload, territory_key(scopes)
 
 
 def checked(snapshot):
@@ -191,7 +203,11 @@ def package(ident: str, _user=Depends(current_user)):
         row = db.execute('SELECT * FROM archive_packages WHERE id=?', (ident,)).fetchone()
     if not row:
         raise HTTPException(404, 'Pacote não encontrado.')
-    return {**dict(row), 'snapshot': json.loads(row['payload']), 'payload': None}
+    snapshot = json.loads(row['payload'])
+    # Pacotes anteriores podiam ter territórios válidos diferentes e chave nula.
+    # A aprovação sempre os valida novamente antes de atualizar a chave gravada.
+    scopes = [(territory.get('source'), territory.get('ids', [])) if isinstance(territory := layer.get('territory'), dict) else None for layer in snapshot['layers']]
+    return {**dict(row), 'territory_key': row['territory_key'] or territory_key(scopes), 'snapshot': snapshot, 'payload': None}
 
 
 @router.post('/acervo/{ident}/{action}')
@@ -218,7 +234,10 @@ def transition(ident: str, action: str, user=Depends(admin)):
                 db.execute("UPDATE archive_packages SET state='aprovado',updated_at=? WHERE id=?", (stamp, old['id']))
                 db.execute('INSERT INTO archive_events(package_id,action,user_id,at) VALUES(?,?,?,?)', (old['id'], 'substituido', user['id'], stamp))
         state = 'publicado' if action == 'publicar' else 'aprovado'
-        db.execute('UPDATE archive_packages SET state=?,updated_at=? WHERE id=?', (state, stamp, ident))
+        if action in ('aprovar', 'publicar'):
+            db.execute('UPDATE archive_packages SET state=?,territory_key=?,updated_at=? WHERE id=?', (state, key, stamp, ident))
+        else:
+            db.execute('UPDATE archive_packages SET state=?,updated_at=? WHERE id=?', (state, stamp, ident))
         db.execute('INSERT INTO archive_events(package_id,action,user_id,at) VALUES(?,?,?,?)', (ident, action, user['id'], stamp))
     return {'state': state}
 
@@ -238,10 +257,52 @@ def published_packages():
         for layer in members:
             for item in layer['items']:
                 original = item.get('properties', {})
-                features.append({'type': 'Feature', 'id': f"{row['id']}:{item['id']}", 'geometry': {'type': 'Point', 'coordinates': list(reversed(item['position']))}, 'properties': {'label': item['label'], 'categoria': layer['category'], 'color': layer['color'], 'tipo': original.get('tipo'), 'copa_id': original.get('copa_id'), 'score': original.get('score')}})
+                features.append({'type': 'Feature', 'id': f"{row['id']}:{item['id']}", 'geometry': {'type': 'Point', 'coordinates': list(reversed(item['position']))}, 'properties': {'label': item['label'], 'camada_id': layer['id'], 'categoria': layer['category'], 'color': layer['color'], 'tipo': original.get('tipo'), 'copa_id': original.get('copa_id'), 'score': original.get('score')}})
             for crown in layer.get('segmentation', {}).get('features', []):
                 props = crown['properties']
                 if (layer['executionId'], props.get('copa_id')) in living:
-                    features.append({'type': 'Feature', 'id': f"{row['id']}:copa:{crown['id']}", 'geometry': crown['geometry'], 'properties': {'categoria': layer['category'], 'tipo': props.get('tipo'), 'copa_id': props.get('copa_id'), 'color': '#25b882' if props.get('tipo') == 'copa_individual' else '#f1aa43' if props.get('tipo') == 'grupo_de_copas' else '#53aff0'}})
-        output.append({'id': row['id'], 'name': row['name'], 'published_at': row['updated_at'], 'bounds': [layer['bounds'] for layer in members], 'data': {'type': 'FeatureCollection', 'features': features}})
+                    features.append({'type': 'Feature', 'id': f"{row['id']}:copa:{crown['id']}", 'geometry': crown['geometry'], 'properties': {'camada_id': layer['id'], 'categoria': layer['category'], 'tipo': props.get('tipo'), 'copa_id': props.get('copa_id'), 'color': '#25b882' if props.get('tipo') == 'copa_individual' else '#f1aa43' if props.get('tipo') == 'grupo_de_copas' else '#53aff0'}})
+        sector_ids = sorted({ident for layer in members for ident in (layer.get('territory') or {}).get('ids', [])})
+        output.append({'id': row['id'], 'name': row['name'], 'published_at': row['updated_at'], 'sector_ids': sector_ids, 'layers': [{'id': layer['id'], 'name': layer['name'], 'category': layer['category'], 'color': layer['color'], 'points': len(layer['items']), 'segmentation': bool(layer.get('segmentation')), 'diagnostic_available': bool(re.fullmatch(r'\d{8}T\d{6}Z-[0-9a-f]{8}', layer.get('executionId', ''))) and not bool(layer.get('segmentation'))} for layer in members], 'bounds': [layer['bounds'] for layer in members], 'data': {'type': 'FeatureCollection', 'features': features}})
     return output
+
+
+class PublicDiagnostic(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    layer_id: str = Field(min_length=1, max_length=200)
+    layer_ids: list[str] = Field(min_length=1, max_length=100)
+    distancia_m: float = Field(default=25, ge=5, le=100, allow_inf_nan=False)
+
+
+@router.post('/publico/pacotes/{ident}/ruas')
+def public_streets(ident: str, body: PublicDiagnostic):
+    with connect() as db:
+        row = db.execute("SELECT payload FROM archive_packages WHERE id=? AND state='publicado'", (ident,)).fetchone()
+    if not row:
+        raise HTTPException(404, 'Pacote publicado não encontrado.')
+    snapshot = json.loads(row['payload'])
+    members = [layer for layer in snapshot['layers'] if layer['id'] in snapshot['visible_ids']]
+    if body.layer_id not in body.layer_ids or len(set(body.layer_ids)) != len(body.layer_ids) or any(value not in {layer['id'] for layer in members} for value in body.layer_ids):
+        raise HTTPException(422, 'A seleção contém camadas que não pertencem ao pacote publicado.')
+    active = next((layer for layer in members if layer['id'] == body.layer_id and not layer.get('segmentation')), None)
+    if not active or not re.fullmatch(r'\d{8}T\d{6}Z-[0-9a-f]{8}', active.get('executionId', '')):
+        raise HTTPException(422, 'Selecione uma camada publicada de análise territorial para consultar ruas.')
+    if not public_street_limit.acquire(blocking=False):
+        raise HTTPException(503, 'O diagnóstico está ocupado. Tente novamente em instantes.')
+    try:
+        territory = get_territory()
+        execution = active['executionId']
+        ids = read_sector_analysis(execution, RESULTS, territory)
+        if active.get('linkedCrowns'):
+            selected_layers = [layer for layer in members if layer['id'] in body.layer_ids and layer.get('linkedCrowns') and not layer.get('segmentation') and layer['executionId'] == execution and layer['items']]
+            records, metadata = select_canopies(execution, RESULTS, [{'id_camada': layer['id'], 'ids_copas': [item['properties']['copa_id'] for item in layer['items']]} for layer in selected_layers])
+            result = analyze_streets(territory, ids, [record['coordinates'] for record in records], body.distancia_m, canopies=records)
+            result['arboriza'].update(metadata)
+        else:
+            points = [list(reversed(item['position'])) for item in active['items']]
+            result = analyze_streets(territory, ids, points, body.distancia_m)
+        return result
+    except (ValueError, KeyError, TypeError, OSError) as error:
+        raise HTTPException(422, str(error)) from error
+    finally:
+        public_street_limit.release()

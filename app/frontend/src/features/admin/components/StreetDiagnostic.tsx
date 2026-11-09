@@ -28,6 +28,7 @@ export function StreetMap({ data, selected, onSelect, onClear, view, points }: {
   useEffect(() => { const chosen = new Set(view.rankedKeys); const ids = rankStreets(data).filter((row) => chosen.has(row.key)).flatMap((row) => row.ids); if (selected) ids.push(selected); renderer.current?.select(ids) }, [selected, data, view.metric, view.rankedKeys])
   useEffect(() => { renderer.current?.filter(new Set(visibleStreets(streetEntries(data), view.category, view.search).map((entry) => String(entry.feature.id)))) }, [view.category, view.search, data, view.metric])
   useEffect(() => { renderer.current?.showBoundary(view.boundary) }, [view.boundary, data, view.metric])
+  useEffect(() => { renderer.current?.showPoints(view.points) }, [view.points, data, points, view.metric])
   useEffect(() => { if (view.focus) renderer.current?.focus(view.focus.ids ?? view.focus.id) }, [view.focus])
   return null
 }

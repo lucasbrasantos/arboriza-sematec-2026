@@ -147,3 +147,9 @@
   .admin-summary-panel figure img { height: 190px; }
 }
 @media (prefers-reduced-motion: reduce) { .admin-workspace { animation: none; } .admin-area-row { transition: none; } }
+.admin-steps > li { display: flex; }
+.admin-steps ul li { display: list-item; padding: 4px 0; border: 0; }
+.admin-steps label { display: flex; gap: 8px; align-items: flex-start; margin: 14px 0; }
+.admin-steps .ar-button, .archive-action, .admin-summary-panel .ar-button { margin-top: 14px; }
+.archive-action { display: inline-flex; text-decoration: none; }
+.archive-preview .leaflet-container { width: 100%; height: 180px; border-radius: 12px; background: #e2eadb; }
