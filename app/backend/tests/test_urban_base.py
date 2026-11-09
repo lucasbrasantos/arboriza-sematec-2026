@@ -68,3 +68,13 @@ class UrbanBaseTest(unittest.TestCase):
             db=storage.connect(path)
             self.assertEqual(db.execute('SELECT key FROM windows').fetchone()[0],'done')
             db.close()
+
+    def test_saved_snapshot_works_without_local_processing_results(self):
+        client=TestClient(create_app())
+        with tempfile.TemporaryDirectory() as tmp, patch.object(jobs,'ROOT',Path(tmp)/'results'), \
+             patch('arboriza_api.urban_base.router.BACKEND_DIR',Path(tmp)/'backend'):
+            snapshot=Path(tmp)/'frontend/public/data/base-urbana-aracatuba.geojson'
+            snapshot.parent.mkdir(parents=True)
+            expected={'type':'FeatureCollection','features':[],'base':{'id':'saved'}}
+            snapshot.write_text(json.dumps(expected),encoding='utf-8')
+            self.assertEqual(client.get('/api/base-urbana/publicada').json(),expected)

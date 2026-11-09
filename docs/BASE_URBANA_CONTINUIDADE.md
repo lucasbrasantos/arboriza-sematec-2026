@@ -1,5 +1,10 @@
 # Base urbana V2 — continuidade
 
+## Entrega concluída — 09/11/2026
+
+Base 499/499 concluída e publicada: 104.904 indivíduos, 11.653 grupos, cobertura 14,808%. Commit funcional `9189254` enviado à `app-front`; release e seus quatro anexos enviados. Ver `docs/RELATORIO_BASE_URBANA_V2.md`. A inferência NÃO precisa ser refeita. Capturas reais em `docs/assets/base-urbana-v2/`. O recibo do email Gmail e o encerramento dos processos devem ser conferidos em `app/backend/cache/base-urbana-qa/entrega-final.json` (registro local após envio). Não repetir inferência.
+
+
 ## LEIA PRIMEIRO — entrega noturna autorizada em andamento
 
 Trabalhar na pasta ORIGINAL `X:\-code-\arboriza-sematec`, branch `app-front`. Usuário autorizou explicitamente concluir, validar, COMMITAR e SUBIR para GitHub enquanto dorme; também pediu salvar arquivos e minimizar tokens. Não esperar nova aprovação. Não trocar a branch; preservar o fix de StreetWorkspace.
