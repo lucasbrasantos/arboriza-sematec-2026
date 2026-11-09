@@ -27,6 +27,8 @@
 .sector-legend.has-panel { left:calc(50% + 150px); }
 .sector-legend-heading { display:flex; align-items:center; justify-content:space-between; font-size:.7rem; color:#536957; }
 .sector-legend-heading > span { display:flex; align-items:center; gap:6px; }
+.sector-legend.is-collapsed { width:min(270px,calc(100% - 90px)); }
+.sector-legend-heading button { display:grid; place-items:center; min-width:30px; min-height:30px; }
 .sector-metric { display:flex; align-items:center; position:relative; margin-top:3px; }
 .sector-metric select { appearance:none; width:100%; border:0; background:transparent; color:#143f2b; font:inherit; font-size:1.25rem; font-weight:650; padding:6px 25px 10px 0; cursor:pointer; }
 .sector-metric svg { position:absolute; right:0; pointer-events:none; }

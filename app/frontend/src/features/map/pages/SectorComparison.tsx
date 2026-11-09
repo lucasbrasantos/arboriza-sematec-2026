@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 import { GeoJSON, Marker, useMap, useMapEvents } from 'react-leaflet'
 import { divIcon } from 'leaflet'
 import type { FeatureCollection, Polygon } from 'geojson'
-import { ArrowLeft, Check, ChevronDown, Download, Layers, RefreshCw, TreePine } from 'lucide-react'
+import { ArrowLeft, Check, ChevronDown, Download, Layers, Menu, RefreshCw, TreePine } from 'lucide-react'
 import MapCanvas from '../components/MapCanvas'
 import { areas, heatPalettes } from '../data/map-data'
 import type { MapArea } from '../data/map-data'
@@ -56,6 +56,7 @@ export default function SectorComparison({initialIds,onClose}:{initialIds?:strin
   const [error,setError]=useState('')
   const [busy,setBusy]=useState(true)
   const [panel,setPanel]=useState(()=>window.matchMedia('(min-width: 900px)').matches)
+  const [legendExpanded,setLegendExpanded]=useState(true)
   const [query,setQuery]=useState('')
   const [attempt,setAttempt]=useState(0)
   const [initialSelection]=useState(initialIds??[])
@@ -113,14 +114,16 @@ export default function SectorComparison({initialIds,onClose}:{initialIds?:strin
       <div className="sector-list">{options.map(f=><button type="button" key={String(f.id)} aria-pressed={selected.has(String(f.id))} onClick={()=>toggle(String(f.id))}><span className="sector-check">{selected.has(String(f.id))&&<Check size={13}/>}</span><span>{String(f.id)}</span><small>{f.properties.individuos===undefined?'—':format(f.properties.individuos)}</small></button>)}</div>
       {data?.base && <a href="/api/base-urbana/exportar/geopackage"><Download size={15}/>Baixar base completa</a>}
     </aside>
-    <div className={`sector-legend ${panel?'has-panel':''}`}>
-      <div className="sector-legend-heading"><span><TreePine size={16}/> Arborização urbana</span><button type="button" onClick={()=>{setBusy(true);setAttempt(v=>v+1)}} disabled={busy} aria-label="Atualizar base do mapa"><RefreshCw size={15}/></button></div>
+    <div className={`sector-legend ${panel?'has-panel':''} ${legendExpanded?'':'is-collapsed'}`}>
+      <div className="sector-legend-heading"><span><button type="button" aria-label={legendExpanded?'Recolher legenda':'Expandir legenda'} aria-expanded={legendExpanded} aria-controls="sector-legend-content" onClick={()=>setLegendExpanded(value=>!value)}><Menu size={18}/></button><TreePine size={16}/> Arborização urbana</span><button type="button" onClick={()=>{setBusy(true);setAttempt(v=>v+1)}} disabled={busy} aria-label="Atualizar base do mapa"><RefreshCw size={15}/></button></div>
+      <div id="sector-legend-content" hidden={!legendExpanded}>
       <label className="sector-metric"><select aria-label="Indicador das cores" value={metric} onChange={e=>setMetric(e.target.value as Metric)}>{Object.entries(metrics).map(([key,value])=><option key={key} value={key}>{value.label}</option>)}</select><ChevronDown size={16}/></label>
       {data?.base?<><div className="sector-color-scale" aria-label="Faixas de valores">{legend.map((limit,i)=><div key={i}><i style={{background:palette[Math.min(4,i)]}}/><span>{i===0?`Até ${format(limit,metric==='individuos'?0:1)}`:Number.isFinite(limit)?`${format(breaks[i-1]??0,1)}–${format(limit,1)}`:`Acima de ${format(breaks[i-1]??0,1)}`}</span></div>)}</div><div className="sector-scale-unit">{metrics[metric].unit} · faixas fixas da base urbana</div></>:<p className="sector-empty">{busy?'Carregando base…':'A primeira base urbana está em preparação. Setores cinza ainda não têm resultados publicados.'}</p>}
       <div className="sector-statistics"><div><strong>{stats.complete?format(stats.n):'—'}</strong><span>indivíduos detectados</span></div><div><strong>{stats.area?format(100*stats.canopy/stats.area,1)+'%':'—'}</strong><span>cobertura do recorte</span></div><div><strong>{stats.complete}/{selected.size}</strong><span>setores com resultado</span></div></div>
       <div className="sector-label-controls"><label htmlFor="sector-label-mode">Rótulos no mapa</label><select id="sector-label-mode" value={labels} onChange={e=>setLabels(e.target.value as Label)}><option value="none">Desativados</option><option value="individuos">Quantidade</option><option value="cobertura">Cobertura (%)</option></select></div>
       {selected.size<2&&<p className="sector-hint">Selecione pelo menos dois setores para comparar.</p>}
       {error&&<p role="alert">{error} <button type="button" onClick={()=>setAttempt(v=>v+1)}>Tentar novamente</button></p>}
+      </div>
     </div>
     <footer className="sector-source">{data?.base?<>Estimativa automática · V2 · {new Date(data.base.completed_at).toLocaleDateString('pt-BR')}<span>Grupos entram na cobertura, não na contagem de indivíduos. Pendentes excluídos.</span></>:<>Malha urbana IBGE 2022 · Araçatuba</>}</footer>
   </section>
